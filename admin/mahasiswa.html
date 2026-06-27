@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Mahasiswa - Admin CareerPath</title>
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-light: #DBEAFE;
+            --background: #F8FAFC;
+            --surface: #FFFFFF;
+            --border: #E2E8F0;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --success: #22C55E;
+            --success-light: #F0FDF4;
+            --warning: #F59E0B;
+            --warning-light: #FFFBEB;
+            --danger: #EF4444;
+            --danger-light: #FEF2F2;
+            --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+            --sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text-primary);
+            background: var(--background);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 40;
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            color: #FFFFFF;
+            background: linear-gradient(180deg, var(--primary-dark) 0%, #2563EB 62%, var(--primary) 100%);
+            box-shadow: 8px 0 28px rgba(29, 78, 216, 0.16);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            margin: 0 8px 34px;
+            color: #FFFFFF;
+            font-size: 20px;
+            font-weight: 850;
+            letter-spacing: -0.45px;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            font-size: 18px;
+        }
+
+        .admin-label {
+            margin: 0 10px 14px;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .menu {
+            display: grid;
+            gap: 5px;
+        }
+
+        .menu a {
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 12px;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.84);
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .menu a:hover {
+            transform: translateX(2px);
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .menu a.active {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+        }
+
+        .menu-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 14px 10px 3px;
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .admin-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-avatar {
+            width: 37px;
+            height: 37px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .admin-card strong {
+            display: block;
+            margin-bottom: 2px;
+            color: #FFFFFF;
+            font-size: 13px;
+        }
+
+        .admin-card span {
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 11px;
+        }
+
+        /* Main */
+        .main {
+            grid-column: 2;
+            min-width: 0;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 0 clamp(22px, 4vw, 52px);
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+        }
+
+        .menu-toggle,
+        .mobile-brand {
+            display: none;
+        }
+
+        .global-search {
+            position: relative;
+            width: min(410px, 44vw);
+        }
+
+        .global-search input {
+            width: 100%;
+            min-height: 41px;
+            padding: 10px 13px 10px 39px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            color: #94A3B8;
+            font-style: normal;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon-button {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            background: #FFFFFF;
+            cursor: pointer;
+        }
+
+        .profile-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 5px 10px 5px 6px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .top-avatar {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        .content {
+            width: min(1280px, 94%);
+            margin: 32px auto 58px;
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary-dark);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: clamp(27px, 3vw, 35px);
+            letter-spacing: -1px;
+        }
+
+        .page-header p {
+            max-width: 750px;
+            margin: 8px 0 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .button-primary,
+        .button-outline,
+        .button-danger,
+        .action-button {
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 800;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .button-primary:hover,
+        .button-outline:hover,
+        .button-danger:hover,
+        .action-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .button-primary {
+            padding: 11px 15px;
+            color: #FFFFFF;
+            background: var(--primary);
+            box-shadow: 0 9px 18px rgba(59, 130, 246, 0.22);
+        }
+
+        .button-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .button-outline {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FFFFFF;
+        }
+
+        .button-danger {
+            padding: 10px 14px;
+            color: #FFFFFF;
+            background: var(--danger);
+        }
+
+        /* Summary */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 135px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            background: var(--surface);
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+        }
+
+        .summary-card::after {
+            content: "";
+            position: absolute;
+            width: 105px;
+            height: 105px;
+            right: -50px;
+            bottom: -58px;
+            border-radius: 50%;
+            background: var(--primary-light);
+        }
+
+        .summary-icon {
+            position: relative;
+            z-index: 1;
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 18px;
+        }
+
+        .summary-card h3 {
+            position: relative;
+            z-index: 1;
+            margin: 12px 0 4px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .summary-card strong {
+            position: relative;
+            z-index: 1;
+            display: block;
+            font-size: 26px;
+            letter-spacing: -0.8px;
+        }
+
+        .summary-card span {
+            position: relative;
+            z-index: 1;
+            display: block;
+            margin-top: 4px;
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        /* Student table */
+        .student-card {
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 22px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 17px;
+            letter-spacing: -0.35px;
+        }
+
+        .card-header p {
+            margin: 6px 0 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .table-search {
+            width: 240px;
+            min-height: 40px;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .status-filter {
+            min-height: 40px;
+            padding: 9px 30px 9px 11px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1050px;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 13px 22px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FBFDFF;
+            font-size: 10px;
+            font-weight: 850;
+            letter-spacing: 0.06em;
+            text-align: left;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 15px 22px;
+            border-bottom: 1px solid #EDF2F7;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #FBFDFF;
+        }
+
+        .student-cell {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .student-avatar {
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        .student-cell strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .student-cell span {
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+
+        .riasec-code {
+            display: inline-flex;
+            gap: 3px;
+            align-items: center;
+            padding: 5px 8px;
+            border-radius: 999px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+            font-weight: 850;
+            letter-spacing: 0.04em;
+        }
+
+        .progress-wrap {
+            display: grid;
+            grid-template-columns: 92px 1fr;
+            align-items: center;
+            gap: 9px;
+            min-width: 180px;
+        }
+
+        .progress-wrap span {
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .progress {
+            height: 8px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #EAF0F8;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        }
+
+        .status {
+            display: inline-flex;
+            padding: 5px 8px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 850;
+            white-space: nowrap;
+        }
+
+        .status.active {
+            color: #166534;
+            background: var(--success-light);
+        }
+
+        .status.incomplete {
+            color: #92400E;
+            background: var(--warning-light);
+        }
+
+        .status.inactive {
+            color: #B91C1C;
+            background: var(--danger-light);
+        }
+
+        .action-row {
+            display: flex;
+            gap: 7px;
+        }
+
+        .action-button {
+            padding: 7px 9px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+        }
+
+        .action-button.block {
+            color: #92400E;
+            background: var(--warning-light);
+        }
+
+        .action-button.delete {
+            color: #B91C1C;
+            background: var(--danger-light);
+        }
+
+        .empty-row {
+            display: none;
+        }
+
+        .empty-row td {
+            padding: 38px 22px;
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .table-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 14px 22px;
+            border-top: 1px solid #EDF2F7;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .table-footer strong {
+            color: var(--text-primary);
+        }
+
+        /* Insights */
+        .insight-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .activity-card .card-header {
+            padding-bottom: 15px;
+        }
+
+        .activity-list {
+            display: grid;
+            gap: 0;
+            padding: 6px 22px 14px;
+        }
+
+        .activity-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 0;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .activity-row:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            border-radius: 10px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 14px;
+        }
+
+        .activity-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .activity-info strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 12px;
+        }
+
+        .activity-info span {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .activity-time {
+            color: var(--text-secondary);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+
+        .completion-card {
+            padding: 22px;
+        }
+
+        .completion-card h2 {
+            margin: 0;
+            font-size: 17px;
+            letter-spacing: -0.35px;
+        }
+
+        .completion-card>p {
+            margin: 6px 0 18px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .completion-list {
+            display: grid;
+            gap: 13px;
+        }
+
+        .completion-row {
+            display: grid;
+            grid-template-columns: 1fr 104px 37px;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .completion-row span {
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .completion-track {
+            height: 8px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #EAF0F8;
+        }
+
+        .completion-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        }
+
+        .completion-row strong {
+            color: var(--primary-dark);
+            font-size: 11px;
+            text-align: right;
+        }
+
+        /* Detail modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            place-items: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show {
+            display: grid;
+        }
+
+        .modal {
+            width: min(100%, 700px);
+            max-height: calc(100vh - 40px);
+            overflow: auto;
+            border-radius: 18px;
+            background: #FFFFFF;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+            animation: pop 0.22s ease-out;
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+            background: #FFFFFF;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .close-button {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border: none;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            background: #F1F5F9;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .student-profile {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 22px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .profile-avatar {
+            width: 54px;
+            height: 54px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 15px;
+            font-weight: 850;
+        }
+
+        .student-profile h3 {
+            margin: 0 0 4px;
+            font-size: 16px;
+        }
+
+        .student-profile p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            padding: 22px;
+        }
+
+        .detail-card {
+            padding: 14px;
+            border: 1px solid #E6EEF7;
+            border-radius: 12px;
+            background: #FFFFFF;
+        }
+
+        .detail-card h4 {
+            margin: 0 0 8px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .detail-card strong {
+            display: block;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .detail-card span {
+            display: block;
+            margin-top: 4px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .detail-section {
+            padding: 0 22px 22px;
+        }
+
+        .detail-section h3 {
+            margin: 0 0 11px;
+            font-size: 15px;
+        }
+
+        .recommendation-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px;
+            border: 1px solid #BFDBFE;
+            border-radius: 13px;
+            background: #F8FBFF;
+        }
+
+        .recommendation-box strong {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--primary-dark);
+            font-size: 14px;
+        }
+
+        .recommendation-box span {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .recommendation-score {
+            color: var(--primary-dark);
+            font-size: 17px;
+            font-weight: 850;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 0 22px 22px;
+        }
+
+        .confirm-card {
+            width: min(100%, 420px);
+            padding: 24px;
+            border-radius: 18px;
+            background: #FFFFFF;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+            text-align: center;
+        }
+
+        .confirm-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 14px;
+            border-radius: 14px;
+            color: #92400E;
+            background: var(--warning-light);
+            font-size: 21px;
+        }
+
+        .confirm-card h2 {
+            margin: 0 0 8px;
+            font-size: 18px;
+        }
+
+        .confirm-card p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .confirm-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 120;
+            max-width: min(390px, 88vw);
+            padding: 13px 15px;
+            border-radius: 11px;
+            color: #FFFFFF;
+            background: #1E293B;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.22);
+            font-size: 13px;
+            line-height: 1.45;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(18px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1080px) {
+            :root {
+                --sidebar-width: 220px;
+            }
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .insight-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        @media (max-width: 780px) {
+            .app-shell {
+                display: block;
+            }
+
+            .sidebar {
+                width: min(86vw, 280px);
+                transform: translateX(-105%);
+                transition: transform 0.25s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .topbar {
+                height: 64px;
+                padding: 0 4vw;
+            }
+
+            .menu-toggle {
+                width: 38px;
+                height: 38px;
+                display: grid;
+                place-items: center;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                color: var(--text-secondary);
+                background: #FFFFFF;
+                cursor: pointer;
+            }
+
+            .mobile-brand {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: var(--primary-dark);
+                font-size: 17px;
+                font-weight: 850;
+            }
+
+            .mobile-brand .brand-mark {
+                width: 34px;
+                height: 34px;
+                border: none;
+                background: var(--primary);
+                font-size: 15px;
+            }
+
+            .global-search {
+                display: none;
+            }
+
+            .profile-name {
+                display: none;
+            }
+
+            .content {
+                width: min(94%, 1280px);
+                margin-top: 23px;
+            }
+
+            .page-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-row {
+                flex-direction: column;
+            }
+
+            .search-box,
+            .table-search,
+            .status-filter {
+                width: 100%;
+            }
+
+            .modal-actions,
+            .confirm-actions {
+                flex-direction: column-reverse;
+            }
+
+            .modal-actions button,
+            .confirm-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
+            <a class="brand" href="#">
+                <span class="brand-mark">✦</span>
+                <span>CareerPath</span>
+            </a>
+
+            <div class="admin-label">Panel Administrator</div>
+
+            <nav class="menu">
+                <a href="index.html"><span class="menu-icon">⌂</span>Dashboard</a>
+                <a href="alternatif-karir.html"><span class="menu-icon">◈</span>Alternatif Karir</a>
+                <a href="konfigurasi-rekomendasi.html"><span class="menu-icon">⚙</span>Konfigurasi Rekomendasi</a>
+                <a href="data-pasar-kerja.html"><span class="menu-icon">▤</span>Data Pasar Kerja</a>
+                <a class="active" href="mahasiswa.html"><span class="menu-icon">◉</span>Mahasiswa</a>
+                <a href="riwayat-rekomendasi.html"><span class="menu-icon">◷</span>Riwayat Rekomendasi</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="admin-card">
+                    <div class="admin-avatar">AD</div>
+                    <div>
+                        <strong>Administrator</strong>
+                        <span>admin@careerpath.id</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <section class="main">
+            <header class="topbar">
+                <button class="menu-toggle" type="button" onclick="toggleSidebar()" aria-label="Buka menu">☰</button>
+
+                <div class="mobile-brand">
+                    <span class="brand-mark">✦</span>
+                    <span>CareerPath</span>
+                </div>
+
+                <div class="global-search">
+                    <span class="search-icon">⌕</span>
+                    <input type="search" placeholder="Cari mahasiswa, karir, atau data pasar kerja..."
+                        onkeydown="handleGlobalSearch(event)">
+                </div>
+
+                <div class="top-actions">
+                    <button class="icon-button" type="button" onclick="showToast('Tidak ada notifikasi baru.')"
+                        aria-label="Notifikasi">♧</button>
+                    <button class="profile-button" type="button"
+                        onclick="showToast('Menu profil administrator akan dibuka.')">
+                        <span class="top-avatar">AD</span>
+                        <span class="profile-name">Administrator</span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="breadcrumbs">
+                    <a href="#">Dashboard</a>
+                    <span>›</span>
+                    <span>Mahasiswa</span>
+                </div>
+
+                <section class="page-header">
+                    <div>
+                        <h1>Data Mahasiswa</h1>
+                        <p>Pantau data akun, kelengkapan profil, hasil tes RIASEC, data akademik, dan aktivitas
+                            rekomendasi mahasiswa. Administrator hanya dapat melihat data, mengatur status akun, dan
+                            tidak mengubah nilai mahasiswa.</p>
+                    </div>
+                    <button class="button-primary" type="button"
+                        onclick="showToast('Fitur ekspor data mahasiswa akan diproses.')">⇩ Ekspor Data</button>
+                </section>
+
+                <section class="summary-grid">
+                    <article class="summary-card">
+                        <div class="summary-icon">◉</div>
+                        <h3>Total Mahasiswa</h3>
+                        <strong id="totalStudents">124</strong>
+                        <span>Mahasiswa terdaftar pada sistem CareerPath.</span>
+                    </article>
+                    <article class="summary-card">
+                        <div class="summary-icon">✓</div>
+                        <h3>Profil Lengkap</h3>
+                        <strong id="completeStudents">96</strong>
+                        <span>Mahasiswa telah melengkapi data utama.</span>
+                    </article>
+                    <article class="summary-card">
+                        <div class="summary-icon">◌</div>
+                        <h3>Tes RIASEC Selesai</h3>
+                        <strong id="riasecStudents">89</strong>
+                        <span>Mahasiswa yang sudah memiliki hasil minat karir.</span>
+                    </article>
+                    <article class="summary-card">
+                        <div class="summary-icon">◷</div>
+                        <h3>Rekomendasi Dibuat</h3>
+                        <strong id="recommendationStudents">82</strong>
+                        <span>Mahasiswa yang sudah memperoleh rekomendasi.</span>
+                    </article>
+                </section>
+
+                <section class="student-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Daftar Mahasiswa</h2>
+                            <p>Gunakan pencarian dan filter untuk memantau kelengkapan data serta status akun mahasiswa.
+                            </p>
+                        </div>
+
+                        <div class="filter-row">
+                            <div class="search-box">
+                                <span class="search-icon">⌕</span>
+                                <input class="table-search" id="studentSearch" type="search"
+                                    placeholder="Cari nama atau program studi..." oninput="filterStudents()">
+                            </div>
+                            <select class="status-filter" id="studentStatusFilter" onchange="filterStudents()">
+                                <option value="all">Semua Status</option>
+                                <option value="active">Aktif</option>
+                                <option value="incomplete">Belum Lengkap</option>
+                                <option value="inactive">Nonaktif</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Mahasiswa</th>
+                                    <th>Program Studi</th>
+                                    <th>Semester</th>
+                                    <th>RIASEC</th>
+                                    <th>Kelengkapan Data</th>
+                                    <th>Rekomendasi Terakhir</th>
+                                    <th>Status Akun</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody">
+                                <tr data-name="Mame Riyadi" data-status="active" data-complete="100" data-riasec="true"
+                                    data-recommendation="true">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar">MR</div>
+                                            <div>
+                                                <strong>Mame Riyadi</strong>
+                                                <span>mame.riyadi@student.ac.id</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Teknologi Informasi</td>
+                                    <td>6</td>
+                                    <td><span class="riasec-code">I R C</span></td>
+                                    <td>
+                                        <div class="progress-wrap"><span>100% lengkap</span>
+                                            <div class="progress">
+                                                <div class="progress-fill" style="width:100%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Software Engineer<br><span style="color:#64748B;font-size:10px">22 Juni
+                                            2026</span></td>
+                                    <td><span class="status active">Aktif</span></td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="openDetailModal(this)">Detail</button><button
+                                                class="action-button block"
+                                                onclick="confirmStatusChange(this)">Nonaktifkan</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Andi Saputra" data-status="active" data-complete="90" data-riasec="true"
+                                    data-recommendation="true">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar">AS</div>
+                                            <div>
+                                                <strong>Andi Saputra</strong>
+                                                <span>andi.saputra@student.ac.id</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Teknik Informatika</td>
+                                    <td>8</td>
+                                    <td><span class="riasec-code">R I E</span></td>
+                                    <td>
+                                        <div class="progress-wrap"><span>90% lengkap</span>
+                                            <div class="progress">
+                                                <div class="progress-fill" style="width:90%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Cybersecurity Analyst<br><span style="color:#64748B;font-size:10px">21 Juni
+                                            2026</span></td>
+                                    <td><span class="status active">Aktif</span></td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="openDetailModal(this)">Detail</button><button
+                                                class="action-button block"
+                                                onclick="confirmStatusChange(this)">Nonaktifkan</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Nadia Aulia" data-status="incomplete" data-complete="65"
+                                    data-riasec="true" data-recommendation="false">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar">NA</div>
+                                            <div>
+                                                <strong>Nadia Aulia</strong>
+                                                <span>nadia.aulia@student.ac.id</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Sistem Informasi</td>
+                                    <td>6</td>
+                                    <td><span class="riasec-code">A S E</span></td>
+                                    <td>
+                                        <div class="progress-wrap"><span>65% lengkap</span>
+                                            <div class="progress">
+                                                <div class="progress-fill" style="width:65%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span style="color:#64748B">Belum tersedia</span></td>
+                                    <td><span class="status incomplete">Belum Lengkap</span></td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="openDetailModal(this)">Detail</button><button
+                                                class="action-button block"
+                                                onclick="confirmStatusChange(this)">Nonaktifkan</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Rizky Firmansyah" data-status="active" data-complete="85"
+                                    data-riasec="true" data-recommendation="true">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar">RF</div>
+                                            <div>
+                                                <strong>Rizky Firmansyah</strong>
+                                                <span>rizky.firmansyah@student.ac.id</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Ilmu Komputer</td>
+                                    <td>8</td>
+                                    <td><span class="riasec-code">I C R</span></td>
+                                    <td>
+                                        <div class="progress-wrap"><span>85% lengkap</span>
+                                            <div class="progress">
+                                                <div class="progress-fill" style="width:85%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Data Analyst<br><span style="color:#64748B;font-size:10px">20 Juni 2026</span>
+                                    </td>
+                                    <td><span class="status active">Aktif</span></td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="openDetailModal(this)">Detail</button><button
+                                                class="action-button block"
+                                                onclick="confirmStatusChange(this)">Nonaktifkan</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Siti Nurfadilah" data-status="active" data-complete="100"
+                                    data-riasec="true" data-recommendation="true">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar">SN</div>
+                                            <div>
+                                                <strong>Siti Nurfadilah</strong>
+                                                <span>siti.nurfadilah@student.ac.id</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Teknologi Informasi</td>
+                                    <td>6</td>
+                                    <td><span class="riasec-code">A S I</span></td>
+                                    <td>
+                                        <div class="progress-wrap"><span>100% lengkap</span>
+                                            <div class="progress">
+                                                <div class="progress-fill" style="width:100%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>UI/UX Designer<br><span style="color:#64748B;font-size:10px">18 Juni 2026</span>
+                                    </td>
+                                    <td><span class="status active">Aktif</span></td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="openDetailModal(this)">Detail</button><button
+                                                class="action-button block"
+                                                onclick="confirmStatusChange(this)">Nonaktifkan</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Dimas Pratama" data-status="inactive" data-complete="40"
+                                    data-riasec="false" data-recommendation="false">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar">DP</div>
+                                            <div>
+                                                <strong>Dimas Pratama</strong>
+                                                <span>dimas.pratama@student.ac.id</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>Teknik Informatika</td>
+                                    <td>6</td>
+                                    <td><span style="color:#94A3B8">Belum tes</span></td>
+                                    <td>
+                                        <div class="progress-wrap"><span>40% lengkap</span>
+                                            <div class="progress">
+                                                <div class="progress-fill" style="width:40%"></div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span style="color:#64748B">Belum tersedia</span></td>
+                                    <td><span class="status inactive">Nonaktif</span></td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="openDetailModal(this)">Detail</button><button
+                                                class="action-button block"
+                                                onclick="confirmStatusChange(this)">Aktifkan</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr class="empty-row" id="emptyRow">
+                                    <td colspan="8">Data mahasiswa tidak ditemukan.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-footer">
+                        <span>Menampilkan <strong id="visibleCount">6</strong> mahasiswa.</span>
+                        <span>Data akademik dan hasil tes hanya dapat diperbarui oleh mahasiswa.</span>
+                    </div>
+                </section>
+
+                <section class="insight-grid">
+                    <article class="card activity-card">
+                        <div class="card-header">
+                            <div>
+                                <h2>Aktivitas Mahasiswa Terbaru</h2>
+                                <p>Aktivitas terbaru yang dilakukan mahasiswa dalam sistem.</p>
+                            </div>
+                            <button class="button-outline" type="button"
+                                onclick="showToast('Halaman riwayat aktivitas akan dibuka.')">Lihat Semua</button>
+                        </div>
+
+                        <div class="activity-list">
+                            <div class="activity-row">
+                                <div class="activity-icon">◌</div>
+                                <div class="activity-info">
+                                    <strong>Mame Riyadi menyelesaikan tes RIASEC</strong>
+                                    <span>Hasil dominan: Investigative, Realistic, Conventional.</span>
+                                </div>
+                                <span class="activity-time">5 menit lalu</span>
+                            </div>
+                            <div class="activity-row">
+                                <div class="activity-icon">✓</div>
+                                <div class="activity-info">
+                                    <strong>Andi Saputra memperbarui data akademik</strong>
+                                    <span>Komponen akademik telah diperbarui menjadi 90% lengkap.</span>
+                                </div>
+                                <span class="activity-time">18 menit lalu</span>
+                            </div>
+                            <div class="activity-row">
+                                <div class="activity-icon">◷</div>
+                                <div class="activity-info">
+                                    <strong>Rizky Firmansyah menerima rekomendasi karir</strong>
+                                    <span>Rekomendasi utama: Data Analyst.</span>
+                                </div>
+                                <span class="activity-time">42 menit lalu</span>
+                            </div>
+                            <div class="activity-row">
+                                <div class="activity-icon">◉</div>
+                                <div class="activity-info">
+                                    <strong>Siti Nurfadilah melengkapi profil pengguna</strong>
+                                    <span>Profil dan data pendidikan telah selesai diisi.</span>
+                                </div>
+                                <span class="activity-time">1 jam lalu</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <aside class="card completion-card">
+                        <h2>Kelengkapan Data Mahasiswa</h2>
+                        <p>Ringkasan progres pengisian data yang diperlukan untuk menghasilkan rekomendasi karir.</p>
+
+                        <div class="completion-list">
+                            <div class="completion-row">
+                                <span>Profil Mahasiswa</span>
+                                <div class="completion-track">
+                                    <div class="completion-fill" style="width:94%"></div>
+                                </div>
+                                <strong>94%</strong>
+                            </div>
+                            <div class="completion-row">
+                                <span>Data Akademik</span>
+                                <div class="completion-track">
+                                    <div class="completion-fill" style="width:84%"></div>
+                                </div>
+                                <strong>84%</strong>
+                            </div>
+                            <div class="completion-row">
+                                <span>Tes RIASEC</span>
+                                <div class="completion-track">
+                                    <div class="completion-fill" style="width:72%"></div>
+                                </div>
+                                <strong>72%</strong>
+                            </div>
+                            <div class="completion-row">
+                                <span>Hasil Rekomendasi</span>
+                                <div class="completion-track">
+                                    <div class="completion-fill" style="width:66%"></div>
+                                </div>
+                                <strong>66%</strong>
+                            </div>
+                        </div>
+                    </aside>
+                </section>
+            </main>
+        </section>
+    </div>
+
+    <!-- Detail Student Modal -->
+    <div class="modal-overlay" id="detailModal">
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+            <div class="modal-header">
+                <h2 id="detailTitle">Detail Mahasiswa</h2>
+                <button class="close-button" type="button" onclick="closeDetailModal()" aria-label="Tutup">×</button>
+            </div>
+
+            <div class="student-profile">
+                <div class="profile-avatar" id="detailAvatar">MR</div>
+                <div>
+                    <h3 id="detailName">Mame Riyadi</h3>
+                    <p id="detailEmail">mame.riyadi@student.ac.id</p>
+                </div>
+            </div>
+
+            <div class="detail-grid">
+                <article class="detail-card">
+                    <h4>Program Studi</h4>
+                    <strong id="detailProgram">Teknologi Informasi</strong>
+                    <span>Bidang studi mahasiswa</span>
+                </article>
+                <article class="detail-card">
+                    <h4>Semester</h4>
+                    <strong id="detailSemester">6</strong>
+                    <span>Semester aktif</span>
+                </article>
+                <article class="detail-card">
+                    <h4>Hasil RIASEC</h4>
+                    <strong id="detailRiasec">I R C</strong>
+                    <span>Tiga tipe minat dominan</span>
+                </article>
+                <article class="detail-card">
+                    <h4>Kelengkapan Data</h4>
+                    <strong id="detailComplete">100%</strong>
+                    <span>Profil, akademik, dan tes minat</span>
+                </article>
+            </div>
+
+            <div class="detail-section">
+                <h3>Rekomendasi Terakhir</h3>
+                <div class="recommendation-box">
+                    <div>
+                        <strong id="detailRecommendation">Software Engineer</strong>
+                        <span id="detailRecommendationDate">Dihasilkan pada 22 Juni 2026</span>
+                    </div>
+                    <span class="recommendation-score" id="detailScore">0,91</span>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="button-outline" type="button" onclick="closeDetailModal()">Tutup</button>
+                <button class="button-primary" type="button"
+                    onclick="showToast('Riwayat rekomendasi mahasiswa akan dibuka.')">Lihat Riwayat Rekomendasi</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Account status confirmation -->
+    <div class="modal-overlay" id="statusModal">
+        <section class="confirm-card" role="dialog" aria-modal="true">
+            <div class="confirm-icon">!</div>
+            <h2 id="statusModalTitle">Ubah Status Akun?</h2>
+            <p id="statusModalText">Status akun mahasiswa akan diperbarui.</p>
+            <div class="confirm-actions">
+                <button class="button-outline" type="button" onclick="closeStatusModal()">Batal</button>
+                <button class="button-danger" type="button" id="statusConfirmButton"
+                    onclick="applyStatusChange()">Lanjutkan</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let toastTimer;
+        let statusTarget = null;
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function handleGlobalSearch(event) {
+            if (event.key === "Enter") {
+                const query = event.target.value.trim();
+                showToast(query ? `Mencari data untuk: ${query}` : "Masukkan kata kunci pencarian terlebih dahulu.");
+            }
+        }
+
+        function getRows() {
+            return [...document.querySelectorAll("#studentTableBody tr[data-name]")];
+        }
+
+        function filterStudents() {
+            const query = document.getElementById("studentSearch").value.trim().toLowerCase();
+            const status = document.getElementById("studentStatusFilter").value;
+            const rows = getRows();
+            let shown = 0;
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const matchesQuery = text.includes(query);
+                const matchesStatus = status === "all" || row.dataset.status === status;
+                const visible = matchesQuery && matchesStatus;
+
+                row.style.display = visible ? "" : "none";
+                if (visible) shown += 1;
+            });
+
+            document.getElementById("visibleCount").textContent = shown;
+            document.getElementById("emptyRow").style.display = shown === 0 ? "" : "none";
+        }
+
+        function updateSummary() {
+            const rows = getRows();
+            const complete = rows.filter(row => Number(row.dataset.complete) >= 80).length;
+            const riasec = rows.filter(row => row.dataset.riasec === "true").length;
+            const recommendation = rows.filter(row => row.dataset.recommendation === "true").length;
+
+            // Data ringkasan sengaja menggunakan angka ilustratif untuk prototype.
+            document.getElementById("totalStudents").textContent = Math.max(124, rows.length);
+            document.getElementById("completeStudents").textContent = Math.max(96, complete);
+            document.getElementById("riasecStudents").textContent = Math.max(89, riasec);
+            document.getElementById("recommendationStudents").textContent = Math.max(82, recommendation);
+        }
+
+        function getStudentData(row) {
+            const studentCell = row.querySelector(".student-cell");
+            const name = studentCell.querySelector("strong").textContent.trim();
+            const email = studentCell.querySelector("span").textContent.trim();
+            const avatar = row.querySelector(".student-avatar").textContent.trim();
+            const program = row.children[1].textContent.trim();
+            const semester = row.children[2].textContent.trim();
+            const riasec = row.children[3].textContent.trim();
+            const complete = row.dataset.complete || "0";
+            const recommendation = row.children[5].innerText.trim();
+
+            return { name, email, avatar, program, semester, riasec, complete, recommendation };
+        }
+
+        function openDetailModal(button) {
+            const row = button.closest("tr");
+            const data = getStudentData(row);
+
+            document.getElementById("detailAvatar").textContent = data.avatar;
+            document.getElementById("detailName").textContent = data.name;
+            document.getElementById("detailEmail").textContent = data.email;
+            document.getElementById("detailProgram").textContent = data.program;
+            document.getElementById("detailSemester").textContent = data.semester;
+            document.getElementById("detailRiasec").textContent = data.riasec === "Belum tes" ? "Belum tersedia" : data.riasec;
+            document.getElementById("detailComplete").textContent = `${data.complete}%`;
+
+            if (row.dataset.recommendation === "true") {
+                const lines = data.recommendation.split("\n");
+                document.getElementById("detailRecommendation").textContent = lines[0];
+                document.getElementById("detailRecommendationDate").textContent = lines[1] || "Riwayat rekomendasi tersedia";
+                document.getElementById("detailScore").textContent = "0,89";
+            } else {
+                document.getElementById("detailRecommendation").textContent = "Belum tersedia";
+                document.getElementById("detailRecommendationDate").textContent = "Mahasiswa perlu melengkapi data untuk menerima rekomendasi.";
+                document.getElementById("detailScore").textContent = "-";
+            }
+
+            document.getElementById("detailModal").classList.add("show");
+        }
+
+        function closeDetailModal() {
+            document.getElementById("detailModal").classList.remove("show");
+        }
+
+        function confirmStatusChange(button) {
+            statusTarget = button.closest("tr");
+            const name = statusTarget.dataset.name;
+            const current = statusTarget.dataset.status;
+            const target = current === "inactive" ? "aktif" : "nonaktif";
+
+            document.getElementById("statusModalTitle").textContent = `${target === "aktif" ? "Aktifkan" : "Nonaktifkan"} Akun?`;
+            document.getElementById("statusModalText").textContent = `Status akun ${name} akan diubah menjadi ${target}.`;
+            document.getElementById("statusConfirmButton").textContent = target === "aktif" ? "Aktifkan Akun" : "Nonaktifkan Akun";
+            document.getElementById("statusConfirmButton").className = target === "aktif" ? "button-primary" : "button-danger";
+            document.getElementById("statusModal").classList.add("show");
+        }
+
+        function closeStatusModal() {
+            statusTarget = null;
+            document.getElementById("statusModal").classList.remove("show");
+        }
+
+        function applyStatusChange() {
+            if (!statusTarget) return;
+
+            const current = statusTarget.dataset.status;
+            const next = current === "inactive" ? "active" : "inactive";
+            const name = statusTarget.dataset.name;
+            const statusCell = statusTarget.children[6];
+            const button = statusTarget.querySelector(".action-button.block");
+
+            statusTarget.dataset.status = next;
+
+            if (next === "active") {
+                statusCell.innerHTML = `<span class="status active">Aktif</span>`;
+                button.textContent = "Nonaktifkan";
+            } else {
+                statusCell.innerHTML = `<span class="status inactive">Nonaktif</span>`;
+                button.textContent = "Aktifkan";
+            }
+
+            closeStatusModal();
+            filterStudents();
+            updateSummary();
+            showToast(`Status akun ${name} berhasil diubah menjadi ${next === "active" ? "aktif" : "nonaktif"}.`);
+        }
+
+        document.querySelectorAll(".modal-overlay").forEach(overlay => {
+            overlay.addEventListener("click", function (event) {
+                if (event.target !== overlay) return;
+                if (overlay.id === "detailModal") closeDetailModal();
+                if (overlay.id === "statusModal") closeStatusModal();
+            });
+        });
+
+        updateSummary();
+    </script>
+</body>
+
+</html>

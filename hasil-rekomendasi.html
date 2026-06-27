@@ -1,0 +1,1080 @@
+<!doctype html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Hasil Rekomendasi Karir - CareerPath</title>
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-light: #DBEAFE;
+            --background: #F8FAFC;
+            --surface: #FFFFFF;
+            --border: #E2E8F0;
+            --text: #1E293B;
+            --muted: #64748B;
+            --success: #16A34A;
+            --success-light: #F0FDF4;
+            --shadow: 0 14px 36px rgba(15, 23, 42, .08);
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--background);
+            color: var(--text);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        button {
+            font: inherit
+        }
+
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 clamp(20px, 5vw, 78px);
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, .94);
+            backdrop-filter: blur(12px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 850;
+            letter-spacing: -.45px;
+        }
+
+        .brand-mark {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            color: #fff;
+            background: var(--primary);
+            font-size: 17px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 6px
+        }
+
+        .nav-links a {
+            padding: 9px 11px;
+            border-radius: 9px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 750;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--primary-dark);
+            background: #EFF6FF
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 5px 10px 5px 6px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: #fff;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 29px;
+            height: 29px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        .mobile-menu {
+            display: none
+        }
+
+        .page {
+            width: min(1160px, 92%);
+            margin: 34px auto 56px;
+        }
+
+        .crumb {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        .crumb a {
+            color: var(--primary-dark);
+            text-decoration: none;
+            font-weight: 750
+        }
+
+        .heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(28px, 3vw, 37px);
+            letter-spacing: -1.1px
+        }
+
+        .heading p {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.55
+        }
+
+        .time {
+            padding: 9px 11px;
+            border: 1px solid #D8EAFE;
+            border-radius: 999px;
+            color: var(--primary-dark);
+            background: #F8FBFF;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .top-result {
+            position: relative;
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1.1fr .9fr;
+            gap: 25px;
+            min-height: 270px;
+            padding: 30px;
+            border-radius: 22px;
+            color: #fff;
+            background: linear-gradient(135deg, #1D4ED8, #2563EB 57%, #3B82F6);
+            box-shadow: 0 18px 38px rgba(29, 78, 216, .2);
+        }
+
+        .top-result:after {
+            content: "";
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            right: -80px;
+            top: -185px;
+            border: 45px solid rgba(255, 255, 255, .1);
+            border-radius: 50%;
+        }
+
+        .result-copy,
+        .result-score {
+            position: relative;
+            z-index: 1
+        }
+
+        .badge {
+            display: inline-flex;
+            gap: 7px;
+            align-items: center;
+            padding: 7px 10px;
+            border: 1px solid rgba(255, 255, 255, .24);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, .12);
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        .career {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 15px;
+        }
+
+        .career-icon {
+            width: 60px;
+            height: 60px;
+            display: grid;
+            place-items: center;
+            border-radius: 17px;
+            border: 1px solid rgba(255, 255, 255, .24);
+            background: rgba(255, 255, 255, .14);
+            font-size: 26px;
+            font-weight: 850;
+        }
+
+        .career h2 {
+            margin: 0;
+            font-size: clamp(25px, 3vw, 34px);
+            letter-spacing: -.9px
+        }
+
+        .career p {
+            margin: 5px 0 0;
+            color: rgba(255, 255, 255, .8);
+            font-size: 14px
+        }
+
+        .description {
+            max-width: 640px;
+            margin: 20px 0 16px;
+            color: rgba(255, 255, 255, .88);
+            font-size: 14px;
+            line-height: 1.65
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px
+        }
+
+        .tag {
+            padding: 7px 9px;
+            border: 1px solid rgba(255, 255, 255, .2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .11);
+            font-size: 11px;
+            font-weight: 800
+        }
+
+        .result-score {
+            align-self: center;
+            justify-self: end;
+            width: min(100%, 265px);
+            padding: 22px;
+            border: 1px solid rgba(255, 255, 255, .24);
+            border-radius: 17px;
+            background: rgba(255, 255, 255, .12);
+            backdrop-filter: blur(8px);
+        }
+
+        .result-score span {
+            display: block;
+            color: rgba(255, 255, 255, .78);
+            font-size: 12px;
+            font-weight: 700
+        }
+
+        .value {
+            margin: 5px 0 2px;
+            font-size: 52px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -2px
+        }
+
+        .score-note {
+            color: rgba(255, 255, 255, .77);
+            font-size: 11px;
+            line-height: 1.5
+        }
+
+        .divider {
+            height: 1px;
+            margin: 17px 0;
+            background: rgba(255, 255, 255, .18)
+        }
+
+        .score-mini {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px
+        }
+
+        .score-mini div {
+            padding: 9px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .08)
+        }
+
+        .score-mini small {
+            display: block;
+            color: rgba(255, 255, 255, .7);
+            font-size: 10px
+        }
+
+        .score-mini b {
+            font-size: 14px
+        }
+
+        .advice {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 14px 16px;
+            border: 1px solid #BFDBFE;
+            border-radius: 13px;
+            color: #1E40AF;
+            background: #EFF6FF;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1.08fr .92fr;
+            gap: 20px
+        }
+
+        .card {
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 21px 22px 15px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .card-head h2 {
+            margin: 0;
+            font-size: 17px;
+            letter-spacing: -.35px
+        }
+
+        .card-head p {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5
+        }
+
+        .legend {
+            padding: 7px 9px;
+            border: 1px solid #D8EAFE;
+            border-radius: 8px;
+            color: var(--primary-dark);
+            background: #F8FBFF;
+            font-size: 11px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .ranking {
+            padding: 5px 22px 15px
+        }
+
+        .rank {
+            width: 100%;
+            display: grid;
+            grid-template-columns: 35px 1fr 90px 56px;
+            gap: 12px;
+            align-items: center;
+            padding: 14px 0;
+            border: 0;
+            border-bottom: 1px solid #EDF2F7;
+            color: var(--text);
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .rank:last-child {
+            border-bottom: 0
+        }
+
+        .rank.active {
+            margin: 0 -10px;
+            padding: 14px 10px;
+            border-radius: 12px;
+            border-bottom-color: transparent;
+            background: #F8FBFF
+        }
+
+        .rank-no {
+            width: 29px;
+            height: 29px;
+            display: grid;
+            place-items: center;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            border-radius: 9px;
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .rank-title {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+            font-weight: 800
+        }
+
+        .rank-detail {
+            display: block;
+            color: var(--muted);
+            font-size: 11px
+        }
+
+        .track {
+            height: 8px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #EAF0F8
+        }
+
+        .fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark))
+        }
+
+        .rank-score {
+            color: var(--primary-dark);
+            font-size: 13px;
+            font-weight: 900;
+            text-align: right
+        }
+
+        .criteria {
+            display: grid;
+            gap: 17px;
+            padding: 20px 22px 22px
+        }
+
+        .criterion {
+            display: grid;
+            grid-template-columns: 37px 1fr auto;
+            gap: 12px;
+            align-items: center
+        }
+
+        .criterion-code {
+            width: 37px;
+            height: 37px;
+            display: grid;
+            place-items: center;
+            border-radius: 11px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .criterion b {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px
+        }
+
+        .criterion small {
+            color: var(--muted);
+            font-size: 10px
+        }
+
+        .criterion-value {
+            color: var(--primary-dark);
+            font-size: 14px;
+            font-weight: 900
+        }
+
+        .criterion-track {
+            grid-column: 2/4;
+            height: 8px;
+            overflow: hidden;
+            margin-top: -6px;
+            border-radius: 999px;
+            background: #EAF0F8
+        }
+
+        .formula {
+            margin-top: 2px;
+            padding: 13px;
+            border: 1px solid #D8EAFE;
+            border-radius: 12px;
+            color: #1E40AF;
+            background: #F8FBFF;
+            font-size: 11px;
+            line-height: 1.55
+        }
+
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px
+        }
+
+        .inside {
+            padding: 22px
+        }
+
+        .market-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 17px
+        }
+
+        .market-stat {
+            padding: 13px;
+            border: 1px solid #E6EEF7;
+            border-radius: 12px
+        }
+
+        .market-stat small {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--muted);
+            font-size: 11px
+        }
+
+        .market-stat b {
+            display: block;
+            color: var(--primary-dark);
+            font-size: 20px;
+            letter-spacing: -.5px
+        }
+
+        .market-stat span {
+            display: block;
+            margin-top: 3px;
+            color: #166534;
+            font-size: 10px;
+            font-weight: 800
+        }
+
+        .sub-label {
+            margin: 16px 0 8px;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .03em;
+            text-transform: uppercase
+        }
+
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px
+        }
+
+        .skill {
+            padding: 6px 8px;
+            border-radius: 8px;
+            background: #F1F5F9;
+            color: #334155;
+            font-size: 10px;
+            font-weight: 750
+        }
+
+        .location {
+            font-size: 13px;
+            font-weight: 750
+        }
+
+        .market-note {
+            margin-top: 16px;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.55
+        }
+
+        .steps {
+            display: grid;
+            gap: 11px
+        }
+
+        .step {
+            display: grid;
+            grid-template-columns: 31px 1fr;
+            gap: 10px;
+            align-items: start
+        }
+
+        .step-no {
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            border-radius: 9px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+            font-weight: 900
+        }
+
+        .step b {
+            display: block;
+            margin: 1px 0 4px;
+            font-size: 12px
+        }
+
+        .step span {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+            line-height: 1.5
+        }
+
+        .green-note {
+            margin-top: 17px;
+            padding: 13px;
+            border-radius: 12px;
+            color: #166534;
+            background: var(--success-light);
+            font-size: 11px;
+            line-height: 1.55
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 100;
+            max-width: min(390px, 88vw);
+            padding: 13px 15px;
+            border-radius: 11px;
+            color: #fff;
+            background: #1E293B;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, .22);
+            font-size: 13px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(18px);
+            transition: .25s;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        @media(max-width:1000px) {
+
+            .top-result,
+            .main-grid,
+            .bottom-grid {
+                grid-template-columns: 1fr
+            }
+
+            .result-score {
+                justify-self: stretch;
+                width: 100%
+            }
+        }
+
+        @media(max-width:760px) {
+            .app {
+                display: block
+            }
+
+            .side {
+                transform: translateX(-105%);
+                transition: .25s
+            }
+
+            .side.open {
+                transform: translateX(0)
+            }
+
+            .navbar {
+                height: 64px;
+                padding: 0 4vw
+            }
+
+            .nav-links {
+                display: none
+            }
+
+            .mobile-menu {
+                display: grid;
+                width: 38px;
+                height: 38px;
+                place-items: center;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                background: #fff;
+                color: var(--muted)
+            }
+
+            .content {
+                width: min(94%, 1160px);
+                margin-top: 23px
+            }
+
+            .heading {
+                align-items: flex-start;
+                flex-direction: column
+            }
+
+            .profile-name {
+                display: none
+            }
+
+            .rank {
+                grid-template-columns: 33px 1fr 56px
+            }
+
+            .track {
+                display: none
+            }
+        }
+
+        @media(max-width:520px) {
+            .top-result {
+                padding: 23px
+            }
+
+            .career {
+                align-items: flex-start
+            }
+
+            .career h2 {
+                font-size: 27px
+            }
+
+            .market-summary {
+                grid-template-columns: 1fr
+            }
+
+            .card-head {
+                align-items: stretch;
+                flex-direction: column
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar">
+        <button class="mobile-menu" onclick="toggleMenu()">☰</button>
+        <a class="brand" href="index.html"><span class="brand-mark">✦</span><span>CareerPath</span></a>
+        <nav class="nav-links">
+            <a href="index.html" onclick="toast('Halaman beranda akan dibuka.')">Beranda</a>
+            <a href="profile.html" onclick="toast('Halaman profil akan dibuka.')">Profil</a>
+            <a href="data-akademik.html" onclick="toast('Halaman data akademik akan dibuka.')">Data Akademik</a>
+            <a href="riasec.html" onclick="toast('Halaman tes RIASEC akan dibuka.')">Tes RIASEC</a>
+            <a class="active" href="hasil-rekomendasi.html">Hasil Rekomendasi</a>
+        </nav>
+        <button class="profile" onclick="toast('Menu profil mahasiswa akan dibuka.')"><span
+                class="avatar">MR</span><span class="profile-name">Mame Riyadi</span></button>
+    </header>
+
+    <main class="page">
+        <div class="crumb"><a href="#">Beranda</a><span>›</span><span>Hasil Rekomendasi Karir</span></div>
+
+        <section class="heading">
+            <div>
+                <h1>Hasil Rekomendasi Karir</h1>
+                <p>Hasil pengolahan minat karir, kemampuan akademik, dan kebutuhan pasar kerja menggunakan metode Simple
+                    Additive Weighting (SAW).</p>
+            </div>
+            <span class="time">◷ Dibuat pada 22 Juni 2026, 09.18 WIB</span>
+        </section>
+
+        <section class="top-result">
+            <div class="result-copy">
+                <div class="badge">✦ Rekomendasi Utama Anda</div>
+                <div class="career">
+                    <div class="career-icon" id="heroIcon">⌘</div>
+                    <div>
+                        <h2 id="heroTitle">Software Engineer</h2>
+                        <p id="heroSubtitle">Pengembangan perangkat lunak dan solusi digital</p>
+                    </div>
+                </div>
+                <p class="description" id="heroDescription">Hasil ini menunjukkan kesesuaian yang tinggi antara minat
+                    Investigative–Realistic, kemampuan akademik Anda, dan kondisi kebutuhan pasar kerja untuk peran
+                    Software Engineer.</p>
+                <div class="tags" id="heroTags">
+                    <span class="tag">RIASEC: I R C</span>
+                    <span class="tag">Tren pasar meningkat</span>
+                    <span class="tag">520 lowongan</span>
+                </div>
+            </div>
+
+            <div class="result-score">
+                <span>Nilai Preferensi SAW</span>
+                <div class="value" id="heroScore">0,91</div>
+                <div class="score-note">Nilai tertinggi dari seluruh alternatif karir yang dibandingkan.</div>
+                <div class="divider"></div>
+                <div class="score-mini">
+                    <div><small>Ranking</small><b id="heroRank">#1</b></div>
+                    <div><small>Data lengkap</small><b>100%</b></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="advice"><b>ℹ</b><span>Rekomendasi ini dapat menjadi bahan pertimbangan awal. Tetap eksplorasi
+                minat, portofolio, pengalaman proyek, dan informasi pekerjaan sebelum menentukan pilihan karir.</span>
+        </section>
+
+        <section class="main-grid">
+            <article class="card">
+                <div class="card-head">
+                    <div>
+                        <h2>Ranking Alternatif Karir</h2>
+                        <p>Pilih salah satu alternatif untuk melihat detail kesesuaian dan informasi pasar kerjanya.</p>
+                    </div>
+                    <span class="legend">● Nilai Preferensi</span>
+                </div>
+                <div class="ranking" id="ranking">
+                    <button class="rank active" onclick="choose('Software Engineer',this)"><span
+                            class="rank-no">1</span><span><span class="rank-title">Software Engineer</span><span
+                                class="rank-detail">Kesesuaian tinggi pada minat dan akademik</span></span><span
+                            class="track"><span class="fill" style="width:91%"></span></span><span
+                            class="rank-score">0,91</span></button>
+                    <button class="rank" onclick="choose('Data Analyst',this)"><span class="rank-no">2</span><span><span
+                                class="rank-title">Data Analyst</span><span class="rank-detail">Kuat pada minat analitis
+                                dan data</span></span><span class="track"><span class="fill"
+                                style="width:88%"></span></span><span class="rank-score">0,88</span></button>
+                    <button class="rank" onclick="choose('Cybersecurity Analyst',this)"><span
+                            class="rank-no">3</span><span><span class="rank-title">Cybersecurity Analyst</span><span
+                                class="rank-detail">Relevan dengan keamanan dan infrastruktur</span></span><span
+                            class="track"><span class="fill" style="width:86%"></span></span><span
+                            class="rank-score">0,86</span></button>
+                    <button class="rank" onclick="choose('Business Analyst',this)"><span
+                            class="rank-no">4</span><span><span class="rank-title">Business Analyst</span><span
+                                class="rank-detail">Kesesuaian pada analisis kebutuhan sistem</span></span><span
+                            class="track"><span class="fill" style="width:83%"></span></span><span
+                            class="rank-score">0,83</span></button>
+                    <button class="rank" onclick="choose('UI/UX Designer',this)"><span
+                            class="rank-no">5</span><span><span class="rank-title">UI/UX Designer</span><span
+                                class="rank-detail">Cocok untuk minat kreatif dan pengguna</span></span><span
+                            class="track"><span class="fill" style="width:81%"></span></span><span
+                            class="rank-score">0,81</span></button>
+                </div>
+            </article>
+
+            <aside class="card">
+                <div class="card-head">
+                    <div>
+                        <h2>Rincian Nilai Kriteria</h2>
+                        <p>Kontribusi C1, C2, dan C3 terhadap alternatif terpilih.</p>
+                    </div>
+                </div>
+                <div class="criteria">
+                    <div class="criterion">
+                        <div class="criterion-code">C1</div>
+                        <div><b>Minat Karir</b><small id="c1Text">Hasil RIASEC sesuai dengan karakteristik
+                                karir.</small></div>
+                        <div class="criterion-value" id="c1Score">0,95</div>
+                        <div class="criterion-track">
+                            <div class="fill" id="c1Fill" style="width:95%"></div>
+                        </div>
+                    </div>
+                    <div class="criterion">
+                        <div class="criterion-code">C2</div>
+                        <div><b>Kemampuan Akademik</b><small id="c2Text">Pemrograman dan basis data memiliki nilai
+                                baik.</small></div>
+                        <div class="criterion-value" id="c2Score">0,88</div>
+                        <div class="criterion-track">
+                            <div class="fill" id="c2Fill" style="width:88%"></div>
+                        </div>
+                    </div>
+                    <div class="criterion">
+                        <div class="criterion-code">C3</div>
+                        <div><b>Kebutuhan Pasar Kerja</b><small id="c3Text">Peluang lowongan dan tren pekerjaan termasuk
+                                tinggi.</small></div>
+                        <div class="criterion-value" id="c3Score">0,90</div>
+                        <div class="criterion-track">
+                            <div class="fill" id="c3Fill" style="width:90%"></div>
+                        </div>
+                    </div>
+                    <div class="formula">Nilai akhir diperoleh dari penjumlahan nilai normalisasi yang telah dikalikan
+                        bobot: C1 40%, C2 35%, dan C3 25%.</div>
+                </div>
+            </aside>
+        </section>
+
+        <section class="bottom-grid">
+            <article class="card">
+                <div class="card-head">
+                    <div>
+                        <h2>Informasi Pasar Kerja</h2>
+                        <p id="marketTitle">Gambaran kebutuhan pasar kerja untuk Software Engineer.</p>
+                    </div>
+                </div>
+                <div class="inside">
+                    <div class="market-summary">
+                        <div class="market-stat"><small>Jumlah Lowongan</small><b id="marketVacancy">520</b><span
+                                id="marketTrend">↗ Tren meningkat</span></div>
+                        <div class="market-stat"><small>Lokasi Dominan</small><b id="marketShort">Jakarta</b><span
+                                id="marketShortNote">dan peluang remote</span></div>
+                    </div>
+                    <div class="sub-label">Keterampilan yang sering dibutuhkan</div>
+                    <div class="skills" id="marketSkills"><span class="skill">Java</span><span
+                            class="skill">JavaScript</span><span class="skill">SQL</span><span
+                            class="skill">Git</span><span class="skill">REST API</span></div>
+                    <div class="sub-label">Lokasi</div>
+                    <div class="location" id="marketLocation">Jakarta, Bandung, dan Remote</div>
+                    <p class="market-note" id="marketNote">Data pasar kerja ini digunakan sebagai salah satu
+                        pertimbangan dalam kriteria kebutuhan pasar kerja (C3).</p>
+                </div>
+            </article>
+
+            <article class="card">
+                <div class="card-head">
+                    <div>
+                        <h2>Bagaimana Hasil Ini Dihitung?</h2>
+                        <p>Ringkasan proses rekomendasi menggunakan SAW.</p>
+                    </div>
+                </div>
+                <div class="inside">
+                    <div class="steps">
+                        <div class="step">
+                            <div class="step-no">1</div>
+                            <div><b>Mengumpulkan nilai kriteria</b><span>Nilai minat dari RIASEC, nilai akademik, dan
+                                    data kebutuhan pasar kerja digunakan sebagai masukan.</span></div>
+                        </div>
+                        <div class="step">
+                            <div class="step-no">2</div>
+                            <div><b>Melakukan normalisasi</b><span>Nilai setiap kriteria disetarakan agar dapat
+                                    dibandingkan antar alternatif karir.</span></div>
+                        </div>
+                        <div class="step">
+                            <div class="step-no">3</div>
+                            <div><b>Mengalikan dengan bobot SAW</b><span>Nilai normalisasi dikalikan bobot C1, C2, dan
+                                    C3.</span></div>
+                        </div>
+                        <div class="step">
+                            <div class="step-no">4</div>
+                            <div><b>Menentukan ranking</b><span>Alternatif dengan nilai preferensi tertinggi ditampilkan
+                                    sebagai rekomendasi utama.</span></div>
+                        </div>
+                    </div>
+                    <div class="green-note">Hasil dapat berubah apabila Anda memperbarui hasil tes RIASEC, data
+                        akademik, atau sistem memperbarui data pasar kerja.</div>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const careers = {
+            "Software Engineer": {
+                icon: "⌘", rank: "#1", score: "0,91",
+                subtitle: "Pengembangan perangkat lunak dan solusi digital",
+                description: "Hasil ini menunjukkan kesesuaian yang tinggi antara minat Investigative–Realistic, kemampuan akademik Anda, dan kondisi kebutuhan pasar kerja untuk peran Software Engineer.",
+                tags: ["RIASEC: I R C", "Tren pasar meningkat", "520 lowongan"],
+                c1: ["0,95", 95, "Hasil RIASEC sesuai dengan karakteristik karir."],
+                c2: ["0,88", 88, "Pemrograman dan basis data memiliki nilai baik."],
+                c3: ["0,90", 90, "Peluang lowongan dan tren pekerjaan termasuk tinggi."],
+                market: { title: "Gambaran kebutuhan pasar kerja untuk Software Engineer.", vacancy: "520", trend: "↗ Tren meningkat", short: "Jakarta", shortNote: "dan peluang remote", location: "Jakarta, Bandung, dan Remote", skills: ["Java", "JavaScript", "SQL", "Git", "REST API"], note: "Data pasar kerja ini digunakan sebagai salah satu pertimbangan dalam kriteria kebutuhan pasar kerja (C3)." }
+            },
+            "Data Analyst": {
+                icon: "▤", rank: "#2", score: "0,88",
+                subtitle: "Analisis, pengolahan, dan visualisasi data",
+                description: "Pilihan ini sesuai untuk minat analitis Anda serta kemampuan pada data, basis data, dan penyajian informasi untuk pengambilan keputusan.",
+                tags: ["RIASEC: I C R", "Tren pasar meningkat", "340 lowongan"],
+                c1: ["0,91", 91, "Minat analitis dan konvensional memiliki kesesuaian tinggi."],
+                c2: ["0,85", 85, "Komponen basis data dan data analitik mendukung peran ini."],
+                c3: ["0,88", 88, "Kebutuhan tenaga analis data masih menunjukkan tren positif."],
+                market: { title: "Gambaran kebutuhan pasar kerja untuk Data Analyst.", vacancy: "340", trend: "↗ Tren meningkat", short: "Jakarta", shortNote: "dan kota besar lain", location: "Jakarta, Tangerang, dan Surabaya", skills: ["SQL", "Excel", "Power BI", "Python", "Statistics"], note: "Peran Data Analyst banyak dibutuhkan untuk membantu organisasi mengambil keputusan berbasis data." }
+            },
+            "Cybersecurity Analyst": {
+                icon: "⌁", rank: "#3", score: "0,86",
+                subtitle: "Keamanan informasi dan perlindungan sistem",
+                description: "Karir ini memiliki kecocokan pada minat investigatif dan realistis, terutama bagi mahasiswa yang tertarik dengan keamanan jaringan dan sistem.",
+                tags: ["RIASEC: R I E", "Tren pasar meningkat", "210 lowongan"],
+                c1: ["0,92", 92, "Minat investigatif dan realistis mendukung aktivitas analisis keamanan."],
+                c2: ["0,82", 82, "Nilai jaringan dan keamanan memiliki kontribusi kuat."],
+                c3: ["0,84", 84, "Kebutuhan keamanan informasi tumbuh seiring peningkatan layanan digital."],
+                market: { title: "Gambaran kebutuhan pasar kerja untuk Cybersecurity Analyst.", vacancy: "210", trend: "↗ Tren meningkat", short: "Jakarta", shortNote: "dan pusat industri", location: "Jakarta, Bandung, dan Batam", skills: ["Network", "SIEM", "Security", "Linux", "Incident Response"], note: "Permintaan meningkat karena organisasi membutuhkan perlindungan sistem, data, dan infrastruktur digital." }
+            },
+            "Business Analyst": {
+                icon: "◫", rank: "#4", score: "0,83",
+                subtitle: "Analisis kebutuhan bisnis dan solusi teknologi",
+                description: "Karir ini sesuai bagi mahasiswa yang tertarik untuk menjembatani kebutuhan pengguna, proses bisnis, dan pengembangan solusi teknologi.",
+                tags: ["RIASEC: I S E", "Tren pasar stabil", "310 lowongan"],
+                c1: ["0,90", 90, "Kecenderungan sosial dan enterprising mendukung komunikasi kebutuhan."],
+                c2: ["0,74", 74, "Komponen analisis dan perancangan sistem menjadi kekuatan utama."],
+                c3: ["0,86", 86, "Jumlah lowongan cukup tinggi dan permintaan pasar relatif stabil."],
+                market: { title: "Gambaran kebutuhan pasar kerja untuk Business Analyst.", vacancy: "310", trend: "→ Tren stabil", short: "Jakarta", shortNote: "dan wilayah penyangga", location: "Jakarta, Tangerang, dan Bekasi", skills: ["Requirement Analysis", "BPMN", "Communication", "Documentation", "SQL"], note: "Business Analyst diperlukan untuk menerjemahkan kebutuhan bisnis menjadi kebutuhan sistem yang terstruktur." }
+            },
+            "UI/UX Designer": {
+                icon: "◌", rank: "#5", score: "0,81",
+                subtitle: "Desain pengalaman pengguna dan produk digital",
+                description: "Pilihan ini cocok untuk mahasiswa dengan kecenderungan artistik dan sosial yang ingin merancang produk digital yang mudah dan nyaman digunakan.",
+                tags: ["RIASEC: A S I", "Tren pasar stabil", "260 lowongan"],
+                c1: ["0,94", 94, "Minat artistik dan sosial memberikan kesesuaian tinggi pada peran desain."],
+                c2: ["0,78", 78, "Kemampuan analisis sistem dan data mendukung proses desain berbasis pengguna."],
+                c3: ["0,80", 80, "Peluang pekerjaan tersedia dengan kondisi pasar yang relatif stabil."],
+                market: { title: "Gambaran kebutuhan pasar kerja untuk UI/UX Designer.", vacancy: "260", trend: "→ Tren stabil", short: "Bandung", shortNote: "dan kota kreatif", location: "Jakarta, Bandung, dan Yogyakarta", skills: ["Figma", "Wireframe", "User Research", "Prototype", "Design System"], note: "Posisi UI/UX Designer berfokus pada pengembangan pengalaman dan antarmuka produk digital." }
+            }
+        };
+
+        let toastTimer;
+        function toast(message) {
+            const el = document.getElementById("toast");
+            el.textContent = message;
+            el.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+        }
+        function toggleMenu() { document.getElementById("sidebar").classList.toggle("open"); }
+        function updateCriterion(id, value) {
+            document.getElementById(id + "Score").textContent = value[0];
+            document.getElementById(id + "Fill").style.width = value[1] + "%";
+            document.getElementById(id + "Text").textContent = value[2];
+        }
+        function choose(name, button) {
+            const d = careers[name];
+            document.querySelectorAll(".rank").forEach(item => item.classList.remove("active"));
+            button.classList.add("active");
+            document.getElementById("heroIcon").textContent = d.icon;
+            document.getElementById("heroTitle").textContent = name;
+            document.getElementById("heroSubtitle").textContent = d.subtitle;
+            document.getElementById("heroDescription").textContent = d.description;
+            document.getElementById("heroScore").textContent = d.score;
+            document.getElementById("heroRank").textContent = d.rank;
+            document.getElementById("heroTags").innerHTML = d.tags.map(tag => `<span class="tag">${tag}</span>`).join("");
+            updateCriterion("c1", d.c1);
+            updateCriterion("c2", d.c2);
+            updateCriterion("c3", d.c3);
+            document.getElementById("marketTitle").textContent = d.market.title;
+            document.getElementById("marketVacancy").textContent = d.market.vacancy;
+            document.getElementById("marketTrend").textContent = d.market.trend;
+            document.getElementById("marketShort").textContent = d.market.short;
+            document.getElementById("marketShortNote").textContent = d.market.shortNote;
+            document.getElementById("marketLocation").textContent = d.market.location;
+            document.getElementById("marketSkills").innerHTML = d.market.skills.map(skill => `<span class="skill">${skill}</span>`).join("");
+            document.getElementById("marketNote").textContent = d.market.note;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profil - CareerPath</title>
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-light: #DBEAFE;
+            --background: #F8FAFC;
+            --surface: #FFFFFF;
+            --border: #E2E8F0;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --success: #22C55E;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+            --radius-lg: 18px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--background);
+            color: var(--text-primary);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 0 clamp(20px, 6vw, 96px);
+            background: rgba(255, 255, 255, 0.92);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            color: var(--primary-dark);
+            font-size: 19px;
+            font-weight: 850;
+            letter-spacing: -0.45px;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            color: #fff;
+            background: linear-gradient(145deg, var(--primary-dark), var(--primary));
+            box-shadow: 0 8px 18px rgba(59, 130, 246, 0.23);
+            font-size: 18px;
+        }
+
+        .navigation {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .navigation a {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 650;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .navigation a:hover,
+        .navigation a.active {
+            color: var(--primary-dark);
+        }
+
+        .profile-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #BFDBFE;
+            padding: 6px 10px 6px 7px;
+            border-radius: 999px;
+            color: var(--primary-dark);
+            background: #F8FBFF;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .mini-avatar {
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        main {
+            width: min(1180px, 92vw);
+            margin: 34px auto 70px;
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary-dark);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .page-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .page-heading h1 {
+            margin: 0;
+            font-size: clamp(27px, 3vw, 34px);
+            letter-spacing: -0.9px;
+        }
+
+        .page-heading p {
+            margin: 8px 0 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 11px;
+            border: 1px solid #BBF7D0;
+            border-radius: 999px;
+            color: #166534;
+            background: #F0FDF4;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 0.78fr 1.22fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .profile-summary {
+            position: relative;
+            overflow: hidden;
+            padding: 25px;
+        }
+
+        .profile-summary::before {
+            content: "";
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            top: -135px;
+            right: -100px;
+            border-radius: 50%;
+            background: var(--primary-light);
+        }
+
+        .summary-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .large-avatar {
+            width: 76px;
+            height: 76px;
+            display: grid;
+            place-items: center;
+            border: 5px solid #FFFFFF;
+            border-radius: 22px;
+            color: #FFFFFF;
+            background: linear-gradient(145deg, var(--primary-dark), var(--primary));
+            box-shadow: 0 11px 25px rgba(29, 78, 216, 0.22);
+            font-size: 23px;
+            font-weight: 850;
+            letter-spacing: -1px;
+        }
+
+        .profile-summary h2 {
+            margin: 16px 0 4px;
+            font-size: 21px;
+            letter-spacing: -0.45px;
+        }
+
+        .profile-summary .email {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .role-tag {
+            display: inline-flex;
+            margin-top: 12px;
+            padding: 6px 9px;
+            border-radius: 8px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .summary-divider {
+            height: 1px;
+            margin: 22px 0;
+            background: var(--border);
+        }
+
+        .summary-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+        }
+
+        .summary-icon {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            flex: 0 0 auto;
+            place-items: center;
+            border-radius: 10px;
+            color: var(--primary-dark);
+            background: #EFF6FF;
+            font-size: 15px;
+        }
+
+        .summary-item strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .summary-item span {
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .completion {
+            margin-top: 22px;
+            padding: 16px;
+            border-radius: 13px;
+            background: #F8FBFF;
+            border: 1px solid #D8EAFE;
+        }
+
+        .completion-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .completion-head span:last-child {
+            color: var(--primary-dark);
+        }
+
+        .progress-track {
+            height: 8px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #E8F0FA;
+        }
+
+        .progress-bar {
+            width: 82%;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        }
+
+        .completion p {
+            margin: 9px 0 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .form-card {
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: -0.35px;
+        }
+
+        .card-header p {
+            margin: 6px 0 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .saved-label {
+            display: none;
+            padding: 7px 9px;
+            border-radius: 8px;
+            color: #166534;
+            background: #F0FDF4;
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .profile-form {
+            display: grid;
+            gap: 18px;
+            padding: 24px;
+        }
+
+        .section-label {
+            margin: 2px 0 -3px;
+            color: var(--primary-dark);
+            font-size: 12px;
+            font-weight: 850;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+        }
+
+        label {
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 750;
+        }
+
+        input,
+        select {
+            width: 100%;
+            min-height: 44px;
+            padding: 11px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font: inherit;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+        }
+
+        input[readonly] {
+            color: #64748B;
+            background: #F8FAFC;
+            cursor: not-allowed;
+        }
+
+        .form-note {
+            display: flex;
+            align-items: flex-start;
+            gap: 9px;
+            padding: 13px;
+            border: 1px solid #BFDBFE;
+            border-radius: 11px;
+            color: #1E40AF;
+            background: #EFF6FF;
+            font-size: 12px;
+            line-height: 1.52;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding-top: 4px;
+        }
+
+        button {
+            border: none;
+            border-radius: 10px;
+            padding: 11px 15px;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+        }
+
+        .button-outline {
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FFFFFF;
+        }
+
+        .button-primary {
+            color: #FFFFFF;
+            background: var(--primary);
+            box-shadow: 0 9px 18px rgba(59, 130, 246, 0.22);
+        }
+
+        .button-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .bottom-card {
+            padding: 22px;
+        }
+
+        .bottom-card h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .bottom-card>p {
+            margin: 6px 0 16px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .academic-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 15px;
+            border: 1px solid #D8EAFE;
+            border-radius: 13px;
+            background: #F8FBFF;
+        }
+
+        .academic-meta {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .academic-icon {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 18px;
+        }
+
+        .academic-meta strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .academic-meta span {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .text-button {
+            border: none;
+            padding: 0;
+            color: var(--primary-dark);
+            background: transparent;
+            font-size: 12px;
+            font-weight: 850;
+            white-space: nowrap;
+        }
+
+        .account-list {
+            display: grid;
+            gap: 0;
+        }
+
+        .account-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 12px 0;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .account-item:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .account-item strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .account-item span {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .account-item button {
+            padding: 7px 9px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 12px;
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 50;
+            max-width: min(370px, 88vw);
+            padding: 13px 15px;
+            border-radius: 11px;
+            color: #FFFFFF;
+            background: #1E293B;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.22);
+            font-size: 13px;
+            line-height: 1.45;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(18px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        footer {
+            margin-top: 38px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 920px) {
+
+            .layout,
+            .bottom-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .topbar {
+                height: 64px;
+                padding: 0 4vw;
+            }
+
+            .navigation {
+                display: none;
+            }
+
+            .profile-label {
+                display: none;
+            }
+
+            main {
+                width: min(94vw, 1180px);
+                margin-top: 22px;
+            }
+
+            .page-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-summary,
+            .profile-form,
+            .card-header,
+            .bottom-card {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .form-actions {
+                justify-content: stretch;
+            }
+
+            .form-actions button {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <a class="brand" href="#">
+            <span class="brand-mark">✦</span>
+            <span>CareerPath</span>
+        </a>
+
+        <nav class="navigation">
+            <a href="#">Beranda</a>
+            <a href="#">Tes RIASEC</a>
+            <a href="#">Rekomendasi</a>
+            <a class="active" href="#">Profil</a>
+        </nav>
+
+        <button class="profile-button" onclick="showToast('Anda sedang berada di halaman profil.')">
+            <span class="mini-avatar" id="miniAvatar">MR</span>
+            <span class="profile-label" id="topName">Mame Riyadi</span>
+        </button>
+    </header>
+
+    <main>
+        <div class="breadcrumbs">
+            <a href="index.html">Beranda</a>
+            <span>›</span>
+            <span>Profil</span>
+        </div>
+
+        <section class="page-heading">
+            <div>
+                <h1>Profil Mahasiswa</h1>
+                <p>Kelola informasi profil agar sistem dapat memberikan rekomendasi karir yang lebih relevan.</p>
+            </div>
+            <span class="status-chip">● Profil aktif</span>
+        </section>
+
+        <section class="layout">
+            <aside class="card profile-summary">
+                <div class="summary-content">
+                    <div class="large-avatar" id="largeAvatar">MR</div>
+                    <h2 id="summaryName">Mame Riyadi</h2>
+                    <p class="email" id="summaryEmail">mameriyadi6@gmail.com</p>
+                    <span class="role-tag">Mahasiswa</span>
+
+                    <div class="summary-divider"></div>
+
+                    <div class="summary-list">
+                        <div class="summary-item">
+                            <div class="summary-icon">⌂</div>
+                            <div>
+                                <strong id="summaryUniversity">Universitas Esa Unggul</strong>
+                                <span>Perguruan tinggi</span>
+                            </div>
+                        </div>
+
+                        <div class="summary-item">
+                            <div class="summary-icon">◫</div>
+                            <div>
+                                <strong id="summaryStudyProgram">Teknologi Informasi</strong>
+                                <span>Program studi</span>
+                            </div>
+                        </div>
+
+                        <div class="summary-item">
+                            <div class="summary-icon">#</div>
+                            <div>
+                                <strong id="summarySemester">Semester 7</strong>
+                                <span>Semester saat ini</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="completion">
+                        <div class="completion-head">
+                            <span>Kelengkapan profil</span>
+                            <span id="completionPercentage">82%</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                        <p>Lengkapi data akademik dan ikuti tes RIASEC untuk memperoleh rekomendasi karir.</p>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="card form-card">
+                <div class="card-header">
+                    <div>
+                        <h2>Informasi Pribadi dan Akademik</h2>
+                        <p>Perbarui data yang digunakan oleh sistem sebagai informasi pendukung rekomendasi.</p>
+                    </div>
+                    <span class="saved-label" id="savedLabel">✓ Tersimpan</span>
+                </div>
+
+                <form class="profile-form" id="profileForm">
+                    <div class="section-label">Data akun</div>
+
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="fullName">Nama lengkap</label>
+                            <input id="fullName" type="text" value="Mame Riyadi" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="email">Email</label>
+                            <input id="email" type="email" value="mameriyadi6@gmail.com" readonly>
+                        </div>
+                    </div>
+
+                    <div class="section-label">Data pendidikan</div>
+
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="university">Perguruan tinggi</label>
+                            <input id="university" type="text" value="Universitas Esa Unggul" required>
+                        </div>
+
+                        <div class="field">
+                            <label for="studyProgram">Program studi</label>
+                            <select id="studyProgram" required>
+                                <option>Teknik Informatika</option>
+                                <option>Sistem Informasi</option>
+                                <option>Ilmu Komputer</option>
+                                <option selected>Teknologi Informasi</option>
+                                <option>Lainnya</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="semester">Semester saat ini</label>
+                            <select id="semester" required>
+                                <option>Semester 7</option>
+                                <option>Semester 8</option>
+                                <option>Semester 9 atau lebih</option>
+                            </select>
+                        </div>
+
+                        <div class="field">
+                            <label for="domicile">Domisili</label>
+                            <input id="domicile" type="text" value="Jakarta, Indonesia" required>
+                        </div>
+                    </div>
+
+                    <div class="form-note">
+                        <span>ℹ</span>
+                        <span>Data profil digunakan sebagai informasi pendukung. Nilai akademik dan hasil tes RIASEC
+                            dikelola pada halaman terpisah agar proses rekomendasi tetap terstruktur.</span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="button-outline" type="reset"
+                            onclick="showToast('Perubahan pada formulir dibatalkan.')">Batal</button>
+                        <button class="button-primary" type="submit">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </section>
+        </section>
+
+        <section class="bottom-grid">
+            <article class="card bottom-card">
+                <h3>Data Akademik</h3>
+                <p>Lengkapi data kemampuan akademik untuk digunakan sebagai kriteria C2 pada perhitungan rekomendasi.
+                </p>
+
+                <div class="academic-box">
+                    <div class="academic-meta">
+                        <div class="academic-icon">◫</div>
+                        <div>
+                            <strong>Data akademik belum lengkap</strong>
+                            <span>Tambahkan nilai komponen akademik Anda.</span>
+                        </div>
+                    </div>
+                    <button class="text-button" onclick="window.location.href = 'data-akademik.html'">Kelola
+                        →</button>
+                </div>
+            </article>
+
+            <article class="card bottom-card">
+                <h3>Keamanan Akun</h3>
+                <p>Kelola pengaturan penting untuk menjaga keamanan akun Anda.</p>
+
+                <div class="account-list">
+                    <div class="account-item">
+                        <div>
+                            <strong>Kata sandi</strong>
+                            <span>Terakhir diperbarui beberapa waktu lalu</span>
+                        </div>
+                        <button type="button" onclick="showToast('Fitur ubah kata sandi akan dibuka.')">Ubah</button>
+                    </div>
+
+                    <div class="account-item">
+                        <div>
+                            <strong>Alamat email</strong>
+                            <span>Email digunakan untuk masuk ke sistem</span>
+                        </div>
+                        <button type="button"
+                            onclick="showToast('Email hanya dapat diubah melalui verifikasi akun.')">Atur</button>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <footer>
+            CareerPath · Sistem Rekomendasi Karir untuk Mahasiswa Tingkat Akhir Bidang Teknologi Informasi
+        </footer>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let toastTimer;
+
+        function getInitials(name) {
+            return name
+                .trim()
+                .split(/\s+/)
+                .slice(0, 2)
+                .map(part => part.charAt(0).toUpperCase())
+                .join("") || "M";
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+        }
+
+        document.getElementById("profileForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById("fullName").value.trim();
+            const university = document.getElementById("university").value.trim();
+            const studyProgram = document.getElementById("studyProgram").value;
+            const semester = document.getElementById("semester").value;
+
+            const initials = getInitials(name);
+
+            document.getElementById("summaryName").textContent = name;
+            document.getElementById("topName").textContent = name;
+            document.getElementById("summaryUniversity").textContent = university;
+            document.getElementById("summaryStudyProgram").textContent = studyProgram;
+            document.getElementById("summarySemester").textContent = semester;
+            document.getElementById("largeAvatar").textContent = initials;
+            document.getElementById("miniAvatar").textContent = initials;
+
+            const savedLabel = document.getElementById("savedLabel");
+            savedLabel.style.display = "inline-flex";
+            showToast("Perubahan profil berhasil disimpan. Ini masih contoh antarmuka.");
+
+            setTimeout(() => {
+                savedLabel.style.display = "none";
+            }, 2600);
+        });
+    </script>
+</body>
+
+</html>

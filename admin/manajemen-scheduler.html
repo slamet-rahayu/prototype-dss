@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="id">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Manajemen Scheduler - CareerPath Admin</title>
+    <style>
+        :root {
+            --p: #3B82F6;
+            --pd: #1D4ED8;
+            --pl: #DBEAFE;
+            --bg: #F8FAFC;
+            --s: #fff;
+            --b: #E2E8F0;
+            --t: #1E293B;
+            --m: #64748B;
+            --ok: #16A34A;
+            --warn: #D97706;
+            --bad: #DC2626;
+            --shadow: 0 14px 36px rgba(15, 23, 42, .08);
+            --side: 252px
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--t);
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif
+        }
+
+        button,
+        input,
+        select {
+            font: inherit
+        }
+
+        button {
+            cursor: pointer
+        }
+
+        .app {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: var(--side) 1fr
+        }
+
+        .side {
+            position: fixed;
+            inset: 0 auto 0 0;
+            width: var(--side);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            background: linear-gradient(180deg, var(--pd), #2563EB 58%, var(--p));
+            box-shadow: 8px 0 28px rgba(29, 78, 216, .16);
+            z-index: 10
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            margin: 0 8px 34px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: 850
+        }
+
+        .mark {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, .22);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, .15)
+        }
+
+        .label {
+            margin: 0 10px 14px;
+            color: rgba(255, 255, 255, .66);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .08em;
+            text-transform: uppercase
+        }
+
+        .nav {
+            display: grid;
+            gap: 5px
+        }
+
+        .nav a {
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 12px;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, .84);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 720
+        }
+
+        .nav a:hover,
+        .nav .active {
+            background: rgba(255, 255, 255, .17);
+            color: #fff
+        }
+
+        .nicon {
+            width: 22px;
+            text-align: center
+        }
+
+        .admin {
+            margin-top: auto;
+            padding: 15px 10px 3px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, .17)
+        }
+
+        .avatar {
+            width: 37px;
+            height: 37px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, .18);
+            font-size: 12px;
+            font-weight: 850
+        }
+
+        .admin strong {
+            display: block;
+            font-size: 13px
+        }
+
+        .admin span {
+            display: block;
+            margin-top: 2px;
+            color: rgba(255, 255, 255, .7);
+            font-size: 11px
+        }
+
+        .main {
+            grid-column: 2;
+            min-width: 0
+        }
+
+        .top {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            height: 72px;
+            padding: 0 clamp(22px, 4vw, 52px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--b);
+            background: rgba(255, 255, 255, .93);
+            backdrop-filter: blur(12px)
+        }
+
+        .context {
+            color: var(--m);
+            font-size: 13px;
+            font-weight: 650
+        }
+
+        .context b {
+            color: var(--t)
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center
+        }
+
+        .ib {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--b);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--m)
+        }
+
+        .profile {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 5px 10px 5px 6px;
+            border: 1px solid var(--b);
+            border-radius: 999px;
+            background: #fff;
+            font-size: 13px;
+            font-weight: 750
+        }
+
+        .profile .avatar {
+            width: 28px;
+            height: 28px;
+            background: var(--pl);
+            color: var(--pd);
+            font-size: 11px
+        }
+
+        .hamb,
+        .mobilebrand {
+            display: none
+        }
+
+        .content {
+            width: min(1320px, 94%);
+            margin: 32px auto 60px
+        }
+
+        .crumb {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+            color: var(--m);
+            font-size: 13px
+        }
+
+        .crumb a {
+            color: var(--pd);
+            font-weight: 750;
+            text-decoration: none
+        }
+
+        .heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 23px
+        }
+
+        h1 {
+            margin: 0;
+            font-size: clamp(28px, 3vw, 36px);
+            letter-spacing: -1px
+        }
+
+        .heading p {
+            max-width: 760px;
+            margin: 8px 0 0;
+            color: var(--m);
+            font-size: 14px;
+            line-height: 1.55
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 40px;
+            padding: 0 14px;
+            border: 1px solid transparent;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 800
+        }
+
+        .primary {
+            color: #fff;
+            background: var(--p);
+            box-shadow: 0 8px 18px rgba(59, 130, 246, .22)
+        }
+
+        .outline {
+            border-color: var(--b);
+            background: #fff;
+            color: var(--t)
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px
+        }
+
+        .stat {
+            padding: 18px;
+            border: 1px solid var(--b);
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: var(--shadow)
+        }
+
+        .stathead {
+            display: flex;
+            justify-content: space-between;
+            color: var(--m);
+            font-size: 12px;
+            font-weight: 750
+        }
+
+        .sicon {
+            width: 31px;
+            height: 31px;
+            display: grid;
+            place-items: center;
+            border-radius: 9px;
+            color: var(--pd);
+            background: var(--pl)
+        }
+
+        .statvalue {
+            margin-top: 12px;
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: -.8px
+        }
+
+        .statnote {
+            margin-top: 4px;
+            color: var(--m);
+            font-size: 11px
+        }
+
+        .good {
+            color: var(--ok);
+            font-weight: 700
+        }
+
+        .warning {
+            color: var(--warn);
+            font-weight: 700
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.1fr .9fr;
+            gap: 20px;
+            margin-bottom: 20px
+        }
+
+        .card {
+            overflow: hidden;
+            border: 1px solid var(--b);
+            border-radius: 18px;
+            background: var(--s);
+            box-shadow: var(--shadow)
+        }
+
+        .cardhead {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 22px 22px 16px;
+            border-bottom: 1px solid #EDF2F7
+        }
+
+        .cardhead h2 {
+            margin: 0;
+            font-size: 17px
+        }
+
+        .cardhead p {
+            margin: 6px 0 0;
+            color: var(--m);
+            font-size: 12px;
+            line-height: 1.5
+        }
+
+        .body {
+            padding: 22px
+        }
+
+        .fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px
+        }
+
+        .field {
+            display: grid;
+            gap: 7px
+        }
+
+        .field label {
+            font-size: 12px;
+            font-weight: 800;
+            color: #475569
+        }
+
+        .field input,
+        .field select {
+            height: 42px;
+            padding: 0 12px;
+            border: 1px solid var(--b);
+            border-radius: 10px;
+            background: #fff;
+            color: var(--t);
+            font-size: 13px
+        }
+
+        .toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-top: 18px;
+            padding: 14px;
+            border: 1px solid #E6EEF7;
+            border-radius: 12px;
+            background: #FAFCFF
+        }
+
+        .toggle strong {
+            display: block;
+            font-size: 13px
+        }
+
+        .toggle span {
+            display: block;
+            margin-top: 3px;
+            color: var(--m);
+            font-size: 11px;
+            line-height: 1.45
+        }
+
+        .switch {
+            position: relative;
+            width: 46px;
+            height: 25px
+        }
+
+        .switch input {
+            display: none
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            border-radius: 999px;
+            background: #CBD5E1
+        }
+
+        .slider:before {
+            content: "";
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 19px;
+            height: 19px;
+            border-radius: 50%;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, .2);
+            transition: .2s
+        }
+
+        .switch input:checked+.slider {
+            background: var(--p)
+        }
+
+        .switch input:checked+.slider:before {
+            transform: translateX(21px)
+        }
+
+        .footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 800
+        }
+
+        .badge.ok {
+            color: #166534;
+            background: #F0FDF4
+        }
+
+        .badge.warn {
+            color: #92400E;
+            background: #FFFBEB
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor
+        }
+
+        .state {
+            display: grid;
+            gap: 14px
+        }
+
+        .statehero {
+            padding: 17px;
+            border: 1px solid #BFDBFE;
+            border-radius: 14px;
+            background: #F8FBFF
+        }
+
+        .statehero strong {
+            color: var(--pd);
+            font-size: 13px
+        }
+
+        .statehero p {
+            margin: 9px 0 0;
+            color: #475569;
+            font-size: 12px;
+            line-height: 1.55
+        }
+
+        .infos {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 11px
+        }
+
+        .info {
+            padding: 13px;
+            border: 1px solid #E6EEF7;
+            border-radius: 12px
+        }
+
+        .info span {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--m);
+            font-size: 11px
+        }
+
+        .info b {
+            font-size: 13px
+        }
+
+        .manual {
+            padding: 15px;
+            border: 1px solid #D8EAFE;
+            border-radius: 13px;
+            background: #F8FBFF
+        }
+
+        .manual strong {
+            display: block;
+            font-size: 13px
+        }
+
+        .manual p {
+            margin: 5px 0 12px;
+            color: var(--m);
+            font-size: 11px;
+            line-height: 1.5
+        }
+
+        .manual .btn {
+            width: 100%
+        }
+
+        .tools {
+            display: flex;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 18px 22px 0
+        }
+
+        .filters {
+            display: flex;
+            gap: 9px;
+            flex-wrap: wrap
+        }
+
+        .filter {
+            height: 36px;
+            padding: 0 10px;
+            border: 1px solid var(--b);
+            border-radius: 9px;
+            background: #fff;
+            color: #475569;
+            font-size: 12px
+        }
+
+        .filter.active {
+            border-color: #BFDBFE;
+            background: #EFF6FF;
+            color: var(--pd);
+            font-weight: 800
+        }
+
+        .search {
+            width: 220px;
+            height: 36px;
+            padding: 0 10px;
+            border: 1px solid var(--b);
+            border-radius: 9px;
+            font-size: 12px
+        }
+
+        .tablewrap {
+            overflow: auto;
+            padding: 14px 22px 22px
+        }
+
+        table {
+            width: 100%;
+            min-width: 900px;
+            border-collapse: collapse
+        }
+
+        th {
+            padding: 11px 10px;
+            border-bottom: 1px solid var(--b);
+            text-align: left;
+            color: var(--m);
+            font-size: 11px;
+            text-transform: uppercase
+        }
+
+        td {
+            padding: 14px 10px;
+            border-bottom: 1px solid #EDF2F7;
+            color: #334155;
+            font-size: 12px;
+            vertical-align: middle
+        }
+
+        tr:last-child td {
+            border-bottom: 0
+        }
+
+        .tiny {
+            color: var(--m);
+            font-size: 11px;
+            line-height: 1.45
+        }
+
+        .act {
+            padding: 7px 9px;
+            border: 1px solid var(--b);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--pd);
+            font-size: 11px;
+            font-weight: 800
+        }
+
+        .modalback {
+            position: fixed;
+            inset: 0;
+            z-index: 30;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(15, 23, 42, .47)
+        }
+
+        .modalback.show {
+            display: flex
+        }
+
+        .modal {
+            width: min(760px, 100%);
+            max-height: 88vh;
+            overflow: auto;
+            border-radius: 18px;
+            background: #fff;
+            box-shadow: 0 28px 60px rgba(15, 23, 42, .28)
+        }
+
+        .modalhead {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 22px;
+            border-bottom: 1px solid var(--b)
+        }
+
+        .modalhead h3 {
+            margin: 0;
+            font-size: 18px
+        }
+
+        .modalhead p {
+            margin: 6px 0 0;
+            color: var(--m);
+            font-size: 12px
+        }
+
+        .close {
+            width: 34px;
+            height: 34px;
+            border: 1px solid var(--b);
+            border-radius: 9px;
+            background: #fff;
+            color: var(--m)
+        }
+
+        .metas {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 18px
+        }
+
+        .retry {
+            padding: 7px 9px;
+            border: 1px solid #FECACA;
+            border-radius: 8px;
+            background: #FFF7F7;
+            color: var(--bad);
+            font-size: 11px;
+            font-weight: 800
+        }
+
+        .err {
+            color: var(--bad);
+            font-size: 11px
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 40;
+            max-width: min(420px, 88vw);
+            padding: 13px 15px;
+            border-radius: 11px;
+            background: #1E293B;
+            color: #fff;
+            font-size: 13px;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(18px);
+            transition: .25s
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0)
+        }
+
+        @media(max-width:1120px) {
+            :root {
+                --side: 220px
+            }
+
+            .side {
+                width: 220px
+            }
+
+            .summary {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .grid {
+                grid-template-columns: 1fr
+            }
+        }
+
+        @media(max-width:780px) {
+            .app {
+                display: block
+            }
+
+            .side {
+                width: min(86vw, 290px);
+                transform: translateX(-105%);
+                transition: .25s
+            }
+
+            .side.open {
+                transform: translateX(0)
+            }
+
+            .top {
+                height: 64px;
+                padding: 0 4vw
+            }
+
+            .hamb {
+                display: grid;
+                width: 38px;
+                height: 38px;
+                place-items: center;
+                border: 1px solid var(--b);
+                border-radius: 10px;
+                background: #fff;
+                color: var(--m)
+            }
+
+            .mobilebrand {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                color: var(--pd);
+                font-size: 17px;
+                font-weight: 850
+            }
+
+            .mobilebrand .mark {
+                width: 34px;
+                height: 34px;
+                border: 0;
+                background: var(--p)
+            }
+
+            .context,
+            .pname {
+                display: none
+            }
+
+            .content {
+                width: min(94%, 1320px);
+                margin-top: 23px
+            }
+
+            .heading {
+                align-items: flex-start;
+                flex-direction: column
+            }
+
+            .tools {
+                align-items: stretch;
+                flex-direction: column
+            }
+
+            .search {
+                width: 100%
+            }
+
+            .metas {
+                grid-template-columns: 1fr 1fr
+            }
+        }
+
+        @media(max-width:520px) {
+
+            .summary,
+            .fields,
+            .infos,
+            .metas {
+                grid-template-columns: 1fr
+            }
+
+            .cardhead {
+                align-items: stretch;
+                flex-direction: column
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <aside class="side" id="side"><a class="brand" href="#"><span class="mark">✦</span><span>CareerPath</span></a>
+            <div class="label">Menu Admin</div>
+            <nav class="nav"><a href="index.html"><span class="nicon">⌂</span>Dashboard</a><a
+                    href="alternatif-karir.html"><span class="nicon">◫</span>Alternatif Karir</a><a
+                    href="konfigurasi-rekomendasi.html"><span class="nicon">⚙</span>Konfigurasi
+                    Rekomendasi</a><a href="data-pasar-kerja.html"><span class="nicon">▤</span>Data Pasar
+                    Kerja</a><a class="active" href="manajemen-scheduler.html"><span class="nicon">◷</span>Manajemen
+                    Scheduler</a><a href="mahasiswa.html"><span class="nicon">◉</span>Mahasiswa</a><a
+                    href="riwayat-rekomendasi.html"><span class="nicon">✦</span>Riwayat
+                    Rekomendasi</a></nav>
+            <div class="admin">
+                <div class="avatar">AD</div>
+                <div><strong>Administrator</strong><span>CareerPath Admin</span></div>
+            </div>
+        </aside>
+        <section class="main">
+            <header class="top"><button class="hamb" onclick="toggleSide()">☰</button>
+                <div class="mobilebrand"><span class="mark">✦</span><span>CareerPath</span></div>
+                <div class="context">Administrasi Sistem <b>· Manajemen Scheduler</b></div>
+                <div class="actions"><button class="ib" onclick="toast('Tidak ada notifikasi baru.')">♧</button><button
+                        class="profile" onclick="toast('Menu profil administrator akan dibuka.')"><span
+                            class="avatar">AD</span><span class="pname">Administrator</span></button></div>
+            </header>
+            <main class="content">
+                <div class="crumb"><a href="#">Dashboard</a><span>›</span><span>Manajemen Scheduler</span></div>
+                <section class="heading">
+                    <div>
+                        <h1>Manajemen Scheduler</h1>
+                        <p>Atur jadwal pembaruan data pasar kerja dari Adzuna API, jalankan pembaruan manual, dan pantau
+                            riwayat proses pengambilan data setiap alternatif karir.</p>
+                    </div>
+                    <div class="actions"><button class="btn outline"
+                            onclick="document.querySelector('.tablewrap').scrollIntoView({behavior:'smooth'})">◷ Lihat
+                            Riwayat</button><button class="btn primary" onclick="runManual()">↻ Perbarui
+                            Sekarang</button></div>
+                </section>
+                <section class="summary">
+                    <article class="stat">
+                        <div class="stathead"><span>Status Scheduler</span><span class="sicon">◷</span></div>
+                        <div class="statvalue" id="statusText">Aktif</div>
+                        <div class="statnote good" id="statusNote">Berjalan setiap hari</div>
+                    </article>
+                    <article class="stat">
+                        <div class="stathead"><span>Karir Aktif</span><span class="sicon">◫</span></div>
+                        <div class="statvalue">8</div>
+                        <div class="statnote">Diproses pada setiap eksekusi</div>
+                    </article>
+                    <article class="stat">
+                        <div class="stathead"><span>Eksekusi Terakhir</span><span class="sicon">✓</span></div>
+                        <div class="statvalue">8/8</div>
+                        <div class="statnote good">Seluruh karir berhasil diperbarui</div>
+                    </article>
+                    <article class="stat">
+                        <div class="stathead"><span>Jadwal Berikutnya</span><span class="sicon">⌛</span></div>
+                        <div class="statvalue">02.00</div>
+                        <div class="statnote">27 Juni 2026, Asia/Jakarta</div>
+                    </article>
+                </section>
+                <section class="grid">
+                    <article class="card">
+                        <div class="cardhead">
+                            <div>
+                                <h2>Konfigurasi Scheduler</h2>
+                                <p>Pengaturan jadwal otomatis pembaruan jumlah lowongan kerja setiap alternatif karir.
+                                </p>
+                            </div><span class="badge ok">● Aktif</span>
+                        </div>
+                        <div class="body">
+                            <form onsubmit="saveConfig(event)">
+                                <div class="fields">
+                                    <div class="field"><label>Nama Scheduler</label><input
+                                            value="Pembaruan Data Pasar Kerja"></div>
+                                    <div class="field"><label>Kode Scheduler</label><input value="MARKET_DATA_REFRESH"
+                                            readonly></div>
+                                    <div class="field"><label>Frekuensi</label><select id="frequency"
+                                            onchange="syncCron()">
+                                            <option value="daily" selected>Setiap Hari</option>
+                                            <option value="weekly">Setiap Minggu</option>
+                                            <option value="manual">Manual Saja</option>
+                                        </select></div>
+                                    <div class="field"><label>Waktu Eksekusi</label><input id="time" type="time"
+                                            value="02:00" onchange="syncCron()"></div>
+                                    <div class="field"><label>Zona Waktu</label><select>
+                                            <option>Asia/Jakarta (WIB)</option>
+                                            <option>Asia/Makassar (WITA)</option>
+                                            <option>Asia/Jayapura (WIT)</option>
+                                        </select></div>
+                                    <div class="field"><label>Cron Expression</label><input id="cron"
+                                            value="0 0 2 * * *" readonly></div>
+                                </div>
+                                <div class="toggle">
+                                    <div><strong>Aktifkan scheduler otomatis</strong><span>Jika dinonaktifkan, pembaruan
+                                            data pasar kerja hanya dapat dilakukan manual oleh administrator.</span>
+                                    </div><label class="switch"><input id="active" type="checkbox" checked
+                                            onchange="toggleStatus()"><span class="slider"></span></label>
+                                </div>
+                                <div class="footer"><button type="button" class="btn outline"
+                                        onclick="resetConfig()">Atur Ulang</button><button class="btn primary">Simpan
+                                        Konfigurasi</button></div>
+                            </form>
+                        </div>
+                    </article>
+                    <aside class="card">
+                        <div class="cardhead">
+                            <div>
+                                <h2>Status Pembaruan Terakhir</h2>
+                                <p>Ringkasan eksekusi scheduler paling baru.</p>
+                            </div><span class="badge ok">● Berhasil</span>
+                        </div>
+                        <div class="body">
+                            <div class="state">
+                                <div class="statehero"><strong>● Pembaruan data selesai tanpa kendala</strong>
+                                    <p>Scheduler berhasil mengambil jumlah lowongan dari Adzuna API untuk seluruh
+                                        alternatif karir aktif.</p>
+                                </div>
+                                <div class="infos">
+                                    <div class="info"><span>Waktu Mulai</span><b>26 Juni 2026<br>02.00 WIB</b></div>
+                                    <div class="info"><span>Durasi</span><b>00 menit 18 detik</b></div>
+                                    <div class="info"><span>Berhasil</span><b>8 alternatif karir</b></div>
+                                    <div class="info"><span>Gagal</span><b>0 alternatif karir</b></div>
+                                </div>
+                                <div class="manual"><strong>Butuh data terbaru sekarang?</strong>
+                                    <p>Jalankan pembaruan manual untuk seluruh alternatif karir aktif tanpa menunggu
+                                        jadwal berikutnya.</p><button class="btn primary" onclick="runManual()">↻
+                                        Jalankan Pembaruan Manual</button>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </section>
+                <section class="card">
+                    <div class="cardhead">
+                        <div>
+                            <h2>Riwayat Eksekusi Scheduler</h2>
+                            <p>Daftar proses pembaruan otomatis, manual, maupun proses coba ulang.</p>
+                        </div><span class="badge ok">Data dari scheduler_logs</span>
+                    </div>
+                    <div class="tools">
+                        <div class="filters"><button class="filter active"
+                                onclick="setFilter('all',this)">Semua</button><button class="filter"
+                                onclick="setFilter('automatic',this)">Otomatis</button><button class="filter"
+                                onclick="setFilter('manual',this)">Manual</button><button class="filter"
+                                onclick="setFilter('retry',this)">Coba Ulang</button><button class="filter"
+                                onclick="setFilter('partial_failed',this)">Sebagian Gagal</button></div><input
+                            class="search" id="q" placeholder="Cari status atau jenis eksekusi..." oninput="render()">
+                    </div>
+                    <div class="tablewrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Waktu Mulai</th>
+                                    <th>Jenis</th>
+                                    <th>Status</th>
+                                    <th>Diproses</th>
+                                    <th>Berhasil</th>
+                                    <th>Gagal</th>
+                                    <th>Pesan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rows"></tbody>
+                        </table>
+                        <div id="empty"
+                            style="display:none;text-align:center;padding:25px;color:var(--m);font-size:13px">Tidak ada
+                            data yang sesuai.</div>
+                    </div>
+                </section>
+            </main>
+        </section>
+    </div>
+    <div class="modalback" id="modal">
+        <div class="modal">
+            <div class="modalhead">
+                <div>
+                    <h3 id="mtitle">Detail Eksekusi</h3>
+                    <p id="msub"></p>
+                </div><button class="close" onclick="closeModal()">✕</button>
+            </div>
+            <div class="body">
+                <div class="metas" id="meta"></div>
+                <div style="overflow:auto">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Alternatif Karir</th>
+                                <th>Keyword</th>
+                                <th>Status</th>
+                                <th>Jumlah Lowongan</th>
+                                <th>Pesan</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="drows"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="footer" style="padding:16px 22px;border-top:1px solid var(--b)"><button class="btn outline"
+                    onclick="closeModal()">Tutup</button></div>
+        </div>
+    </div>
+    <div class="toast" id="toast"></div>
+    <script>
+        const logs = [
+            { id: 105, started: '26 Juni 2026, 02.00 WIB', completed: '26 Juni 2026, 02.00.18 WIB', type: 'automatic', typeLabel: 'Otomatis', status: 'success', statusLabel: 'Berhasil', total: 8, success: 8, failed: 0, message: 'Seluruh data berhasil diperbarui', duration: '00 menit 18 detik', details: [['Software Engineer', 'software engineer', 'success', '90.585', '-'], ['Data Analyst', 'data analyst', 'success', '42.120', '-'], ['UI/UX Designer', 'ui ux designer', 'success', '12.510', '-'], ['Cybersecurity Analyst', 'cybersecurity analyst', 'success', '18.340', '-'], ['Business Analyst', 'business analyst', 'success', '31.420', '-'], ['Quality Assurance Engineer', 'quality assurance engineer', 'success', '14.280', '-'], ['System Administrator', 'system administrator', 'success', '9.670', '-'], ['IT Project Manager', 'it project manager', 'success', '11.930', '-']] },
+            { id: 104, started: '25 Juni 2026, 02.00 WIB', completed: '25 Juni 2026, 02.00.21 WIB', type: 'automatic', typeLabel: 'Otomatis', status: 'partial_failed', statusLabel: 'Sebagian Gagal', total: 8, success: 7, failed: 1, message: 'Satu permintaan API gagal', duration: '00 menit 21 detik', details: [['Software Engineer', 'software engineer', 'success', '89.971', '-'], ['Data Analyst', 'data analyst', 'success', '41.902', '-'], ['UI/UX Designer', 'ui ux designer', 'success', '12.407', '-'], ['Cybersecurity Analyst', 'cybersecurity analyst', 'success', '18.121', '-'], ['Business Analyst', 'business analyst', 'failed', '-', 'API request timeout'], ['Quality Assurance Engineer', 'quality assurance engineer', 'success', '14.102', '-'], ['System Administrator', 'system administrator', 'success', '9.601', '-'], ['IT Project Manager', 'it project manager', 'success', '11.872', '-']] },
+            { id: 103, started: '25 Juni 2026, 02.15 WIB', completed: '25 Juni 2026, 02.15.04 WIB', type: 'retry', typeLabel: 'Coba Ulang', status: 'success', statusLabel: 'Berhasil', total: 1, success: 1, failed: 0, message: 'Business Analyst berhasil diperbarui', duration: '00 menit 04 detik', details: [['Business Analyst', 'business analyst', 'success', '31.180', '-']] },
+            { id: 102, started: '24 Juni 2026, 13.25 WIB', completed: '24 Juni 2026, 13.25.17 WIB', type: 'manual', typeLabel: 'Manual', status: 'success', statusLabel: 'Berhasil', total: 8, success: 8, failed: 0, message: 'Dijalankan oleh Administrator', duration: '00 menit 17 detik', details: [['Software Engineer', 'software engineer', 'success', '89.430', '-'], ['Data Analyst', 'data analyst', 'success', '41.700', '-'], ['UI/UX Designer', 'ui ux designer', 'success', '12.298', '-'], ['Cybersecurity Analyst', 'cybersecurity analyst', 'success', '17.960', '-'], ['Business Analyst', 'business analyst', 'success', '30.940', '-'], ['Quality Assurance Engineer', 'quality assurance engineer', 'success', '13.988', '-'], ['System Administrator', 'system administrator', 'success', '9.510', '-'], ['IT Project Manager', 'it project manager', 'success', '11.730', '-']] }
+        ]; let filter = 'all', timer; function cls(s) { return s === 'success' ? 'ok' : s === 'partial_failed' ? 'warn' : 'bad' } function badge(s, l) { return `<span class="badge ${cls(s)}"><i class="dot"></i>${l}</span>` } function render() { const q = document.getElementById('q').value.toLowerCase(); const a = logs.filter(x => (filter === 'all' || x.type === filter || x.status === filter) && (`${x.started} ${x.typeLabel} ${x.statusLabel} ${x.message}`).toLowerCase().includes(q)); document.getElementById('rows').innerHTML = a.map(x => `<tr><td><b>${x.started}</b><div class="tiny">Selesai: ${x.completed}</div></td><td>${x.typeLabel}</td><td>${badge(x.status, x.statusLabel)}</td><td>${x.total} karir</td><td>${x.success}</td><td>${x.failed}</td><td><span class="tiny">${x.message}</span></td><td><button class="act" onclick="detail(${x.id})">Detail</button></td></tr>`).join(''); document.getElementById('empty').style.display = a.length ? 'none' : 'block' } function setFilter(f, b) { filter = f; document.querySelectorAll('.filter').forEach(x => x.classList.remove('active')); b.classList.add('active'); render() } function detail(id) { const x = logs.find(a => a.id === id); document.getElementById('mtitle').textContent = 'Detail Eksekusi #' + x.id; document.getElementById('msub').textContent = x.typeLabel + ' · ' + x.started; document.getElementById('meta').innerHTML = `<div class="info"><span>Status</span><b>${x.statusLabel}</b></div><div class="info"><span>Diproses</span><b>${x.total} karir</b></div><div class="info"><span>Berhasil</span><b>${x.success} karir</b></div><div class="info"><span>Durasi</span><b>${x.duration}</b></div>`; document.getElementById('drows').innerHTML = x.details.map((d, i) => `<tr><td><b>${d[0]}</b></td><td>${d[1]}</td><td>${badge(d[2], d[2] === 'success' ? 'Berhasil' : 'Gagal')}</td><td>${d[3]}</td><td>${d[2] === 'failed' ? `<span class="err">${d[4]}</span>` : '-'}</td><td>${d[2] === 'failed' ? `<button class="retry" onclick="retry(${x.id},${i})">↻ Coba Lagi</button>` : '<span class="tiny">Selesai</span>'}</td></tr>`).join(''); document.getElementById('modal').classList.add('show') } function closeModal() { document.getElementById('modal').classList.remove('show') } function retry(id, i) { const x = logs.find(a => a.id === id), d = x.details[i]; d[2] = 'success'; d[3] = '31.420'; d[4] = '-'; x.success++; x.failed--; if (!x.failed) { x.status = 'success'; x.statusLabel = 'Berhasil'; x.message = 'Seluruh data berhasil diperbarui setelah coba ulang' } logs.unshift({ id: Math.max(...logs.map(a => a.id)) + 1, started: '26 Juni 2026, 10.42 WIB', completed: '26 Juni 2026, 10.42.04 WIB', type: 'retry', typeLabel: 'Coba Ulang', status: 'success', statusLabel: 'Berhasil', total: 1, success: 1, failed: 0, message: d[0] + ' berhasil diperbarui', duration: '00 menit 04 detik', details: [[d[0], d[1], 'success', d[3], '-']] }); closeModal(); render(); toast(d[0] + ' berhasil diperbarui melalui proses coba ulang.') } function runManual() { const x = { id: Math.max(...logs.map(a => a.id)) + 1, started: '26 Juni 2026, 10.45 WIB', completed: 'Sedang diproses', type: 'manual', typeLabel: 'Manual', status: 'running', statusLabel: 'Berjalan', total: 8, success: 0, failed: 0, message: 'Pembaruan manual sedang dijalankan oleh Administrator', duration: '-', details: [] }; logs.unshift(x); render(); toast('Pembaruan manual berhasil dijadwalkan.'); setTimeout(() => { x.completed = '26 Juni 2026, 10.45.18 WIB'; x.status = 'success'; x.statusLabel = 'Berhasil'; x.success = 8; x.message = 'Seluruh data berhasil diperbarui'; x.duration = '00 menit 18 detik'; render(); toast('Pembaruan manual selesai. Seluruh data pasar kerja berhasil diperbarui.') }, 2200) } function syncCron() { let [h, m] = (document.getElementById('time').value || '02:00').split(':'), f = document.getElementById('frequency').value; document.getElementById('cron').value = f === 'manual' ? 'Manual execution only' : f === 'weekly' ? `0 ${+m} ${+h} * * 1` : `0 ${+m} ${+h} * * *` } function toggleStatus() { const on = document.getElementById('active').checked; document.getElementById('statusText').textContent = on ? 'Aktif' : 'Nonaktif'; document.getElementById('statusNote').textContent = on ? 'Berjalan setiap hari' : 'Pembaruan manual saja'; document.getElementById('statusNote').className = 'statnote ' + (on ? 'good' : 'warning'); toast(on ? 'Scheduler otomatis diaktifkan.' : 'Scheduler otomatis dinonaktifkan.') } function saveConfig(e) { e.preventDefault(); toast('Konfigurasi scheduler berhasil disimpan.') } function resetConfig() { document.getElementById('frequency').value = 'daily'; document.getElementById('time').value = '02:00'; document.getElementById('active').checked = true; syncCron(); toggleStatus(); toast('Konfigurasi dikembalikan ke pengaturan awal.') } function toggleSide() { document.getElementById('side').classList.toggle('open') } function toast(t) { const x = document.getElementById('toast'); x.textContent = t; x.classList.add('show'); clearTimeout(timer); timer = setTimeout(() => x.classList.remove('show'), 3000) } document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal() }); render();
+    </script>
+</body>
+
+</html>

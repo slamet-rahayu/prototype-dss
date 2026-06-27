@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Konfigurasi Rekomendasi - Admin CareerPath</title>
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-light: #DBEAFE;
+            --background: #F8FAFC;
+            --surface: #FFFFFF;
+            --border: #E2E8F0;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --success: #22C55E;
+            --success-light: #F0FDF4;
+            --warning: #F59E0B;
+            --warning-light: #FFFBEB;
+            --danger: #EF4444;
+            --danger-light: #FEF2F2;
+            --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+            --sidebar-width: 250px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--background);
+            color: var(--text-primary);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 40;
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            color: #FFFFFF;
+            background: linear-gradient(180deg, var(--primary-dark) 0%, #2563EB 62%, var(--primary) 100%);
+            box-shadow: 8px 0 28px rgba(29, 78, 216, 0.16);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            margin: 0 8px 34px;
+            color: #FFFFFF;
+            font-size: 20px;
+            font-weight: 850;
+            letter-spacing: -0.45px;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            font-size: 18px;
+        }
+
+        .admin-label {
+            margin: 0 10px 14px;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .menu {
+            display: grid;
+            gap: 5px;
+        }
+
+        .menu a {
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 12px;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.84);
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .menu a:hover {
+            transform: translateX(2px);
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .menu a.active {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+        }
+
+        .menu-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 14px 10px 3px;
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .admin-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-avatar {
+            width: 37px;
+            height: 37px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .admin-card strong {
+            display: block;
+            margin-bottom: 2px;
+            color: #FFFFFF;
+            font-size: 13px;
+        }
+
+        .admin-card span {
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 11px;
+        }
+
+        .main {
+            grid-column: 2;
+            min-width: 0;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 0 clamp(22px, 4vw, 52px);
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+        }
+
+        .menu-toggle,
+        .mobile-brand {
+            display: none;
+        }
+
+        .global-search {
+            position: relative;
+            width: min(410px, 44vw);
+        }
+
+        .global-search input {
+            width: 100%;
+            min-height: 41px;
+            padding: 10px 13px 10px 39px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            color: #94A3B8;
+            font-style: normal;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon-button {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            background: #FFFFFF;
+            cursor: pointer;
+        }
+
+        .profile-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 5px 10px 5px 6px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .top-avatar {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        .content {
+            width: min(1280px, 94%);
+            margin: 32px auto 58px;
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary-dark);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: clamp(27px, 3vw, 35px);
+            letter-spacing: -1px;
+        }
+
+        .page-header p {
+            max-width: 720px;
+            margin: 8px 0 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .config-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 11px;
+            border: 1px solid #BBF7D0;
+            border-radius: 999px;
+            color: #166534;
+            background: var(--success-light);
+            font-size: 12px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .tab-list {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding: 7px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: #FFFFFF;
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.035);
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 165px;
+            padding: 11px 13px;
+            border: none;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            background: transparent;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .tab-button:hover {
+            color: var(--primary-dark);
+            background: #F8FBFF;
+        }
+
+        .tab-button.active {
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            box-shadow: inset 0 0 0 1px #BFDBFE;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 22px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 17px;
+            letter-spacing: -0.35px;
+        }
+
+        .card-header p {
+            margin: 6px 0 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .button-primary,
+        .button-outline,
+        .button-danger,
+        .button-soft,
+        .small-button {
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 800;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .button-primary:hover,
+        .button-outline:hover,
+        .button-danger:hover,
+        .button-soft:hover,
+        .small-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .button-primary {
+            padding: 11px 15px;
+            color: #FFFFFF;
+            background: var(--primary);
+            box-shadow: 0 9px 18px rgba(59, 130, 246, 0.22);
+        }
+
+        .button-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .button-outline {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FFFFFF;
+        }
+
+        .button-soft {
+            padding: 9px 12px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+        }
+
+        .button-danger {
+            padding: 10px 14px;
+            color: #FFFFFF;
+            background: var(--danger);
+        }
+
+        .info-banner {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 14px 16px;
+            border: 1px solid #BFDBFE;
+            border-radius: 13px;
+            color: #1E40AF;
+            background: #EFF6FF;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .info-banner span:first-child {
+            font-size: 17px;
+            line-height: 1;
+        }
+
+        .criteria-layout,
+        .mapping-layout,
+        .academic-weight-layout {
+            display: grid;
+            grid-template-columns: 1.18fr 0.82fr;
+            gap: 20px;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 670px;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 13px 22px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FBFDFF;
+            font-size: 10px;
+            font-weight: 850;
+            letter-spacing: 0.06em;
+            text-align: left;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 15px 22px;
+            border-bottom: 1px solid #EDF2F7;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #FBFDFF;
+        }
+
+        .criterion-code {
+            display: inline-grid;
+            width: 34px;
+            height: 34px;
+            place-items: center;
+            border-radius: 10px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .criterion-title strong,
+        .component-title strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .criterion-title span,
+        .component-title span {
+            color: var(--text-secondary);
+            font-size: 11px;
+            line-height: 1.4;
+        }
+
+        .weight-input {
+            width: 92px;
+            min-height: 37px;
+            padding: 8px 9px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .weight-input:focus,
+        .select-control:focus,
+        .field input:focus,
+        .field textarea:focus,
+        .field select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+        }
+
+        .benefit-tag {
+            display: inline-flex;
+            padding: 5px 8px;
+            border-radius: 999px;
+            color: #166534;
+            background: var(--success-light);
+            font-size: 10px;
+            font-weight: 850;
+        }
+
+        .side-card {
+            padding: 22px;
+        }
+
+        .side-card h3 {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .side-card>p {
+            margin: 6px 0 18px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        .weight-summary {
+            display: grid;
+            gap: 12px;
+        }
+
+        .weight-row {
+            display: grid;
+            grid-template-columns: 78px 1fr auto;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .weight-row span {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .mini-track {
+            height: 9px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #EAF0F8;
+        }
+
+        .mini-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            transition: width 0.25s ease;
+        }
+
+        .weight-row strong {
+            color: var(--primary-dark);
+            font-size: 12px;
+        }
+
+        .total-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #D8EAFE;
+            border-radius: 12px;
+            background: #F8FBFF;
+        }
+
+        .total-box span {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .total-box strong {
+            color: var(--primary-dark);
+            font-size: 20px;
+            letter-spacing: -0.5px;
+        }
+
+        .small-note {
+            margin-top: 12px;
+            color: var(--text-secondary);
+            font-size: 11px;
+            line-height: 1.48;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            padding: 22px;
+        }
+
+        .component-card {
+            position: relative;
+            min-height: 144px;
+            padding: 17px;
+            border: 1px solid #E5EDF6;
+            border-radius: 13px;
+            background: #FFFFFF;
+            transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .component-card:hover {
+            transform: translateY(-2px);
+            border-color: #BFDBFE;
+            box-shadow: 0 9px 22px rgba(15, 23, 42, 0.06);
+        }
+
+        .component-icon {
+            width: 37px;
+            height: 37px;
+            display: grid;
+            place-items: center;
+            border-radius: 10px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 16px;
+            font-weight: 850;
+        }
+
+        .component-card h3 {
+            margin: 12px 0 4px;
+            font-size: 14px;
+        }
+
+        .component-card p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .component-card .actions {
+            position: absolute;
+            right: 13px;
+            top: 13px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .small-button {
+            padding: 6px 8px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 10px;
+        }
+
+        .small-button.delete {
+            color: #B91C1C;
+            background: var(--danger-light);
+        }
+
+        .mapping-select-wrap,
+        .weight-select-wrap {
+            display: grid;
+            gap: 8px;
+            padding: 22px 22px 0;
+        }
+
+        .mapping-select-wrap label,
+        .weight-select-wrap label {
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .select-control {
+            min-height: 42px;
+            padding: 10px 11px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .mapping-content,
+        .academic-weight-content {
+            padding: 22px;
+        }
+
+        .mapping-career {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            border: 1px solid #D8EAFE;
+            border-radius: 13px;
+            background: #F8FBFF;
+        }
+
+        .mapping-career .career-symbol {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 17px;
+            font-weight: 850;
+        }
+
+        .mapping-career strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .mapping-career span {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .riasec-checks {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .riasec-check {
+            position: relative;
+        }
+
+        .riasec-check input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .riasec-check label {
+            min-height: 69px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 3px;
+            padding: 11px;
+            border: 1px solid var(--border);
+            border-radius: 11px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            cursor: pointer;
+            transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .riasec-check label strong {
+            font-size: 16px;
+        }
+
+        .riasec-check label span {
+            color: var(--text-secondary);
+            font-size: 10px;
+            line-height: 1.25;
+        }
+
+        .riasec-check input:checked+label {
+            border-color: var(--primary);
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .riasec-check input:checked+label span {
+            color: #1E40AF;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .preview-list {
+            display: grid;
+            gap: 10px;
+            margin-top: 13px;
+        }
+
+        .preview-row {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px 0;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .preview-row:last-child {
+            border-bottom: none;
+        }
+
+        .preview-code {
+            width: 27px;
+            height: 27px;
+            display: grid;
+            place-items: center;
+            border-radius: 8px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        .preview-row strong {
+            display: block;
+            margin-bottom: 2px;
+            font-size: 12px;
+        }
+
+        .preview-row span {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .academic-weight-table {
+            width: 100%;
+            min-width: 0;
+        }
+
+        .academic-weight-table tbody td {
+            padding: 12px 0;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .academic-weight-table thead th {
+            padding: 0 0 10px;
+            border-bottom: 1px solid #EDF2F7;
+            background: transparent;
+        }
+
+        .input-group {
+            position: relative;
+            width: 90px;
+        }
+
+        .input-group input {
+            width: 100%;
+            min-height: 38px;
+            padding: 8px 27px 8px 9px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            font-size: 12px;
+            outline: none;
+        }
+
+        .input-group span {
+            position: absolute;
+            right: 9px;
+            top: 50%;
+            color: var(--text-secondary);
+            font-size: 11px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            place-items: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show {
+            display: grid;
+        }
+
+        .modal {
+            width: min(100%, 500px);
+            overflow: hidden;
+            border-radius: 18px;
+            background: #FFFFFF;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+            animation: pop 0.22s ease-out;
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .close-button {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border: none;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            background: #F1F5F9;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .modal-form {
+            display: grid;
+            gap: 16px;
+            padding: 22px;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+        }
+
+        .field label {
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 750;
+        }
+
+        .field input,
+        .field textarea,
+        .field select {
+            width: 100%;
+            min-height: 42px;
+            padding: 10px 11px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .field textarea {
+            min-height: 86px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 0 22px 22px;
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 120;
+            max-width: min(390px, 88vw);
+            padding: 13px 15px;
+            border-radius: 11px;
+            color: #FFFFFF;
+            background: #1E293B;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.22);
+            font-size: 13px;
+            line-height: 1.45;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(18px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1080px) {
+            :root {
+                --sidebar-width: 220px;
+            }
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .criteria-layout,
+            .mapping-layout,
+            .academic-weight-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 780px) {
+            .app-shell {
+                display: block;
+            }
+
+            .sidebar {
+                width: min(86vw, 280px);
+                transform: translateX(-105%);
+                transition: transform 0.25s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .topbar {
+                height: 64px;
+                padding: 0 4vw;
+            }
+
+            .menu-toggle {
+                width: 38px;
+                height: 38px;
+                display: grid;
+                place-items: center;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                color: var(--text-secondary);
+                background: #FFFFFF;
+                cursor: pointer;
+            }
+
+            .mobile-brand {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: var(--primary-dark);
+                font-size: 17px;
+                font-weight: 850;
+            }
+
+            .mobile-brand .brand-mark {
+                width: 34px;
+                height: 34px;
+                border: none;
+                background: var(--primary);
+                font-size: 15px;
+            }
+
+            .global-search {
+                display: none;
+            }
+
+            .profile-name {
+                display: none;
+            }
+
+            .content {
+                width: min(94%, 1280px);
+                margin-top: 23px;
+            }
+
+            .page-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .card-header {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .riasec-checks {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .modal-actions,
+            .form-actions {
+                flex-direction: column-reverse;
+            }
+
+            .modal-actions button,
+            .form-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
+            <a class="brand" href="#">
+                <span class="brand-mark">✦</span>
+                <span>CareerPath</span>
+            </a>
+
+            <div class="admin-label">Panel Administrator</div>
+
+            <nav class="menu">  
+                <a href="index.html"><span class="menu-icon">⌂</span>Dashboard</a>
+                <a href="alternatif-karir.html"><span class="menu-icon">◈</span>Alternatif Karir</a>
+                <a class="active" href="konfigurasi-rekomendasi.html"><span
+                        class="menu-icon">⚙</span>Konfigurasi Rekomendasi</a>
+                <a href="data-pasar-kerja.html"><span class="menu-icon">▤</span>Data Pasar Kerja</a>
+                <a href="mahasiswa.html"><span class="menu-icon">◉</span>Mahasiswa</a>
+                <a href="riwayat-rekomendasi.html"><span class="menu-icon">◷</span>Riwayat Rekomendasi</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="admin-card">
+                    <div class="admin-avatar">AD</div>
+                    <div>
+                        <strong>Administrator</strong>
+                        <span>admin@careerpath.id</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <section class="main">
+            <header class="topbar">
+                <button class="menu-toggle" type="button" onclick="toggleSidebar()" aria-label="Buka menu">☰</button>
+
+                <div class="mobile-brand">
+                    <span class="brand-mark">✦</span>
+                    <span>CareerPath</span>
+                </div>
+
+                <div class="global-search">
+                    <span class="search-icon">⌕</span>
+                    <input type="search" placeholder="Cari mahasiswa, karir, atau data pasar kerja..."
+                        onkeydown="handleGlobalSearch(event)">
+                </div>
+
+                <div class="top-actions">
+                    <button class="icon-button" type="button" onclick="showToast('Tidak ada notifikasi baru.')"
+                        aria-label="Notifikasi">♧</button>
+                    <button class="profile-button" type="button"
+                        onclick="showToast('Menu profil administrator akan dibuka.')">
+                        <span class="top-avatar">AD</span>
+                        <span class="profile-name">Administrator</span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="breadcrumbs">
+                    <a href="#">Dashboard</a>
+                    <span>›</span>
+                    <span>Konfigurasi Rekomendasi</span>
+                </div>
+
+                <section class="page-header">
+                    <div>
+                        <h1>Konfigurasi Rekomendasi</h1>
+                        <p>Atur data master yang digunakan sistem untuk menghitung rekomendasi karir, meliputi kriteria
+                            SAW, komponen akademik, pemetaan RIASEC, dan bobot akademik setiap karir.</p>
+                    </div>
+                    <span class="config-status">● Konfigurasi aktif</span>
+                </section>
+
+                <div class="tab-list" role="tablist">
+                    <button class="tab-button active" type="button" data-tab="criteria"
+                        onclick="switchTab('criteria')">Kriteria dan Bobot SAW</button>
+                    <button class="tab-button" type="button" data-tab="components"
+                        onclick="switchTab('components')">Komponen Akademik</button>
+                    <button class="tab-button" type="button" data-tab="riasec" onclick="switchTab('riasec')">Pemetaan
+                        RIASEC–Karir</button>
+                    <button class="tab-button" type="button" data-tab="academic" onclick="switchTab('academic')">Bobot
+                        Akademik Karir</button>
+                </div>
+
+                <!-- Kriteria dan Bobot SAW -->
+                <section class="tab-panel active" id="criteria">
+                    <div class="info-banner">
+                        <span>ℹ</span>
+                        <span>Ketiga kriteria menggunakan atribut <strong>benefit</strong>. Pastikan total bobot seluruh
+                            kriteria bernilai 100% sebelum menyimpan perubahan.</span>
+                    </div>
+
+                    <div class="criteria-layout">
+                        <article class="card">
+                            <div class="card-header">
+                                <div>
+                                    <h2>Kriteria Metode SAW</h2>
+                                    <p>Kriteria digunakan untuk menghitung nilai preferensi dan ranking alternatif
+                                        karir.</p>
+                                </div>
+                                <button class="button-primary" type="button" onclick="saveCriteria()">Simpan
+                                    Bobot</button>
+                            </div>
+
+                            <div class="table-scroll">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Kode</th>
+                                            <th>Kriteria</th>
+                                            <th>Sumber Nilai</th>
+                                            <th>Atribut</th>
+                                            <th>Bobot</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><span class="criterion-code">C1</span></td>
+                                            <td>
+                                                <div class="criterion-title">
+                                                    <strong>Minat Karir</strong>
+                                                    <span>Kesesuaian minat mahasiswa terhadap alternatif karir.</span>
+                                                </div>
+                                            </td>
+                                            <td>Hasil Tes RIASEC</td>
+                                            <td><span class="benefit-tag">Benefit</span></td>
+                                            <td><input class="weight-input criteria-input" type="number" min="0"
+                                                    max="100" value="40" oninput="updateCriteriaSummary()"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="criterion-code">C2</span></td>
+                                            <td>
+                                                <div class="criterion-title">
+                                                    <strong>Kemampuan Akademik</strong>
+                                                    <span>Nilai akademik berdasarkan komponen relevan.</span>
+                                                </div>
+                                            </td>
+                                            <td>Data Akademik Mahasiswa</td>
+                                            <td><span class="benefit-tag">Benefit</span></td>
+                                            <td><input class="weight-input criteria-input" type="number" min="0"
+                                                    max="100" value="35" oninput="updateCriteriaSummary()"></td>
+                                        </tr>
+                                        <tr>
+                                            <td><span class="criterion-code">C3</span></td>
+                                            <td>
+                                                <div class="criterion-title">
+                                                    <strong>Kebutuhan Pasar Kerja</strong>
+                                                    <span>Informasi kebutuhan pasar kerja untuk setiap karir.</span>
+                                                </div>
+                                            </td>
+                                            <td>Data Pasar Kerja</td>
+                                            <td><span class="benefit-tag">Benefit</span></td>
+                                            <td><input class="weight-input criteria-input" type="number" min="0"
+                                                    max="100" value="25" oninput="updateCriteriaSummary()"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </article>
+
+                        <aside class="card side-card">
+                            <h3>Ringkasan Bobot</h3>
+                            <p>Visualisasi proporsi bobot yang digunakan dalam perhitungan SAW.</p>
+
+                            <div class="weight-summary">
+                                <div class="weight-row">
+                                    <span>C1 Minat</span>
+                                    <div class="mini-track">
+                                        <div class="mini-fill" id="c1Bar" style="width:40%"></div>
+                                    </div>
+                                    <strong id="c1Value">40%</strong>
+                                </div>
+                                <div class="weight-row">
+                                    <span>C2 Akademik</span>
+                                    <div class="mini-track">
+                                        <div class="mini-fill" id="c2Bar" style="width:35%"></div>
+                                    </div>
+                                    <strong id="c2Value">35%</strong>
+                                </div>
+                                <div class="weight-row">
+                                    <span>C3 Pasar Kerja</span>
+                                    <div class="mini-track">
+                                        <div class="mini-fill" id="c3Bar" style="width:25%"></div>
+                                    </div>
+                                    <strong id="c3Value">25%</strong>
+                                </div>
+                            </div>
+
+                            <div class="total-box">
+                                <span>Total bobot</span>
+                                <strong id="criteriaTotal">100%</strong>
+                            </div>
+
+                            <p class="small-note">Dalam implementasi, bobot akan diubah menjadi nilai desimal sebelum
+                                diproses dengan metode SAW.</p>
+                        </aside>
+                    </div>
+                </section>
+
+                <!-- Komponen Akademik -->
+                <section class="tab-panel" id="components">
+                    <div class="info-banner">
+                        <span>ℹ</span>
+                        <span>Komponen akademik menjadi dasar pengolahan nilai kemampuan akademik mahasiswa atau
+                            kriteria C2. Bobot setiap komponen dapat diatur per alternatif karir pada tab
+                            berikutnya.</span>
+                    </div>
+
+                    <article class="card">
+                        <div class="card-header">
+                            <div>
+                                <h2>Daftar Komponen Akademik</h2>
+                                <p>Kelola kelompok mata kuliah atau bidang penilaian akademik yang digunakan sistem.</p>
+                            </div>
+                            <button class="button-primary" type="button" onclick="openComponentModal()">+ Tambah
+                                Komponen</button>
+                        </div>
+
+                        <div class="component-grid" id="componentGrid">
+                            <article class="component-card" data-name="Pemrograman">
+                                <div class="component-icon">⌘</div>
+                                <div class="actions">
+                                    <button class="small-button" onclick="editComponent(this)">Ubah</button>
+                                    <button class="small-button delete" onclick="deleteComponent(this)">Hapus</button>
+                                </div>
+                                <h3>Pemrograman</h3>
+                                <p>Dasar pemrograman, pengembangan web, dan pengembangan aplikasi.</p>
+                            </article>
+
+                            <article class="component-card" data-name="Basis Data">
+                                <div class="component-icon">▤</div>
+                                <div class="actions">
+                                    <button class="small-button" onclick="editComponent(this)">Ubah</button>
+                                    <button class="small-button delete" onclick="deleteComponent(this)">Hapus</button>
+                                </div>
+                                <h3>Basis Data</h3>
+                                <p>Perancangan basis data, SQL, serta manajemen data.</p>
+                            </article>
+
+                            <article class="component-card" data-name="Analisis dan Perancangan Sistem">
+                                <div class="component-icon">◫</div>
+                                <div class="actions">
+                                    <button class="small-button" onclick="editComponent(this)">Ubah</button>
+                                    <button class="small-button delete" onclick="deleteComponent(this)">Hapus</button>
+                                </div>
+                                <h3>Analisis dan Perancangan Sistem</h3>
+                                <p>Analisis kebutuhan, pemodelan sistem, serta perancangan solusi.</p>
+                            </article>
+
+                            <article class="component-card" data-name="Jaringan dan Keamanan">
+                                <div class="component-icon">⌁</div>
+                                <div class="actions">
+                                    <button class="small-button" onclick="editComponent(this)">Ubah</button>
+                                    <button class="small-button delete" onclick="deleteComponent(this)">Hapus</button>
+                                </div>
+                                <h3>Jaringan dan Keamanan</h3>
+                                <p>Jaringan komputer, keamanan informasi, dan infrastruktur TI.</p>
+                            </article>
+
+                            <article class="component-card" data-name="Data dan Kecerdasan Buatan">
+                                <div class="component-icon">◌</div>
+                                <div class="actions">
+                                    <button class="small-button" onclick="editComponent(this)">Ubah</button>
+                                    <button class="small-button delete" onclick="deleteComponent(this)">Hapus</button>
+                                </div>
+                                <h3>Data dan Kecerdasan Buatan</h3>
+                                <p>Statistika, analitik data, serta konsep kecerdasan buatan.</p>
+                            </article>
+                        </div>
+                    </article>
+                </section>
+
+                <!-- Pemetaan RIASEC -->
+                <section class="tab-panel" id="riasec">
+                    <div class="info-banner">
+                        <span>ℹ</span>
+                        <span>Pemetaan ini menentukan tipe minat RIASEC yang relevan untuk setiap alternatif karir.
+                            Sistem akan menggunakan hasil tes mahasiswa untuk menghasilkan nilai kesesuaian minat atau
+                            C1.</span>
+                    </div>
+
+                    <div class="mapping-layout">
+                        <article class="card">
+                            <div class="card-header">
+                                <div>
+                                    <h2>Pemetaan Tipe RIASEC</h2>
+                                    <p>Pilih alternatif karir, kemudian tentukan tipe RIASEC yang sesuai.</p>
+                                </div>
+                            </div>
+
+                            <div class="mapping-select-wrap">
+                                <label for="careerMappingSelect">Alternatif karir</label>
+                                <select class="select-control" id="careerMappingSelect" onchange="loadRiaSecMapping()">
+                                    <option value="Software Engineer">Software Engineer</option>
+                                    <option value="Data Analyst">Data Analyst</option>
+                                    <option value="UI/UX Designer">UI/UX Designer</option>
+                                    <option value="Cybersecurity Analyst">Cybersecurity Analyst</option>
+                                    <option value="Business Analyst">Business Analyst</option>
+                                    <option value="Quality Assurance Engineer">Quality Assurance Engineer</option>
+                                </select>
+                            </div>
+
+                            <div class="mapping-content">
+                                <div class="mapping-career">
+                                    <div class="career-symbol" id="mappingIcon">⌘</div>
+                                    <div>
+                                        <strong id="mappingTitle">Software Engineer</strong>
+                                        <span id="mappingDescription">Pengembangan perangkat lunak dan solusi
+                                            digital.</span>
+                                    </div>
+                                </div>
+
+                                <div class="riasec-checks">
+                                    <div class="riasec-check">
+                                        <input id="mapR" type="checkbox" value="R">
+                                        <label for="mapR"><strong>R</strong><span>Realistic</span></label>
+                                    </div>
+                                    <div class="riasec-check">
+                                        <input id="mapI" type="checkbox" value="I">
+                                        <label for="mapI"><strong>I</strong><span>Investigative</span></label>
+                                    </div>
+                                    <div class="riasec-check">
+                                        <input id="mapA" type="checkbox" value="A">
+                                        <label for="mapA"><strong>A</strong><span>Artistic</span></label>
+                                    </div>
+                                    <div class="riasec-check">
+                                        <input id="mapS" type="checkbox" value="S">
+                                        <label for="mapS"><strong>S</strong><span>Social</span></label>
+                                    </div>
+                                    <div class="riasec-check">
+                                        <input id="mapE" type="checkbox" value="E">
+                                        <label for="mapE"><strong>Enterprising</strong><span>Enterprising</span></label>
+                                    </div>
+                                    <div class="riasec-check">
+                                        <input id="mapC" type="checkbox" value="C">
+                                        <label for="mapC"><strong>C</strong><span>Conventional</span></label>
+                                    </div>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button class="button-outline" type="button"
+                                        onclick="loadRiaSecMapping()">Batal</button>
+                                    <button class="button-primary" type="button" onclick="saveRiaSecMapping()">Simpan
+                                        Pemetaan</button>
+                                </div>
+                            </div>
+                        </article>
+
+                        <aside class="card side-card">
+                            <h3>Preview Pemetaan</h3>
+                            <p>Contoh pemetaan RIASEC untuk beberapa alternatif karir yang tersedia.</p>
+
+                            <div class="preview-list" id="mappingPreview">
+                                <div class="preview-row">
+                                    <span class="preview-code">SE</span>
+                                    <div><strong>Software Engineer</strong><span>Investigative, Realistic</span></div>
+                                </div>
+                                <div class="preview-row">
+                                    <span class="preview-code">DA</span>
+                                    <div><strong>Data Analyst</strong><span>Investigative, Conventional</span></div>
+                                </div>
+                                <div class="preview-row">
+                                    <span class="preview-code">UX</span>
+                                    <div><strong>UI/UX Designer</strong><span>Artistic, Social</span></div>
+                                </div>
+                                <div class="preview-row">
+                                    <span class="preview-code">BA</span>
+                                    <div><strong>Business Analyst</strong><span>Investigative, Social,
+                                            Enterprising</span></div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+
+                <!-- Bobot Akademik Karir -->
+                <section class="tab-panel" id="academic">
+                    <div class="info-banner">
+                        <span>ℹ</span>
+                        <span>Bobot akademik digunakan untuk menentukan relevansi setiap komponen akademik terhadap
+                            alternatif karir tertentu. Total bobot untuk satu alternatif karir harus bernilai
+                            100%.</span>
+                    </div>
+
+                    <div class="academic-weight-layout">
+                        <article class="card">
+                            <div class="card-header">
+                                <div>
+                                    <h2>Bobot Akademik Berdasarkan Karir</h2>
+                                    <p>Atur kontribusi masing-masing komponen akademik untuk menghitung C2.</p>
+                                </div>
+                            </div>
+
+                            <div class="weight-select-wrap">
+                                <label for="academicCareerSelect">Alternatif karir</label>
+                                <select class="select-control" id="academicCareerSelect"
+                                    onchange="loadAcademicWeights()">
+                                    <option value="Software Engineer">Software Engineer</option>
+                                    <option value="Data Analyst">Data Analyst</option>
+                                    <option value="UI/UX Designer">UI/UX Designer</option>
+                                    <option value="Cybersecurity Analyst">Cybersecurity Analyst</option>
+                                    <option value="Business Analyst">Business Analyst</option>
+                                </select>
+                            </div>
+
+                            <div class="academic-weight-content">
+                                <table class="academic-weight-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Komponen Akademik</th>
+                                            <th>Relevansi</th>
+                                            <th>Bobot</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="academicWeightBody">
+                                        <tr>
+                                            <td>
+                                                <div class="component-title">
+                                                    <strong>Pemrograman</strong><span>Pengembangan aplikasi dan
+                                                        web.</span>
+                                                </div>
+                                            </td>
+                                            <td><span class="benefit-tag">Sangat Tinggi</span></td>
+                                            <td>
+                                                <div class="input-group"><input class="academic-weight-input"
+                                                        type="number" min="0" max="100" value="35"
+                                                        oninput="updateAcademicWeightSummary()"><span>%</span></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="component-title"><strong>Basis Data</strong><span>SQL dan
+                                                        manajemen data.</span></div>
+                                            </td>
+                                            <td><span class="benefit-tag">Tinggi</span></td>
+                                            <td>
+                                                <div class="input-group"><input class="academic-weight-input"
+                                                        type="number" min="0" max="100" value="25"
+                                                        oninput="updateAcademicWeightSummary()"><span>%</span></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="component-title"><strong>Analisis dan Perancangan
+                                                        Sistem</strong><span>Analisis kebutuhan dan rancangan
+                                                        solusi.</span></div>
+                                            </td>
+                                            <td><span class="benefit-tag">Tinggi</span></td>
+                                            <td>
+                                                <div class="input-group"><input class="academic-weight-input"
+                                                        type="number" min="0" max="100" value="20"
+                                                        oninput="updateAcademicWeightSummary()"><span>%</span></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="component-title"><strong>Jaringan dan
+                                                        Keamanan</strong><span>Infrastruktur dan keamanan TI.</span>
+                                                </div>
+                                            </td>
+                                            <td><span class="benefit-tag">Sedang</span></td>
+                                            <td>
+                                                <div class="input-group"><input class="academic-weight-input"
+                                                        type="number" min="0" max="100" value="10"
+                                                        oninput="updateAcademicWeightSummary()"><span>%</span></div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div class="component-title"><strong>Data dan Kecerdasan
+                                                        Buatan</strong><span>Data, statistik, dan AI.</span></div>
+                                            </td>
+                                            <td><span class="benefit-tag">Sedang</span></td>
+                                            <td>
+                                                <div class="input-group"><input class="academic-weight-input"
+                                                        type="number" min="0" max="100" value="10"
+                                                        oninput="updateAcademicWeightSummary()"><span>%</span></div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                                <div class="total-box">
+                                    <span>Total bobot <strong id="academicCareerName">Software Engineer</strong></span>
+                                    <strong id="academicWeightTotal">100%</strong>
+                                </div>
+
+                                <div class="form-actions">
+                                    <button class="button-outline" type="button"
+                                        onclick="loadAcademicWeights()">Batal</button>
+                                    <button class="button-primary" type="button" onclick="saveAcademicWeights()">Simpan
+                                        Bobot Akademik</button>
+                                </div>
+                            </div>
+                        </article>
+
+                        <aside class="card side-card">
+                            <h3>Penjelasan C2</h3>
+                            <p>Nilai kemampuan akademik mahasiswa dihitung dengan memadukan nilai tiap komponen dengan
+                                bobot relevansinya pada alternatif karir.</p>
+
+                            <div class="preview-list">
+                                <div class="preview-row">
+                                    <span class="preview-code">1</span>
+                                    <div><strong>Nilai komponen mahasiswa</strong><span>Diambil dari data akademik yang
+                                            diinput mahasiswa.</span></div>
+                                </div>
+                                <div class="preview-row">
+                                    <span class="preview-code">2</span>
+                                    <div><strong>Bobot relevansi karir</strong><span>Diatur administrator pada halaman
+                                            ini.</span></div>
+                                </div>
+                                <div class="preview-row">
+                                    <span class="preview-code">3</span>
+                                    <div><strong>Nilai C2 per alternatif</strong><span>Digunakan bersama C1 dan C3 dalam
+                                            metode SAW.</span></div>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </section>
+            </main>
+        </section>
+    </div>
+
+    <!-- Modal Komponen Akademik -->
+    <div class="modal-overlay" id="componentModal">
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="componentModalTitle">
+            <div class="modal-header">
+                <h2 id="componentModalTitle">Tambah Komponen Akademik</h2>
+                <button class="close-button" type="button" onclick="closeComponentModal()" aria-label="Tutup">×</button>
+            </div>
+
+            <form class="modal-form" id="componentForm">
+                <input type="hidden" id="componentEditIndex">
+
+                <div class="field">
+                    <label for="componentName">Nama komponen</label>
+                    <input id="componentName" type="text" placeholder="Contoh: Manajemen Proyek TI" required>
+                </div>
+
+                <div class="field">
+                    <label for="componentDescription">Deskripsi</label>
+                    <textarea id="componentDescription" placeholder="Jelaskan ruang lingkup komponen akademik."
+                        required></textarea>
+                </div>
+            </form>
+
+            <div class="modal-actions">
+                <button class="button-outline" type="button" onclick="closeComponentModal()">Batal</button>
+                <button class="button-primary" type="submit" form="componentForm">Simpan Komponen</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const mappingData = {
+            "Software Engineer": {
+                icon: "⌘",
+                description: "Pengembangan perangkat lunak dan solusi digital.",
+                types: ["R", "I"]
+            },
+            "Data Analyst": {
+                icon: "▤",
+                description: "Analisis, pengolahan, dan visualisasi data.",
+                types: ["I", "C"]
+            },
+            "UI/UX Designer": {
+                icon: "◌",
+                description: "Desain pengalaman dan antarmuka digital.",
+                types: ["A", "S"]
+            },
+            "Cybersecurity Analyst": {
+                icon: "⌁",
+                description: "Analisis risiko dan keamanan informasi.",
+                types: ["R", "I"]
+            },
+            "Business Analyst": {
+                icon: "◫",
+                description: "Analisis kebutuhan bisnis dan solusi teknologi.",
+                types: ["I", "S", "E"]
+            },
+            "Quality Assurance Engineer": {
+                icon: "✓",
+                description: "Pengujian dan jaminan kualitas perangkat lunak.",
+                types: ["C", "I"]
+            }
+        };
+
+        const academicWeightData = {
+            "Software Engineer": [35, 25, 20, 10, 10],
+            "Data Analyst": [15, 30, 15, 5, 35],
+            "UI/UX Designer": [20, 10, 30, 5, 35],
+            "Cybersecurity Analyst": [20, 10, 15, 40, 15],
+            "Business Analyst": [15, 20, 35, 10, 20]
+        };
+
+        const academicRelevance = {
+            "Software Engineer": ["Sangat Tinggi", "Tinggi", "Tinggi", "Sedang", "Sedang"],
+            "Data Analyst": ["Sedang", "Sangat Tinggi", "Sedang", "Rendah", "Sangat Tinggi"],
+            "UI/UX Designer": ["Tinggi", "Sedang", "Sangat Tinggi", "Rendah", "Tinggi"],
+            "Cybersecurity Analyst": ["Tinggi", "Sedang", "Sedang", "Sangat Tinggi", "Tinggi"],
+            "Business Analyst": ["Sedang", "Tinggi", "Sangat Tinggi", "Sedang", "Tinggi"]
+        };
+
+        const academicComponents = [
+            ["Pemrograman", "Pengembangan aplikasi dan web."],
+            ["Basis Data", "SQL dan manajemen data."],
+            ["Analisis dan Perancangan Sistem", "Analisis kebutuhan dan rancangan solusi."],
+            ["Jaringan dan Keamanan", "Infrastruktur dan keamanan TI."],
+            ["Data dan Kecerdasan Buatan", "Data, statistik, dan AI."]
+        ];
+
+        let toastTimer;
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function handleGlobalSearch(event) {
+            if (event.key === "Enter") {
+                const query = event.target.value.trim();
+                showToast(query ? `Mencari data untuk: ${query}` : "Masukkan kata kunci pencarian terlebih dahulu.");
+            }
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll(".tab-button").forEach(button => {
+                button.classList.toggle("active", button.dataset.tab === tabName);
+            });
+
+            document.querySelectorAll(".tab-panel").forEach(panel => {
+                panel.classList.toggle("active", panel.id === tabName);
+            });
+        }
+
+        function getCriteriaValues() {
+            return [...document.querySelectorAll(".criteria-input")].map(input => Number(input.value) || 0);
+        }
+
+        function updateCriteriaSummary() {
+            const values = getCriteriaValues();
+            values.forEach((value, index) => {
+                document.getElementById(`c${index + 1}Bar`).style.width = `${Math.max(0, Math.min(100, value))}%`;
+                document.getElementById(`c${index + 1}Value`).textContent = `${value}%`;
+            });
+
+            const total = values.reduce((sum, value) => sum + value, 0);
+            const totalElement = document.getElementById("criteriaTotal");
+            totalElement.textContent = `${total}%`;
+            totalElement.style.color = total === 100 ? "var(--primary-dark)" : "var(--danger)";
+        }
+
+        function saveCriteria() {
+            const total = getCriteriaValues().reduce((sum, value) => sum + value, 0);
+            if (total !== 100) {
+                showToast("Total bobot kriteria harus bernilai 100%.");
+                return;
+            }
+            showToast("Kriteria dan bobot SAW berhasil disimpan.");
+        }
+
+        function loadRiaSecMapping() {
+            const career = document.getElementById("careerMappingSelect").value;
+            const data = mappingData[career];
+            document.getElementById("mappingIcon").textContent = data.icon;
+            document.getElementById("mappingTitle").textContent = career;
+            document.getElementById("mappingDescription").textContent = data.description;
+
+            ["R", "I", "A", "S", "E", "C"].forEach(type => {
+                document.getElementById(`map${type}`).checked = data.types.includes(type);
+            });
+        }
+
+        function saveRiaSecMapping() {
+            const career = document.getElementById("careerMappingSelect").value;
+            const selected = ["R", "I", "A", "S", "E", "C"]
+                .filter(type => document.getElementById(`map${type}`).checked);
+
+            if (!selected.length) {
+                showToast("Pilih minimal satu tipe RIASEC.");
+                return;
+            }
+
+            mappingData[career].types = selected;
+            updateMappingPreview();
+            showToast(`Pemetaan RIASEC untuk ${career} berhasil disimpan.`);
+        }
+
+        function fullTypeName(type) {
+            const names = {
+                R: "Realistic",
+                I: "Investigative",
+                A: "Artistic",
+                S: "Social",
+                E: "Enterprising",
+                C: "Conventional"
+            };
+            return names[type];
+        }
+
+        function previewCode(name) {
+            return name
+                .split(" ")
+                .slice(0, 2)
+                .map(word => word[0])
+                .join("")
+                .toUpperCase();
+        }
+
+        function updateMappingPreview() {
+            const careers = ["Software Engineer", "Data Analyst", "UI/UX Designer", "Business Analyst"];
+            document.getElementById("mappingPreview").innerHTML = careers.map(career => `
+        <div class="preview-row">
+          <span class="preview-code">${previewCode(career)}</span>
+          <div>
+            <strong>${career}</strong>
+            <span>${mappingData[career].types.map(fullTypeName).join(", ")}</span>
+          </div>
+        </div>
+      `).join("");
+        }
+
+        function getAcademicInputs() {
+            return [...document.querySelectorAll(".academic-weight-input")];
+        }
+
+        function updateAcademicWeightSummary() {
+            const values = getAcademicInputs().map(input => Number(input.value) || 0);
+            const total = values.reduce((sum, value) => sum + value, 0);
+            const totalElement = document.getElementById("academicWeightTotal");
+            totalElement.textContent = `${total}%`;
+            totalElement.style.color = total === 100 ? "var(--primary-dark)" : "var(--danger)";
+        }
+
+        function loadAcademicWeights() {
+            const career = document.getElementById("academicCareerSelect").value;
+            const values = academicWeightData[career];
+            const relevance = academicRelevance[career];
+            const rows = [...document.querySelectorAll("#academicWeightBody tr")];
+
+            rows.forEach((row, index) => {
+                row.querySelector(".academic-weight-input").value = values[index];
+                row.querySelector(".benefit-tag").textContent = relevance[index];
+            });
+
+            document.getElementById("academicCareerName").textContent = career;
+            updateAcademicWeightSummary();
+        }
+
+        function saveAcademicWeights() {
+            const career = document.getElementById("academicCareerSelect").value;
+            const values = getAcademicInputs().map(input => Number(input.value) || 0);
+            const total = values.reduce((sum, value) => sum + value, 0);
+
+            if (total !== 100) {
+                showToast("Total bobot akademik harus bernilai 100%.");
+                return;
+            }
+
+            academicWeightData[career] = values;
+            showToast(`Bobot akademik untuk ${career} berhasil disimpan.`);
+        }
+
+        function openComponentModal() {
+            document.getElementById("componentModalTitle").textContent = "Tambah Komponen Akademik";
+            document.getElementById("componentForm").reset();
+            document.getElementById("componentEditIndex").value = "";
+            document.getElementById("componentModal").classList.add("show");
+        }
+
+        function closeComponentModal() {
+            document.getElementById("componentModal").classList.remove("show");
+        }
+
+        function componentIcon(name) {
+            if (name.toLowerCase().includes("pemrograman")) return "⌘";
+            if (name.toLowerCase().includes("basis data")) return "▤";
+            if (name.toLowerCase().includes("jaringan")) return "⌁";
+            if (name.toLowerCase().includes("data")) return "◌";
+            return "◫";
+        }
+
+        function componentCardMarkup(name, description) {
+            return `
+        <div class="component-icon">${componentIcon(name)}</div>
+        <div class="actions">
+          <button class="small-button" onclick="editComponent(this)">Ubah</button>
+          <button class="small-button delete" onclick="deleteComponent(this)">Hapus</button>
+        </div>
+        <h3>${name}</h3>
+        <p>${description}</p>
+      `;
+        }
+
+        function getComponentCards() {
+            return [...document.querySelectorAll("#componentGrid .component-card")];
+        }
+
+        function editComponent(button) {
+            const card = button.closest(".component-card");
+            const cards = getComponentCards();
+            const index = cards.indexOf(card);
+
+            document.getElementById("componentModalTitle").textContent = "Ubah Komponen Akademik";
+            document.getElementById("componentEditIndex").value = index;
+            document.getElementById("componentName").value = card.querySelector("h3").textContent.trim();
+            document.getElementById("componentDescription").value = card.querySelector("p").textContent.trim();
+            document.getElementById("componentModal").classList.add("show");
+        }
+
+        function deleteComponent(button) {
+            const card = button.closest(".component-card");
+            const name = card.querySelector("h3").textContent.trim();
+            if (!confirm(`Hapus komponen akademik "${name}"?`)) return;
+            card.remove();
+            showToast(`Komponen akademik "${name}" berhasil dihapus.`);
+        }
+
+        document.getElementById("componentForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById("componentName").value.trim();
+            const description = document.getElementById("componentDescription").value.trim();
+            const editIndex = document.getElementById("componentEditIndex").value;
+            const cards = getComponentCards();
+
+            const duplicate = cards.find((card, index) =>
+                card.querySelector("h3").textContent.trim().toLowerCase() === name.toLowerCase() &&
+                String(index) !== String(editIndex)
+            );
+
+            if (duplicate) {
+                showToast("Komponen akademik dengan nama tersebut sudah tersedia.");
+                return;
+            }
+
+            if (editIndex !== "") {
+                cards[Number(editIndex)].dataset.name = name;
+                cards[Number(editIndex)].innerHTML = componentCardMarkup(name, description);
+                showToast("Komponen akademik berhasil diperbarui.");
+            } else {
+                const card = document.createElement("article");
+                card.className = "component-card";
+                card.dataset.name = name;
+                card.innerHTML = componentCardMarkup(name, description);
+                document.getElementById("componentGrid").appendChild(card);
+                showToast("Komponen akademik berhasil ditambahkan.");
+            }
+
+            closeComponentModal();
+        });
+
+        document.querySelectorAll(".modal-overlay").forEach(overlay => {
+            overlay.addEventListener("click", function (event) {
+                if (event.target === overlay) closeComponentModal();
+            });
+        });
+
+        loadRiaSecMapping();
+        loadAcademicWeights();
+        updateCriteriaSummary();
+    </script>
+</body>
+
+</html>

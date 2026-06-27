@@ -1,0 +1,1896 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Pasar Kerja - Admin CareerPath</title>
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-light: #DBEAFE;
+            --background: #F8FAFC;
+            --surface: #FFFFFF;
+            --border: #E2E8F0;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --success: #22C55E;
+            --success-light: #F0FDF4;
+            --warning: #F59E0B;
+            --warning-light: #FFFBEB;
+            --danger: #EF4444;
+            --danger-light: #FEF2F2;
+            --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+            --sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text-primary);
+            background: var(--background);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 40;
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            color: #FFFFFF;
+            background: linear-gradient(180deg, var(--primary-dark) 0%, #2563EB 62%, var(--primary) 100%);
+            box-shadow: 8px 0 28px rgba(29, 78, 216, 0.16);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            margin: 0 8px 34px;
+            color: #FFFFFF;
+            font-size: 20px;
+            font-weight: 850;
+            letter-spacing: -0.45px;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            font-size: 18px;
+        }
+
+        .admin-label {
+            margin: 0 10px 14px;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .menu {
+            display: grid;
+            gap: 5px;
+        }
+
+        .menu a {
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 12px;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.84);
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .menu a:hover {
+            transform: translateX(2px);
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .menu a.active {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+        }
+
+        .menu-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 14px 10px 3px;
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .admin-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-avatar {
+            width: 37px;
+            height: 37px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .admin-card strong {
+            display: block;
+            margin-bottom: 2px;
+            color: #FFFFFF;
+            font-size: 13px;
+        }
+
+        .admin-card span {
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 11px;
+        }
+
+        /* Main */
+        .main {
+            grid-column: 2;
+            min-width: 0;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 0 clamp(22px, 4vw, 52px);
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+        }
+
+        .menu-toggle,
+        .mobile-brand {
+            display: none;
+        }
+
+        .global-search {
+            position: relative;
+            width: min(410px, 44vw);
+        }
+
+        .global-search input {
+            width: 100%;
+            min-height: 41px;
+            padding: 10px 13px 10px 39px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            color: #94A3B8;
+            font-style: normal;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon-button {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            background: #FFFFFF;
+            cursor: pointer;
+        }
+
+        .profile-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 5px 10px 5px 6px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .top-avatar {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        .content {
+            width: min(1280px, 94%);
+            margin: 32px auto 58px;
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary-dark);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: clamp(27px, 3vw, 35px);
+            letter-spacing: -1px;
+        }
+
+        .page-header p {
+            max-width: 750px;
+            margin: 8px 0 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .button-primary,
+        .button-outline,
+        .button-danger,
+        .action-button {
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 800;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .button-primary:hover,
+        .button-outline:hover,
+        .button-danger:hover,
+        .action-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .button-primary {
+            padding: 11px 15px;
+            color: #FFFFFF;
+            background: var(--primary);
+            box-shadow: 0 9px 18px rgba(59, 130, 246, 0.22);
+        }
+
+        .button-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .button-outline {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FFFFFF;
+        }
+
+        .button-danger {
+            padding: 10px 14px;
+            color: #FFFFFF;
+            background: var(--danger);
+        }
+
+        /* Stats */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 135px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            background: var(--surface);
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+        }
+
+        .summary-card::after {
+            content: "";
+            position: absolute;
+            width: 105px;
+            height: 105px;
+            right: -50px;
+            bottom: -58px;
+            border-radius: 50%;
+            background: var(--primary-light);
+        }
+
+        .summary-icon {
+            position: relative;
+            z-index: 1;
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 18px;
+        }
+
+        .summary-card h3 {
+            position: relative;
+            z-index: 1;
+            margin: 12px 0 4px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .summary-card strong {
+            position: relative;
+            z-index: 1;
+            display: block;
+            font-size: 26px;
+            letter-spacing: -0.8px;
+        }
+
+        .summary-card span {
+            position: relative;
+            z-index: 1;
+            display: block;
+            margin-top: 4px;
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        /* Main card */
+        .market-card {
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 22px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 17px;
+            letter-spacing: -0.35px;
+        }
+
+        .card-header p {
+            margin: 6px 0 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .table-search {
+            width: 245px;
+            min-height: 40px;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .status-filter {
+            min-height: 40px;
+            padding: 9px 30px 9px 11px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1080px;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 13px 22px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FBFDFF;
+            font-size: 10px;
+            font-weight: 850;
+            letter-spacing: 0.06em;
+            text-align: left;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 15px 22px;
+            border-bottom: 1px solid #EDF2F7;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #FBFDFF;
+        }
+
+        .career-cell {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .career-icon {
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            border-radius: 10px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 16px;
+            font-weight: 850;
+        }
+
+        .career-cell strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .career-cell span {
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+
+        .vacancy-number {
+            color: var(--primary-dark);
+            font-size: 15px;
+            font-weight: 850;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            max-width: 215px;
+        }
+
+        .skill-tag {
+            padding: 4px 7px;
+            border-radius: 7px;
+            color: #334155;
+            background: #F1F5F9;
+            font-size: 10px;
+            font-weight: 750;
+        }
+
+        .location {
+            max-width: 160px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 8px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 850;
+            white-space: nowrap;
+        }
+
+        .trend.up {
+            color: #166534;
+            background: var(--success-light);
+        }
+
+        .trend.stable {
+            color: #92400E;
+            background: var(--warning-light);
+        }
+
+        .trend.down {
+            color: #B91C1C;
+            background: var(--danger-light);
+        }
+
+        .source-text {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 7px;
+        }
+
+        .action-button {
+            padding: 7px 9px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+        }
+
+        .action-button.delete {
+            color: #B91C1C;
+            background: var(--danger-light);
+        }
+
+        .empty-row {
+            display: none;
+        }
+
+        .empty-row td {
+            padding: 38px 22px;
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .table-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 14px 22px;
+            border-top: 1px solid #EDF2F7;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .table-footer strong {
+            color: var(--text-primary);
+        }
+
+        .insight-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .chart-card .card-header {
+            padding-bottom: 15px;
+        }
+
+        .chart-wrap {
+            height: 245px;
+            padding: 22px 24px 26px;
+        }
+
+        .chart-box {
+            height: 100%;
+            display: grid;
+            grid-template-columns: 38px 1fr;
+            gap: 12px;
+        }
+
+        .y-labels {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2px 0 30px;
+            color: #94A3B8;
+            font-size: 11px;
+            text-align: right;
+        }
+
+        .chart-area {
+            position: relative;
+            border-bottom: 1px solid #CBD5E1;
+            background:
+                linear-gradient(to bottom, transparent 0, transparent 24.5%, #EDF2F7 25%, transparent 25.5%, transparent 49.5%, #EDF2F7 50%, transparent 50.5%, transparent 74.5%, #EDF2F7 75%, transparent 75.5%);
+        }
+
+        .bars {
+            position: absolute;
+            inset: 9px 8px 28px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            align-items: end;
+            gap: 20px;
+        }
+
+        .bar-item {
+            display: grid;
+            grid-template-rows: 1fr auto;
+            align-items: end;
+            gap: 8px;
+        }
+
+        .bar {
+            width: 100%;
+            min-height: 8px;
+            border-radius: 8px 8px 2px 2px;
+            background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+            box-shadow: 0 7px 14px rgba(59, 130, 246, 0.17);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .bar:hover {
+            transform: translateY(-4px);
+        }
+
+        .bar-item span {
+            color: var(--text-secondary);
+            font-size: 10px;
+            text-align: center;
+        }
+
+        .coverage-card {
+            padding: 22px;
+        }
+
+        .coverage-card h2 {
+            margin: 0;
+            font-size: 17px;
+            letter-spacing: -0.35px;
+        }
+
+        .coverage-card>p {
+            margin: 6px 0 18px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .coverage-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .coverage-row {
+            display: grid;
+            grid-template-columns: 1fr 94px 38px;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .coverage-row span {
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .coverage-track {
+            height: 8px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #EAF0F8;
+        }
+
+        .coverage-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        }
+
+        .coverage-row strong {
+            color: var(--primary-dark);
+            font-size: 11px;
+            text-align: right;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            place-items: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show {
+            display: grid;
+        }
+
+        .modal {
+            width: min(100%, 720px);
+            max-height: calc(100vh - 40px);
+            overflow: auto;
+            border-radius: 18px;
+            background: #FFFFFF;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+            animation: pop 0.22s ease-out;
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+            background: #FFFFFF;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .close-button {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border: none;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            background: #F1F5F9;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .modal-form {
+            display: grid;
+            gap: 16px;
+            padding: 22px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+        }
+
+        .field label {
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 750;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            min-height: 42px;
+            padding: 10px 11px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .field textarea {
+            min-height: 92px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus,
+        .table-search:focus,
+        .global-search input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+        }
+
+        .help-text {
+            margin: -2px 0 0;
+            color: var(--text-secondary);
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 0 22px 22px;
+        }
+
+        .confirm-card {
+            width: min(100%, 420px);
+            padding: 24px;
+            border-radius: 18px;
+            background: #FFFFFF;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+            text-align: center;
+        }
+
+        .confirm-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 14px;
+            border-radius: 14px;
+            color: #B91C1C;
+            background: var(--danger-light);
+            font-size: 21px;
+        }
+
+        .confirm-card h2 {
+            margin: 0 0 8px;
+            font-size: 18px;
+        }
+
+        .confirm-card p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .confirm-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 120;
+            max-width: min(390px, 88vw);
+            padding: 13px 15px;
+            border-radius: 11px;
+            color: #FFFFFF;
+            background: #1E293B;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.22);
+            font-size: 13px;
+            line-height: 1.45;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(18px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1080px) {
+            :root {
+                --sidebar-width: 220px;
+            }
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .insight-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        @media (max-width: 780px) {
+            .app-shell {
+                display: block;
+            }
+
+            .sidebar {
+                width: min(86vw, 280px);
+                transform: translateX(-105%);
+                transition: transform 0.25s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .topbar {
+                height: 64px;
+                padding: 0 4vw;
+            }
+
+            .menu-toggle {
+                width: 38px;
+                height: 38px;
+                display: grid;
+                place-items: center;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                color: var(--text-secondary);
+                background: #FFFFFF;
+                cursor: pointer;
+            }
+
+            .mobile-brand {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: var(--primary-dark);
+                font-size: 17px;
+                font-weight: 850;
+            }
+
+            .mobile-brand .brand-mark {
+                width: 34px;
+                height: 34px;
+                border: none;
+                background: var(--primary);
+                font-size: 15px;
+            }
+
+            .global-search {
+                display: none;
+            }
+
+            .profile-name {
+                display: none;
+            }
+
+            .content {
+                width: min(94%, 1280px);
+                margin-top: 23px;
+            }
+
+            .page-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-row {
+                flex-direction: column;
+            }
+
+            .search-box,
+            .table-search,
+            .status-filter {
+                width: 100%;
+            }
+
+            .modal-actions,
+            .confirm-actions {
+                flex-direction: column-reverse;
+            }
+
+            .modal-actions button,
+            .confirm-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
+            <a class="brand" href="#">
+                <span class="brand-mark">✦</span>
+                <span>CareerPath</span>
+            </a>
+
+            <div class="admin-label">Panel Administrator</div>
+
+            <nav class="menu">
+                <a href="index.html"><span class="menu-icon">⌂</span>Dashboard</a>
+                <a href="alternatif-karir.html"><span class="menu-icon">◈</span>Alternatif Karir</a>
+                <a href="konfigurasi-rekomendasi.html"><span class="menu-icon">⚙</span>Konfigurasi Rekomendasi</a>
+                <a class="active" href="data-pasar-kerja.html"><span class="menu-icon">▤</span>Data Pasar Kerja</a>
+                <a href="mahasiswa.html"><span class="menu-icon">◉</span>Mahasiswa</a>
+                <a href="riwayat-rekomendasi.html"><span class="menu-icon">◷</span>Riwayat Rekomendasi</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="admin-card">
+                    <div class="admin-avatar">AD</div>
+                    <div>
+                        <strong>Administrator</strong>
+                        <span>admin@careerpath.id</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <section class="main">
+            <header class="topbar">
+                <button class="menu-toggle" type="button" onclick="toggleSidebar()" aria-label="Buka menu">☰</button>
+
+                <div class="mobile-brand">
+                    <span class="brand-mark">✦</span>
+                    <span>CareerPath</span>
+                </div>
+
+                <div class="global-search">
+                    <span class="search-icon">⌕</span>
+                    <input type="search" placeholder="Cari mahasiswa, karir, atau data pasar kerja..."
+                        onkeydown="handleGlobalSearch(event)">
+                </div>
+
+                <div class="top-actions">
+                    <button class="icon-button" type="button" onclick="showToast('Tidak ada notifikasi baru.')"
+                        aria-label="Notifikasi">♧</button>
+                    <button class="profile-button" type="button"
+                        onclick="showToast('Menu profil administrator akan dibuka.')">
+                        <span class="top-avatar">AD</span>
+                        <span class="profile-name">Administrator</span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="breadcrumbs">
+                    <a href="#">Dashboard</a>
+                    <span>›</span>
+                    <span>Data Pasar Kerja</span>
+                </div>
+
+                <section class="page-header">
+                    <div>
+                        <h1>Data Pasar Kerja</h1>
+                        <p>Kelola data kebutuhan pasar kerja yang menjadi nilai C3 dalam proses rekomendasi karir
+                            menggunakan metode SAW.</p>
+                    </div>
+                    <button class="button-primary" type="button" onclick="openMarketModal()">+ Tambah Data Pasar
+                        Kerja</button>
+                </section>
+
+                <section class="summary-grid">
+                    <article class="summary-card">
+                        <div class="summary-icon">▤</div>
+                        <h3>Data Karir Tersedia</h3>
+                        <strong id="marketTotal">7</strong>
+                        <span>Alternatif karir dengan data pasar kerja.</span>
+                    </article>
+                    <article class="summary-card">
+                        <div class="summary-icon">⌕</div>
+                        <h3>Total Lowongan</h3>
+                        <strong id="vacancyTotal">2.090</strong>
+                        <span>Akumulasi lowongan dari data yang dikelola.</span>
+                    </article>
+                    <article class="summary-card">
+                        <div class="summary-icon">↗</div>
+                        <h3>Tren Meningkat</h3>
+                        <strong id="upTrendTotal">4</strong>
+                        <span>Karir dengan permintaan pasar yang meningkat.</span>
+                    </article>
+                    <article class="summary-card">
+                        <div class="summary-icon">◷</div>
+                        <h3>Pembaruan Terakhir</h3>
+                        <strong>Hari ini</strong>
+                        <span>Data pasar kerja telah diperbarui.</span>
+                    </article>
+                </section>
+
+                <section class="market-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Daftar Data Pasar Kerja</h2>
+                            <p>Data dapat berupa jumlah lowongan, keterampilan yang dibutuhkan, lokasi, tren pekerjaan,
+                                dan sumber informasi.</p>
+                        </div>
+
+                        <div class="filter-row">
+                            <div class="search-box">
+                                <span class="search-icon">⌕</span>
+                                <input class="table-search" id="marketSearch" type="search"
+                                    placeholder="Cari karir atau keterampilan..." oninput="filterMarketData()">
+                            </div>
+                            <select class="status-filter" id="trendFilter" onchange="filterMarketData()">
+                                <option value="all">Semua Tren</option>
+                                <option value="up">Meningkat</option>
+                                <option value="stable">Stabil</option>
+                                <option value="down">Menurun</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Alternatif Karir</th>
+                                    <th>Jumlah Lowongan</th>
+                                    <th>Keterampilan Dibutuhkan</th>
+                                    <th>Lokasi Dominan</th>
+                                    <th>Tren</th>
+                                    <th>Sumber Data</th>
+                                    <th>Diperbarui</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="marketTableBody">
+                                <tr data-name="Software Engineer" data-trend="up" data-vacancy="520">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">⌘</div>
+                                            <div>
+                                                <strong>Software Engineer</strong>
+                                                <span>Pengembangan perangkat lunak</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="vacancy-number">520</span></td>
+                                    <td>
+                                        <div class="skill-tags"><span class="skill-tag">Java</span><span
+                                                class="skill-tag">JavaScript</span><span class="skill-tag">SQL</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="location">Jakarta, Bandung, Remote</span></td>
+                                    <td><span class="trend up">↗ Meningkat</span></td>
+                                    <td><span class="source-text">Data admin</span></td>
+                                    <td>22 Juni 2026</td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="editMarketData(this)">Ubah</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Data Analyst" data-trend="up" data-vacancy="340">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">▤</div>
+                                            <div>
+                                                <strong>Data Analyst</strong>
+                                                <span>Analisis dan visualisasi data</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="vacancy-number">340</span></td>
+                                    <td>
+                                        <div class="skill-tags"><span class="skill-tag">SQL</span><span
+                                                class="skill-tag">Excel</span><span class="skill-tag">Power BI</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="location">Jakarta, Tangerang, Surabaya</span></td>
+                                    <td><span class="trend up">↗ Meningkat</span></td>
+                                    <td><span class="source-text">Data admin</span></td>
+                                    <td>22 Juni 2026</td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="editMarketData(this)">Ubah</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="UI UX Designer" data-trend="stable" data-vacancy="260">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">◌</div>
+                                            <div>
+                                                <strong>UI/UX Designer</strong>
+                                                <span>Desain produk digital</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="vacancy-number">260</span></td>
+                                    <td>
+                                        <div class="skill-tags"><span class="skill-tag">Figma</span><span
+                                                class="skill-tag">Wireframe</span><span
+                                                class="skill-tag">Research</span></div>
+                                    </td>
+                                    <td><span class="location">Jakarta, Bandung, Yogyakarta</span></td>
+                                    <td><span class="trend stable">→ Stabil</span></td>
+                                    <td><span class="source-text">Data admin</span></td>
+                                    <td>21 Juni 2026</td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="editMarketData(this)">Ubah</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Cybersecurity Analyst" data-trend="up" data-vacancy="210">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">⌁</div>
+                                            <div>
+                                                <strong>Cybersecurity Analyst</strong>
+                                                <span>Keamanan informasi</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="vacancy-number">210</span></td>
+                                    <td>
+                                        <div class="skill-tags"><span class="skill-tag">Network</span><span
+                                                class="skill-tag">SIEM</span><span class="skill-tag">Security</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="location">Jakarta, Bandung, Batam</span></td>
+                                    <td><span class="trend up">↗ Meningkat</span></td>
+                                    <td><span class="source-text">Data admin</span></td>
+                                    <td>20 Juni 2026</td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="editMarketData(this)">Ubah</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Business Analyst" data-trend="stable" data-vacancy="310">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">◫</div>
+                                            <div>
+                                                <strong>Business Analyst</strong>
+                                                <span>Analisis kebutuhan bisnis</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="vacancy-number">310</span></td>
+                                    <td>
+                                        <div class="skill-tags"><span class="skill-tag">Requirement</span><span
+                                                class="skill-tag">BPMN</span><span
+                                                class="skill-tag">Communication</span></div>
+                                    </td>
+                                    <td><span class="location">Jakarta, Tangerang, Bekasi</span></td>
+                                    <td><span class="trend stable">→ Stabil</span></td>
+                                    <td><span class="source-text">Data admin</span></td>
+                                    <td>19 Juni 2026</td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="editMarketData(this)">Ubah</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Quality Assurance Engineer" data-trend="up" data-vacancy="270">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">✓</div>
+                                            <div>
+                                                <strong>Quality Assurance Engineer</strong>
+                                                <span>Pengujian perangkat lunak</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="vacancy-number">270</span></td>
+                                    <td>
+                                        <div class="skill-tags"><span class="skill-tag">Testing</span><span
+                                                class="skill-tag">API</span><span class="skill-tag">Selenium</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="location">Jakarta, Bandung, Semarang</span></td>
+                                    <td><span class="trend up">↗ Meningkat</span></td>
+                                    <td><span class="source-text">Data admin</span></td>
+                                    <td>18 Juni 2026</td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="editMarketData(this)">Ubah</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="System Administrator" data-trend="down" data-vacancy="180">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">◉</div>
+                                            <div>
+                                                <strong>System Administrator</strong>
+                                                <span>Administrasi sistem</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="vacancy-number">180</span></td>
+                                    <td>
+                                        <div class="skill-tags"><span class="skill-tag">Linux</span><span
+                                                class="skill-tag">Cloud</span><span class="skill-tag">Server</span>
+                                        </div>
+                                    </td>
+                                    <td><span class="location">Jakarta, Surabaya, Medan</span></td>
+                                    <td><span class="trend down">↘ Menurun</span></td>
+                                    <td><span class="source-text">Data admin</span></td>
+                                    <td>16 Juni 2026</td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="editMarketData(this)">Ubah</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr class="empty-row" id="emptyRow">
+                                    <td colspan="8">Data pasar kerja tidak ditemukan.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-footer">
+                        <span>Menampilkan <strong id="visibleCount">7</strong> data pasar kerja.</span>
+                        <span>Nilai jumlah lowongan digunakan sebagai dasar nilai kebutuhan pasar kerja (C3).</span>
+                    </div>
+                </section>
+
+                <section class="insight-grid">
+                    <article class="card chart-card">
+                        <div class="card-header">
+                            <div>
+                                <h2>Lowongan Berdasarkan Karir</h2>
+                                <p>Perbandingan jumlah lowongan pada beberapa alternatif karir utama.</p>
+                            </div>
+                            <span
+                                style="padding:7px 9px;border:1px solid #D8EAFE;border-radius:8px;color:#1D4ED8;background:#F8FBFF;font-size:11px;font-weight:800;">Jumlah
+                                lowongan</span>
+                        </div>
+
+                        <div class="chart-wrap">
+                            <div class="chart-box">
+                                <div class="y-labels">
+                                    <span>600</span>
+                                    <span>400</span>
+                                    <span>200</span>
+                                    <span>0</span>
+                                </div>
+                                <div class="chart-area">
+                                    <div class="bars">
+                                        <div class="bar-item">
+                                            <div class="bar" style="height:87%;"
+                                                onclick="showToast('Software Engineer: 520 lowongan.')"></div>
+                                            <span>SE</span>
+                                        </div>
+                                        <div class="bar-item">
+                                            <div class="bar" style="height:57%;"
+                                                onclick="showToast('Data Analyst: 340 lowongan.')"></div><span>DA</span>
+                                        </div>
+                                        <div class="bar-item">
+                                            <div class="bar" style="height:52%;"
+                                                onclick="showToast('Business Analyst: 310 lowongan.')"></div>
+                                            <span>BA</span>
+                                        </div>
+                                        <div class="bar-item">
+                                            <div class="bar" style="height:45%;"
+                                                onclick="showToast('QA Engineer: 270 lowongan.')"></div><span>QA</span>
+                                        </div>
+                                        <div class="bar-item">
+                                            <div class="bar" style="height:43%;"
+                                                onclick="showToast('UI/UX Designer: 260 lowongan.')"></div>
+                                            <span>UX</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+
+                    <aside class="card coverage-card">
+                        <h2>Kelengkapan Data</h2>
+                        <p>Ringkasan kelengkapan informasi pasar kerja pada data yang tersedia.</p>
+
+                        <div class="coverage-list">
+                            <div class="coverage-row">
+                                <span>Jumlah Lowongan</span>
+                                <div class="coverage-track">
+                                    <div class="coverage-fill" style="width:100%"></div>
+                                </div>
+                                <strong>100%</strong>
+                            </div>
+                            <div class="coverage-row">
+                                <span>Keterampilan</span>
+                                <div class="coverage-track">
+                                    <div class="coverage-fill" style="width:100%"></div>
+                                </div>
+                                <strong>100%</strong>
+                            </div>
+                            <div class="coverage-row">
+                                <span>Lokasi</span>
+                                <div class="coverage-track">
+                                    <div class="coverage-fill" style="width:86%"></div>
+                                </div>
+                                <strong>86%</strong>
+                            </div>
+                            <div class="coverage-row">
+                                <span>Tren Pekerjaan</span>
+                                <div class="coverage-track">
+                                    <div class="coverage-fill" style="width:100%"></div>
+                                </div>
+                                <strong>100%</strong>
+                            </div>
+                            <div class="coverage-row">
+                                <span>Sumber Data</span>
+                                <div class="coverage-track">
+                                    <div class="coverage-fill" style="width:100%"></div>
+                                </div>
+                                <strong>100%</strong>
+                            </div>
+                        </div>
+                    </aside>
+                </section>
+            </main>
+        </section>
+    </div>
+
+    <!-- Modal Tambah / Ubah -->
+    <div class="modal-overlay" id="marketModal">
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah Data Pasar Kerja</h2>
+                <button class="close-button" type="button" onclick="closeMarketModal()" aria-label="Tutup">×</button>
+            </div>
+
+            <form class="modal-form" id="marketForm">
+                <input id="editIndex" type="hidden">
+
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="careerName">Alternatif karir</label>
+                        <select id="careerName" required>
+                            <option value="">Pilih alternatif karir</option>
+                            <option value="Software Engineer">Software Engineer</option>
+                            <option value="Data Analyst">Data Analyst</option>
+                            <option value="UI/UX Designer">UI/UX Designer</option>
+                            <option value="Cybersecurity Analyst">Cybersecurity Analyst</option>
+                            <option value="Business Analyst">Business Analyst</option>
+                            <option value="Quality Assurance Engineer">Quality Assurance Engineer</option>
+                            <option value="System Administrator">System Administrator</option>
+                            <option value="Cloud Engineer">Cloud Engineer</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="vacancyCount">Jumlah lowongan</label>
+                        <input id="vacancyCount" type="number" min="0" placeholder="Contoh: 250" required>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="marketTrend">Tren pekerjaan</label>
+                        <select id="marketTrend" required>
+                            <option value="up">Meningkat</option>
+                            <option value="stable">Stabil</option>
+                            <option value="down">Menurun</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="sourceData">Sumber data</label>
+                        <input id="sourceData" type="text" placeholder="Contoh: Data admin" value="Data admin" required>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="skills">Keterampilan dibutuhkan</label>
+                    <input id="skills" type="text"
+                        placeholder="Pisahkan keterampilan dengan koma. Contoh: Java, SQL, Spring Boot" required>
+                    <p class="help-text">Keterampilan akan ditampilkan sebagai label pada tabel.</p>
+                </div>
+
+                <div class="field">
+                    <label for="location">Lokasi dominan</label>
+                    <input id="location" type="text" placeholder="Contoh: Jakarta, Bandung, Remote" required>
+                </div>
+
+                <div class="field">
+                    <label for="marketNote">Catatan pasar kerja</label>
+                    <textarea id="marketNote"
+                        placeholder="Tambahkan catatan ringkas tentang kondisi kebutuhan pasar kerja."
+                        required></textarea>
+                </div>
+            </form>
+
+            <div class="modal-actions">
+                <button class="button-outline" type="button" onclick="closeMarketModal()">Batal</button>
+                <button class="button-primary" type="submit" form="marketForm">Simpan Data</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal Hapus -->
+    <div class="modal-overlay" id="deleteModal">
+        <section class="confirm-card" role="dialog" aria-modal="true">
+            <div class="confirm-icon">!</div>
+            <h2>Hapus Data Pasar Kerja?</h2>
+            <p id="deleteText">Data yang dihapus tidak dapat dikembalikan.</p>
+            <div class="confirm-actions">
+                <button class="button-outline" type="button" onclick="closeDeleteModal()">Batal</button>
+                <button class="button-danger" type="button" onclick="deleteMarketData()">Hapus Data</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const careerMeta = {
+            "Software Engineer": { icon: "⌘", category: "Pengembangan perangkat lunak" },
+            "Data Analyst": { icon: "▤", category: "Analisis dan visualisasi data" },
+            "UI/UX Designer": { icon: "◌", category: "Desain produk digital" },
+            "Cybersecurity Analyst": { icon: "⌁", category: "Keamanan informasi" },
+            "Business Analyst": { icon: "◫", category: "Analisis kebutuhan bisnis" },
+            "Quality Assurance Engineer": { icon: "✓", category: "Pengujian perangkat lunak" },
+            "System Administrator": { icon: "◉", category: "Administrasi sistem" },
+            "Cloud Engineer": { icon: "☁", category: "Infrastruktur cloud" }
+        };
+
+        let toastTimer;
+        let deleteTarget = null;
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function handleGlobalSearch(event) {
+            if (event.key === "Enter") {
+                const query = event.target.value.trim();
+                showToast(query ? `Mencari data untuk: ${query}` : "Masukkan kata kunci pencarian terlebih dahulu.");
+            }
+        }
+
+        function trendLabel(trend) {
+            if (trend === "up") return "↗ Meningkat";
+            if (trend === "down") return "↘ Menurun";
+            return "→ Stabil";
+        }
+
+        function trendClass(trend) {
+            return trend === "up" ? "up" : trend === "down" ? "down" : "stable";
+        }
+
+        function getRows() {
+            return [...document.querySelectorAll("#marketTableBody tr[data-name]")];
+        }
+
+        function today() {
+            return new Intl.DateTimeFormat("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric"
+            }).format(new Date());
+        }
+
+        function numberFormat(value) {
+            return new Intl.NumberFormat("id-ID").format(Number(value) || 0);
+        }
+
+        function updateSummary() {
+            const rows = getRows();
+            const vacancyTotal = rows.reduce((total, row) => total + (Number(row.dataset.vacancy) || 0), 0);
+            const upTrendTotal = rows.filter(row => row.dataset.trend === "up").length;
+
+            document.getElementById("marketTotal").textContent = rows.length;
+            document.getElementById("vacancyTotal").textContent = numberFormat(vacancyTotal);
+            document.getElementById("upTrendTotal").textContent = upTrendTotal;
+        }
+
+        function filterMarketData() {
+            const query = document.getElementById("marketSearch").value.trim().toLowerCase();
+            const trend = document.getElementById("trendFilter").value;
+            const rows = getRows();
+            let shown = 0;
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const matchesQuery = text.includes(query);
+                const matchesTrend = trend === "all" || row.dataset.trend === trend;
+                const visible = matchesQuery && matchesTrend;
+                row.style.display = visible ? "" : "none";
+                if (visible) shown += 1;
+            });
+
+            document.getElementById("visibleCount").textContent = shown;
+            document.getElementById("emptyRow").style.display = shown === 0 ? "" : "none";
+        }
+
+        function openMarketModal() {
+            document.getElementById("modalTitle").textContent = "Tambah Data Pasar Kerja";
+            document.getElementById("marketForm").reset();
+            document.getElementById("sourceData").value = "Data admin";
+            document.getElementById("editIndex").value = "";
+            document.getElementById("marketModal").classList.add("show");
+        }
+
+        function closeMarketModal() {
+            document.getElementById("marketModal").classList.remove("show");
+        }
+
+        function extractSkills(row) {
+            return [...row.querySelectorAll(".skill-tag")].map(tag => tag.textContent.trim()).join(", ");
+        }
+
+        function editMarketData(button) {
+            const row = button.closest("tr");
+            const index = getRows().indexOf(row);
+
+            document.getElementById("modalTitle").textContent = "Ubah Data Pasar Kerja";
+            document.getElementById("editIndex").value = index;
+            document.getElementById("careerName").value = row.dataset.name;
+            document.getElementById("vacancyCount").value = row.dataset.vacancy;
+            document.getElementById("marketTrend").value = row.dataset.trend;
+            document.getElementById("sourceData").value = row.querySelector(".source-text").textContent.trim();
+            document.getElementById("skills").value = extractSkills(row);
+            document.getElementById("location").value = row.querySelector(".location").textContent.trim();
+            document.getElementById("marketNote").value = `Data kebutuhan pasar kerja untuk ${row.dataset.name} dikelola oleh administrator.`;
+
+            document.getElementById("marketModal").classList.add("show");
+        }
+
+        function createSkillTags(skills) {
+            return skills.map(skill => `<span class="skill-tag">${skill}</span>`).join("");
+        }
+
+        function rowMarkup({ career, vacancy, skills, location, trend, source }) {
+            const meta = careerMeta[career] || { icon: "◈", category: "Karir bidang teknologi informasi" };
+
+            return `
+        <td>
+          <div class="career-cell">
+            <div class="career-icon">${meta.icon}</div>
+            <div>
+              <strong>${career}</strong>
+              <span>${meta.category}</span>
+            </div>
+          </div>
+        </td>
+        <td><span class="vacancy-number">${numberFormat(vacancy)}</span></td>
+        <td><div class="skill-tags">${createSkillTags(skills)}</div></td>
+        <td><span class="location">${location}</span></td>
+        <td><span class="trend ${trendClass(trend)}">${trendLabel(trend)}</span></td>
+        <td><span class="source-text">${source}</span></td>
+        <td>${today()}</td>
+        <td>
+          <div class="action-row">
+            <button class="action-button" onclick="editMarketData(this)">Ubah</button>
+            <button class="action-button delete" onclick="confirmDelete(this)">Hapus</button>
+          </div>
+        </td>
+      `;
+        }
+
+        document.getElementById("marketForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const career = document.getElementById("careerName").value.trim();
+            const vacancy = Number(document.getElementById("vacancyCount").value);
+            const trend = document.getElementById("marketTrend").value;
+            const source = document.getElementById("sourceData").value.trim();
+            const skills = document.getElementById("skills").value
+                .split(",")
+                .map(item => item.trim())
+                .filter(Boolean);
+            const location = document.getElementById("location").value.trim();
+            const editIndex = document.getElementById("editIndex").value;
+            const rows = getRows();
+
+            if (!career || !skills.length) {
+                showToast("Lengkapi alternatif karir dan keterampilan yang dibutuhkan.");
+                return;
+            }
+
+            const duplicate = rows.find((row, index) =>
+                row.dataset.name.toLowerCase() === career.toLowerCase() &&
+                String(index) !== String(editIndex)
+            );
+
+            if (duplicate) {
+                showToast("Data pasar kerja untuk alternatif karir tersebut sudah tersedia.");
+                return;
+            }
+
+            const data = { career, vacancy, skills, location, trend, source };
+
+            if (editIndex !== "") {
+                const row = rows[Number(editIndex)];
+                row.dataset.name = career;
+                row.dataset.trend = trend;
+                row.dataset.vacancy = vacancy;
+                row.innerHTML = rowMarkup(data);
+                showToast("Data pasar kerja berhasil diperbarui.");
+            } else {
+                const row = document.createElement("tr");
+                row.dataset.name = career;
+                row.dataset.trend = trend;
+                row.dataset.vacancy = vacancy;
+                row.innerHTML = rowMarkup(data);
+                document.getElementById("marketTableBody").insertBefore(row, document.getElementById("emptyRow"));
+                showToast("Data pasar kerja berhasil ditambahkan.");
+            }
+
+            closeMarketModal();
+            updateSummary();
+            filterMarketData();
+        });
+
+        function confirmDelete(button) {
+            deleteTarget = button.closest("tr");
+            const career = deleteTarget.dataset.name;
+            document.getElementById("deleteText").textContent = `Data pasar kerja untuk "${career}" akan dihapus dari sistem.`;
+            document.getElementById("deleteModal").classList.add("show");
+        }
+
+        function closeDeleteModal() {
+            deleteTarget = null;
+            document.getElementById("deleteModal").classList.remove("show");
+        }
+
+        function deleteMarketData() {
+            if (!deleteTarget) return;
+            const career = deleteTarget.dataset.name;
+            deleteTarget.remove();
+            closeDeleteModal();
+            updateSummary();
+            filterMarketData();
+            showToast(`Data pasar kerja "${career}" berhasil dihapus.`);
+        }
+
+        document.querySelectorAll(".modal-overlay").forEach(overlay => {
+            overlay.addEventListener("click", function (event) {
+                if (event.target !== overlay) return;
+                if (overlay.id === "marketModal") closeMarketModal();
+                if (overlay.id === "deleteModal") closeDeleteModal();
+            });
+        });
+
+        updateSummary();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alternatif Karir - Admin CareerPath</title>
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-light: #DBEAFE;
+            --background: #F8FAFC;
+            --surface: #FFFFFF;
+            --border: #E2E8F0;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --success: #22C55E;
+            --success-light: #F0FDF4;
+            --warning: #F59E0B;
+            --warning-light: #FFFBEB;
+            --danger: #EF4444;
+            --danger-light: #FEF2F2;
+            --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+            --sidebar-width: 250px;
+            --radius-lg: 18px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text-primary);
+            background: var(--background);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        button,
+        input,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+        }
+
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 40;
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            color: #FFFFFF;
+            background: linear-gradient(180deg, var(--primary-dark) 0%, #2563EB 62%, var(--primary) 100%);
+            box-shadow: 8px 0 28px rgba(29, 78, 216, 0.16);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            margin: 0 8px 34px;
+            color: #FFFFFF;
+            font-size: 20px;
+            font-weight: 850;
+            letter-spacing: -0.45px;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            font-size: 18px;
+        }
+
+        .admin-label {
+            margin: 0 10px 14px;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .menu {
+            display: grid;
+            gap: 5px;
+        }
+
+        .menu a {
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 12px;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.84);
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .menu a:hover {
+            transform: translateX(2px);
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .menu a.active {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+        }
+
+        .menu-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 14px 10px 3px;
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .admin-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-avatar {
+            width: 37px;
+            height: 37px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .admin-card strong {
+            display: block;
+            margin-bottom: 2px;
+            color: #FFFFFF;
+            font-size: 13px;
+        }
+
+        .admin-card span {
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 11px;
+        }
+
+        .main {
+            grid-column: 2;
+            min-width: 0;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 0 clamp(22px, 4vw, 52px);
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+        }
+
+        .menu-toggle,
+        .mobile-brand {
+            display: none;
+        }
+
+        .global-search {
+            position: relative;
+            width: min(410px, 44vw);
+        }
+
+        .global-search input {
+            width: 100%;
+            min-height: 41px;
+            padding: 10px 13px 10px 39px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .global-search input:focus,
+        .search-input:focus,
+        .form-field input:focus,
+        .form-field textarea:focus,
+        .form-field select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            color: #94A3B8;
+            font-style: normal;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon-button {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            background: #FFFFFF;
+            cursor: pointer;
+        }
+
+        .profile-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 5px 10px 5px 6px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .top-avatar {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        .content {
+            width: min(1280px, 94%);
+            margin: 32px auto 58px;
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary-dark);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: clamp(27px, 3vw, 35px);
+            letter-spacing: -1px;
+        }
+
+        .page-header p {
+            margin: 8px 0 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .button-primary,
+        .button-outline,
+        .button-danger,
+        .action-button {
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 800;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .button-primary:hover,
+        .button-outline:hover,
+        .button-danger:hover,
+        .action-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .button-primary {
+            padding: 11px 15px;
+            color: #FFFFFF;
+            background: var(--primary);
+            box-shadow: 0 9px 18px rgba(59, 130, 246, 0.22);
+        }
+
+        .button-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .button-outline {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FFFFFF;
+        }
+
+        .button-danger {
+            padding: 10px 14px;
+            color: #FFFFFF;
+            background: var(--danger);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 132px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            background: var(--surface);
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+        }
+
+        .summary-card::after {
+            content: "";
+            position: absolute;
+            width: 105px;
+            height: 105px;
+            right: -50px;
+            bottom: -58px;
+            border-radius: 50%;
+            background: var(--primary-light);
+        }
+
+        .summary-icon {
+            position: relative;
+            z-index: 1;
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 18px;
+        }
+
+        .summary-card h3 {
+            position: relative;
+            z-index: 1;
+            margin: 12px 0 4px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .summary-card strong {
+            position: relative;
+            z-index: 1;
+            font-size: 27px;
+            letter-spacing: -0.8px;
+        }
+
+        .summary-card span {
+            position: relative;
+            z-index: 1;
+            display: block;
+            margin-top: 4px;
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .table-card {
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 22px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 17px;
+            letter-spacing: -0.35px;
+        }
+
+        .card-header p {
+            margin: 6px 0 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-input {
+            width: 245px;
+            min-height: 40px;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .select-filter {
+            min-height: 40px;
+            padding: 9px 30px 9px 11px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 940px;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 13px 22px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FBFDFF;
+            font-size: 10px;
+            font-weight: 850;
+            letter-spacing: 0.06em;
+            text-align: left;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 15px 22px;
+            border-bottom: 1px solid #EDF2F7;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #FBFDFF;
+        }
+
+        .career-cell {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .career-icon {
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            border-radius: 10px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 16px;
+            font-weight: 850;
+        }
+
+        .career-cell strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .career-cell span {
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+
+        .description {
+            max-width: 260px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .riasec-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .riasec-tag {
+            min-width: 26px;
+            padding: 4px 6px;
+            border-radius: 7px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 10px;
+            font-weight: 850;
+            text-align: center;
+        }
+
+        .status {
+            display: inline-flex;
+            padding: 5px 8px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 850;
+            white-space: nowrap;
+        }
+
+        .status.active {
+            color: #166534;
+            background: var(--success-light);
+        }
+
+        .status.inactive {
+            color: #92400E;
+            background: var(--warning-light);
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 7px;
+        }
+
+        .action-button {
+            padding: 7px 9px;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            font-size: 11px;
+        }
+
+        .action-button.delete {
+            color: #B91C1C;
+            background: var(--danger-light);
+        }
+
+        .table-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 14px 22px;
+            border-top: 1px solid #EDF2F7;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .table-footer strong {
+            color: var(--text-primary);
+        }
+
+        .empty-row {
+            display: none;
+        }
+
+        .empty-row td {
+            padding: 36px 22px;
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            place-items: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show {
+            display: grid;
+        }
+
+        .modal {
+            width: min(100%, 610px);
+            overflow: hidden;
+            border-radius: 18px;
+            background: #FFFFFF;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+            animation: pop 0.22s ease-out;
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .close-button {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border: none;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            background: #F1F5F9;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .modal-form {
+            display: grid;
+            gap: 16px;
+            padding: 22px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-field {
+            display: grid;
+            gap: 8px;
+        }
+
+        .form-field label {
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 750;
+        }
+
+        .form-field input,
+        .form-field textarea,
+        .form-field select {
+            width: 100%;
+            min-height: 43px;
+            padding: 10px 11px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .form-field textarea {
+            min-height: 90px;
+            resize: vertical;
+            line-height: 1.5;
+        }
+
+        .riasec-inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 9px;
+        }
+
+        .riasec-input {
+            position: relative;
+        }
+
+        .riasec-input input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .riasec-input label {
+            min-width: 37px;
+            min-height: 34px;
+            display: grid;
+            place-items: center;
+            padding: 5px 8px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            background: #FFFFFF;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .riasec-input input:checked+label {
+            border-color: var(--primary);
+            color: var(--primary-dark);
+            background: var(--primary-light);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 0 22px 22px;
+        }
+
+        .confirm-card {
+            width: min(100%, 420px);
+            padding: 24px;
+            border-radius: 18px;
+            background: #FFFFFF;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+            text-align: center;
+        }
+
+        .confirm-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 14px;
+            border-radius: 14px;
+            color: #B91C1C;
+            background: var(--danger-light);
+            font-size: 21px;
+        }
+
+        .confirm-card h2 {
+            margin: 0 0 8px;
+            font-size: 18px;
+        }
+
+        .confirm-card p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .confirm-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 120;
+            max-width: min(390px, 88vw);
+            padding: 13px 15px;
+            border-radius: 11px;
+            color: #FFFFFF;
+            background: #1E293B;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.22);
+            font-size: 13px;
+            line-height: 1.45;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(18px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1080px) {
+            :root {
+                --sidebar-width: 220px;
+            }
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .filters {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 780px) {
+            .app-shell {
+                display: block;
+            }
+
+            .sidebar {
+                width: min(86vw, 280px);
+                transform: translateX(-105%);
+                transition: transform 0.25s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .topbar {
+                height: 64px;
+                padding: 0 4vw;
+            }
+
+            .menu-toggle {
+                width: 38px;
+                height: 38px;
+                display: grid;
+                place-items: center;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                color: var(--text-secondary);
+                background: #FFFFFF;
+                cursor: pointer;
+            }
+
+            .mobile-brand {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: var(--primary-dark);
+                font-size: 17px;
+                font-weight: 850;
+            }
+
+            .mobile-brand .brand-mark {
+                width: 34px;
+                height: 34px;
+                border: none;
+                background: var(--primary);
+                font-size: 15px;
+            }
+
+            .global-search {
+                display: none;
+            }
+
+            .profile-name {
+                display: none;
+            }
+
+            .content {
+                width: min(94%, 1280px);
+                margin-top: 23px;
+            }
+
+            .page-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .filters {
+                flex-direction: column;
+            }
+
+            .search-box,
+            .search-input,
+            .select-filter {
+                width: 100%;
+            }
+
+            .modal-actions,
+            .confirm-actions {
+                flex-direction: column-reverse;
+            }
+
+            .modal-actions button,
+            .confirm-actions button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
+            <a class="brand" href="#">
+                <span class="brand-mark">✦</span>
+                <span>CareerPath</span>
+            </a>
+
+            <div class="admin-label">Panel Administrator</div>
+
+            <nav class="menu">
+                <a href="index.html"><span class="menu-icon">⌂</span>Dashboard</a>
+                <a class="active" href="alternatif-karir.html"><span class="menu-icon">◈</span>Alternatif Karir</a>
+                <a href="konfigurasi-rekomendasi.html"><span class="menu-icon">⚙</span>Konfigurasi Rekomendasi</a>
+                <a href="data-pasar-kerja.html"><span class="menu-icon">▤</span>Data Pasar Kerja</a>
+                <a href="mahasiswa.html"><span class="menu-icon">◉</span>Mahasiswa</a>
+                <a href="riwayat-rekomendasi.html"><span class="menu-icon">◷</span>Riwayat Rekomendasi</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="admin-card">
+                    <div class="admin-avatar">AD</div>
+                    <div>
+                        <strong>Administrator</strong>
+                        <span>admin@careerpath.id</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <section class="main">
+            <header class="topbar">
+                <button class="menu-toggle" type="button" onclick="toggleSidebar()" aria-label="Buka menu">☰</button>
+
+                <div class="mobile-brand">
+                    <span class="brand-mark">✦</span>
+                    <span>CareerPath</span>
+                </div>
+
+                <div class="global-search">
+                    <span class="search-icon">⌕</span>
+                    <input type="search" placeholder="Cari mahasiswa, karir, atau data pasar kerja..."
+                        onkeydown="handleGlobalSearch(event)">
+                </div>
+
+                <div class="top-actions">
+                    <button class="icon-button" type="button" onclick="showToast('Tidak ada notifikasi baru.')"
+                        aria-label="Notifikasi">♧</button>
+                    <button class="profile-button" type="button"
+                        onclick="showToast('Menu profil administrator akan dibuka.')">
+                        <span class="top-avatar">AD</span>
+                        <span class="profile-name">Administrator</span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="breadcrumbs">
+                    <a href="#">Dashboard</a>
+                    <span>›</span>
+                    <span>Alternatif Karir</span>
+                </div>
+
+                <section class="page-header">
+                    <div>
+                        <h1>Alternatif Karir</h1>
+                        <p>Kelola daftar alternatif karir bidang teknologi informasi yang digunakan dalam proses
+                            rekomendasi.</p>
+                    </div>
+                    <button class="button-primary" type="button" onclick="openCareerModal()">+ Tambah Alternatif
+                        Karir</button>
+                </section>
+
+                <section class="summary-grid">
+                    <article class="summary-card">
+                        <div class="summary-icon">◈</div>
+                        <h3>Total Alternatif</h3>
+                        <strong id="totalCareer">8</strong>
+                        <span>Alternatif karir yang terdaftar di sistem.</span>
+                    </article>
+                    <article class="summary-card">
+                        <div class="summary-icon">✓</div>
+                        <h3>Karir Aktif</h3>
+                        <strong id="activeCareer">7</strong>
+                        <span>Alternatif siap digunakan pada rekomendasi.</span>
+                    </article>
+                    <article class="summary-card">
+                        <div class="summary-icon">◷</div>
+                        <h3>Terakhir Diperbarui</h3>
+                        <strong>Hari ini</strong>
+                        <span>Data alternatif karir telah diperbarui.</span>
+                    </article>
+                </section>
+
+                <section class="table-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Daftar Alternatif Karir</h2>
+                            <p>Setiap karir dapat dikaitkan dengan tipe RIASEC pada halaman konfigurasi rekomendasi.</p>
+                        </div>
+
+                        <div class="filters">
+                            <div class="search-box">
+                                <span class="search-icon">⌕</span>
+                                <input class="search-input" id="careerSearch" type="search"
+                                    placeholder="Cari alternatif karir..." oninput="filterCareers()">
+                            </div>
+
+                            <select class="select-filter" id="statusFilter" onchange="filterCareers()">
+                                <option value="all">Semua Status</option>
+                                <option value="active">Aktif</option>
+                                <option value="inactive">Nonaktif</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Alternatif Karir</th>
+                                    <th>Deskripsi Singkat</th>
+                                    <th>Tipe RIASEC</th>
+                                    <th>Status</th>
+                                    <th>Terakhir Diperbarui</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="careerTableBody">
+                                <tr data-status="active" data-name="Software Engineer">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">⌘</div>
+                                            <div>
+                                                <strong>Software Engineer</strong>
+                                                <span>Pengembangan perangkat lunak</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="description">Merancang, membangun, menguji, dan memelihara aplikasi atau
+                                        sistem perangkat lunak.</td>
+                                    <td>
+                                        <div class="riasec-tags"><span class="riasec-tag">I</span><span
+                                                class="riasec-tag">R</span></div>
+                                    </td>
+                                    <td><span class="status active">Aktif</span></td>
+                                    <td>22 Juni 2026</td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="action-button" onclick="editCareer(this)">Ubah</button>
+                                            <button class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr data-status="active" data-name="Data Analyst">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">▤</div>
+                                            <div>
+                                                <strong>Data Analyst</strong>
+                                                <span>Analisis dan visualisasi data</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="description">Mengolah, menganalisis, dan menyajikan data sebagai dasar
+                                        pengambilan keputusan.</td>
+                                    <td>
+                                        <div class="riasec-tags"><span class="riasec-tag">I</span><span
+                                                class="riasec-tag">C</span></div>
+                                    </td>
+                                    <td><span class="status active">Aktif</span></td>
+                                    <td>22 Juni 2026</td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="action-button" onclick="editCareer(this)">Ubah</button>
+                                            <button class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr data-status="active" data-name="UI UX Designer">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">◌</div>
+                                            <div>
+                                                <strong>UI/UX Designer</strong>
+                                                <span>Desain produk digital</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="description">Merancang pengalaman pengguna dan antarmuka digital yang
+                                        mudah serta nyaman digunakan.</td>
+                                    <td>
+                                        <div class="riasec-tags"><span class="riasec-tag">A</span><span
+                                                class="riasec-tag">S</span></div>
+                                    </td>
+                                    <td><span class="status active">Aktif</span></td>
+                                    <td>21 Juni 2026</td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="action-button" onclick="editCareer(this)">Ubah</button>
+                                            <button class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr data-status="active" data-name="Cybersecurity Analyst">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">⌁</div>
+                                            <div>
+                                                <strong>Cybersecurity Analyst</strong>
+                                                <span>Keamanan informasi</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="description">Menganalisis risiko keamanan dan membantu melindungi sistem
+                                        serta data organisasi.</td>
+                                    <td>
+                                        <div class="riasec-tags"><span class="riasec-tag">I</span><span
+                                                class="riasec-tag">R</span></div>
+                                    </td>
+                                    <td><span class="status active">Aktif</span></td>
+                                    <td>20 Juni 2026</td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="action-button" onclick="editCareer(this)">Ubah</button>
+                                            <button class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr data-status="active" data-name="Business Analyst">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">◫</div>
+                                            <div>
+                                                <strong>Business Analyst</strong>
+                                                <span>Analisis kebutuhan bisnis</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="description">Menganalisis kebutuhan pengguna dan bisnis untuk mendukung
+                                        pengembangan solusi teknologi.</td>
+                                    <td>
+                                        <div class="riasec-tags"><span class="riasec-tag">I</span><span
+                                                class="riasec-tag">S</span><span class="riasec-tag">E</span></div>
+                                    </td>
+                                    <td><span class="status active">Aktif</span></td>
+                                    <td>19 Juni 2026</td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="action-button" onclick="editCareer(this)">Ubah</button>
+                                            <button class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr data-status="active" data-name="Quality Assurance Engineer">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">✓</div>
+                                            <div>
+                                                <strong>Quality Assurance Engineer</strong>
+                                                <span>Pengujian perangkat lunak</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="description">Memastikan kualitas aplikasi melalui pengujian, dokumentasi,
+                                        dan validasi kebutuhan sistem.</td>
+                                    <td>
+                                        <div class="riasec-tags"><span class="riasec-tag">C</span><span
+                                                class="riasec-tag">I</span></div>
+                                    </td>
+                                    <td><span class="status active">Aktif</span></td>
+                                    <td>18 Juni 2026</td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="action-button" onclick="editCareer(this)">Ubah</button>
+                                            <button class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr data-status="inactive" data-name="IT Project Manager">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">◆</div>
+                                            <div>
+                                                <strong>IT Project Manager</strong>
+                                                <span>Manajemen proyek teknologi</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="description">Merencanakan, mengoordinasikan, dan memantau pelaksanaan
+                                        proyek teknologi informasi.</td>
+                                    <td>
+                                        <div class="riasec-tags"><span class="riasec-tag">E</span><span
+                                                class="riasec-tag">S</span></div>
+                                    </td>
+                                    <td><span class="status inactive">Nonaktif</span></td>
+                                    <td>17 Juni 2026</td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="action-button" onclick="editCareer(this)">Ubah</button>
+                                            <button class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr data-status="active" data-name="System Administrator">
+                                    <td>
+                                        <div class="career-cell">
+                                            <div class="career-icon">◉</div>
+                                            <div>
+                                                <strong>System Administrator</strong>
+                                                <span>Administrasi sistem</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="description">Mengelola, memelihara, dan memastikan ketersediaan
+                                        infrastruktur serta sistem organisasi.</td>
+                                    <td>
+                                        <div class="riasec-tags"><span class="riasec-tag">R</span><span
+                                                class="riasec-tag">C</span></div>
+                                    </td>
+                                    <td><span class="status active">Aktif</span></td>
+                                    <td>16 Juni 2026</td>
+                                    <td>
+                                        <div class="row-actions">
+                                            <button class="action-button" onclick="editCareer(this)">Ubah</button>
+                                            <button class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr class="empty-row" id="emptyRow">
+                                    <td colspan="6">Alternatif karir tidak ditemukan.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-footer">
+                        <span>Menampilkan <strong id="visibleCount">8</strong> alternatif karir.</span>
+                        <span>Gunakan konfigurasi rekomendasi untuk mengatur detail pemetaan dan bobot.</span>
+                    </div>
+                </section>
+            </main>
+        </section>
+    </div>
+
+    <div class="modal-overlay" id="careerModal">
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah Alternatif Karir</h2>
+                <button class="close-button" type="button" onclick="closeCareerModal()" aria-label="Tutup">×</button>
+            </div>
+
+            <form class="modal-form" id="careerForm">
+                <input id="editIndex" type="hidden">
+
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="careerName">Nama alternatif karir</label>
+                        <input id="careerName" type="text" placeholder="Contoh: Cloud Engineer" required>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="careerStatus">Status</label>
+                        <select id="careerStatus" required>
+                            <option value="active">Aktif</option>
+                            <option value="inactive">Nonaktif</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="careerCategory">Kategori</label>
+                    <input id="careerCategory" type="text" placeholder="Contoh: Infrastruktur cloud" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="careerDescription">Deskripsi singkat</label>
+                    <textarea id="careerDescription" placeholder="Jelaskan peran utama dari alternatif karir ini."
+                        required></textarea>
+                </div>
+
+                <div class="form-field">
+                    <label>Tipe RIASEC terkait</label>
+                    <div class="riasec-inputs">
+                        <span class="riasec-input"><input id="R" type="checkbox" value="R"><label
+                                for="R">R</label></span>
+                        <span class="riasec-input"><input id="I" type="checkbox" value="I"><label
+                                for="I">I</label></span>
+                        <span class="riasec-input"><input id="A" type="checkbox" value="A"><label
+                                for="A">A</label></span>
+                        <span class="riasec-input"><input id="S" type="checkbox" value="S"><label
+                                for="S">S</label></span>
+                        <span class="riasec-input"><input id="E" type="checkbox" value="E"><label
+                                for="E">E</label></span>
+                        <span class="riasec-input"><input id="C" type="checkbox" value="C"><label
+                                for="C">C</label></span>
+                    </div>
+                </div>
+            </form>
+
+            <div class="modal-actions">
+                <button class="button-outline" type="button" onclick="closeCareerModal()">Batal</button>
+                <button class="button-primary" type="submit" form="careerForm">Simpan</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal-overlay" id="deleteModal">
+        <section class="confirm-card" role="dialog" aria-modal="true">
+            <div class="confirm-icon">!</div>
+            <h2>Hapus Alternatif Karir?</h2>
+            <p id="deleteText">Data yang dihapus tidak dapat dikembalikan.</p>
+            <div class="confirm-actions">
+                <button class="button-outline" type="button" onclick="closeDeleteModal()">Batal</button>
+                <button class="button-danger" type="button" onclick="deleteCareer()">Hapus Data</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const iconMap = {
+            "Software Engineer": "⌘",
+            "Data Analyst": "▤",
+            "UI/UX Designer": "◌",
+            "Cybersecurity Analyst": "⌁",
+            "Business Analyst": "◫",
+            "Quality Assurance Engineer": "✓",
+            "IT Project Manager": "◆",
+            "System Administrator": "◉",
+            "Cloud Engineer": "☁"
+        };
+
+        let toastTimer;
+        let deleteTarget = null;
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function handleGlobalSearch(event) {
+            if (event.key === "Enter") {
+                const query = event.target.value.trim();
+                showToast(query ? `Mencari data untuk: ${query}` : "Masukkan kata kunci pencarian terlebih dahulu.");
+            }
+        }
+
+        function getRows() {
+            return [...document.querySelectorAll("#careerTableBody tr[data-name]")];
+        }
+
+        function today() {
+            return new Intl.DateTimeFormat("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric"
+            }).format(new Date());
+        }
+
+        function updateSummary() {
+            const rows = getRows();
+            const activeRows = rows.filter(row => row.dataset.status === "active");
+            document.getElementById("totalCareer").textContent = rows.length;
+            document.getElementById("activeCareer").textContent = activeRows.length;
+        }
+
+        function filterCareers() {
+            const query = document.getElementById("careerSearch").value.trim().toLowerCase();
+            const status = document.getElementById("statusFilter").value;
+            const rows = getRows();
+            let shown = 0;
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const matchesQuery = text.includes(query);
+                const matchesStatus = status === "all" || row.dataset.status === status;
+                const visible = matchesQuery && matchesStatus;
+                row.style.display = visible ? "" : "none";
+                if (visible) shown += 1;
+            });
+
+            document.getElementById("visibleCount").textContent = shown;
+            document.getElementById("emptyRow").style.display = shown === 0 ? "" : "none";
+        }
+
+        function resetRiaSecInputs(selected = []) {
+            document.querySelectorAll(".riasec-input input").forEach(input => {
+                input.checked = selected.includes(input.value);
+            });
+        }
+
+        function openCareerModal() {
+            document.getElementById("modalTitle").textContent = "Tambah Alternatif Karir";
+            document.getElementById("careerForm").reset();
+            document.getElementById("editIndex").value = "";
+            resetRiaSecInputs();
+            document.getElementById("careerModal").classList.add("show");
+        }
+
+        function closeCareerModal() {
+            document.getElementById("careerModal").classList.remove("show");
+        }
+
+        function editCareer(button) {
+            const row = button.closest("tr");
+            const rows = getRows();
+            const index = rows.indexOf(row);
+            const name = row.dataset.name;
+            const category = row.querySelector(".career-cell span").textContent.trim();
+            const description = row.querySelector(".description").textContent.trim();
+            const status = row.dataset.status;
+            const riasec = [...row.querySelectorAll(".riasec-tag")].map(item => item.textContent.trim());
+
+            document.getElementById("modalTitle").textContent = "Ubah Alternatif Karir";
+            document.getElementById("editIndex").value = index;
+            document.getElementById("careerName").value = name;
+            document.getElementById("careerCategory").value = category;
+            document.getElementById("careerDescription").value = description;
+            document.getElementById("careerStatus").value = status;
+            resetRiaSecInputs(riasec);
+
+            document.getElementById("careerModal").classList.add("show");
+        }
+
+        function createRiaSecTags(types) {
+            return types.length
+                ? `<div class="riasec-tags">${types.map(type => `<span class="riasec-tag">${type}</span>`).join("")}</div>`
+                : `<span style="color:#94A3B8;font-size:11px">Belum diatur</span>`;
+        }
+
+        function statusMarkup(status) {
+            return status === "active"
+                ? `<span class="status active">Aktif</span>`
+                : `<span class="status inactive">Nonaktif</span>`;
+        }
+
+        function rowMarkup({ name, category, description, status, types }) {
+            const icon = iconMap[name] || "◈";
+            return `
+        <td>
+          <div class="career-cell">
+            <div class="career-icon">${icon}</div>
+            <div>
+              <strong>${name}</strong>
+              <span>${category}</span>
+            </div>
+          </div>
+        </td>
+        <td class="description">${description}</td>
+        <td>${createRiaSecTags(types)}</td>
+        <td>${statusMarkup(status)}</td>
+        <td>${today()}</td>
+        <td>
+          <div class="row-actions">
+            <button class="action-button" onclick="editCareer(this)">Ubah</button>
+            <button class="action-button delete" onclick="confirmDelete(this)">Hapus</button>
+          </div>
+        </td>
+      `;
+        }
+
+        document.getElementById("careerForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const name = document.getElementById("careerName").value.trim();
+            const category = document.getElementById("careerCategory").value.trim();
+            const description = document.getElementById("careerDescription").value.trim();
+            const status = document.getElementById("careerStatus").value;
+            const types = [...document.querySelectorAll(".riasec-input input:checked")].map(input => input.value);
+            const editIndex = document.getElementById("editIndex").value;
+            const rows = getRows();
+
+            if (!types.length) {
+                showToast("Pilih minimal satu tipe RIASEC terkait.");
+                return;
+            }
+
+            const duplicate = rows.find((row, index) =>
+                row.dataset.name.toLowerCase() === name.toLowerCase() &&
+                String(index) !== String(editIndex)
+            );
+
+            if (duplicate) {
+                showToast("Alternatif karir dengan nama tersebut sudah tersedia.");
+                return;
+            }
+
+            const data = { name, category, description, status, types };
+
+            if (editIndex !== "") {
+                const row = rows[Number(editIndex)];
+                row.dataset.name = name;
+                row.dataset.status = status;
+                row.innerHTML = rowMarkup(data);
+                showToast("Alternatif karir berhasil diperbarui.");
+            } else {
+                const row = document.createElement("tr");
+                row.dataset.name = name;
+                row.dataset.status = status;
+                row.innerHTML = rowMarkup(data);
+                document.getElementById("careerTableBody").insertBefore(row, document.getElementById("emptyRow"));
+                showToast("Alternatif karir berhasil ditambahkan.");
+            }
+
+            closeCareerModal();
+            updateSummary();
+            filterCareers();
+        });
+
+        function confirmDelete(button) {
+            deleteTarget = button.closest("tr");
+            const name = deleteTarget.dataset.name;
+            document.getElementById("deleteText").textContent = `Alternatif karir "${name}" akan dihapus dari sistem.`;
+            document.getElementById("deleteModal").classList.add("show");
+        }
+
+        function closeDeleteModal() {
+            deleteTarget = null;
+            document.getElementById("deleteModal").classList.remove("show");
+        }
+
+        function deleteCareer() {
+            if (!deleteTarget) return;
+            const name = deleteTarget.dataset.name;
+            deleteTarget.remove();
+            closeDeleteModal();
+            updateSummary();
+            filterCareers();
+            showToast(`Alternatif karir "${name}" berhasil dihapus.`);
+        }
+
+        document.querySelectorAll(".modal-overlay").forEach(overlay => {
+            overlay.addEventListener("click", function (event) {
+                if (event.target !== overlay) return;
+                if (overlay.id === "careerModal") closeCareerModal();
+                if (overlay.id === "deleteModal") closeDeleteModal();
+            });
+        });
+
+        updateSummary();
+    </script>
+</body>
+
+</html>

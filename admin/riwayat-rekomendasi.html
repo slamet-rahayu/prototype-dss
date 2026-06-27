@@ -1,0 +1,1998 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Riwayat Rekomendasi - Admin CareerPath</title>
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-light: #DBEAFE;
+            --background: #F8FAFC;
+            --surface: #FFFFFF;
+            --border: #E2E8F0;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --success: #22C55E;
+            --success-light: #F0FDF4;
+            --warning: #F59E0B;
+            --warning-light: #FFFBEB;
+            --danger: #EF4444;
+            --danger-light: #FEF2F2;
+            --shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+            --sidebar-width: 250px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text-primary);
+            background: var(--background);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        button,
+        input,
+        select {
+            font: inherit;
+        }
+
+        .app-shell {
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            inset: 0 auto 0 0;
+            z-index: 40;
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            color: #FFFFFF;
+            background: linear-gradient(180deg, var(--primary-dark) 0%, #2563EB 62%, var(--primary) 100%);
+            box-shadow: 8px 0 28px rgba(29, 78, 216, 0.16);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            margin: 0 8px 34px;
+            color: #FFFFFF;
+            font-size: 20px;
+            font-weight: 850;
+            letter-spacing: -0.45px;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.15);
+            font-size: 18px;
+        }
+
+        .admin-label {
+            margin: 0 10px 14px;
+            color: rgba(255, 255, 255, 0.65);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .menu {
+            display: grid;
+            gap: 5px;
+        }
+
+        .menu a {
+            min-height: 46px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 12px;
+            border-radius: 10px;
+            color: rgba(255, 255, 255, 0.84);
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+        }
+
+        .menu a:hover {
+            transform: translateX(2px);
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .menu a.active {
+            color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+        }
+
+        .menu-icon {
+            width: 22px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 14px 10px 3px;
+            border-top: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .admin-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-avatar {
+            width: 37px;
+            height: 37px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.18);
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .admin-card strong {
+            display: block;
+            margin-bottom: 2px;
+            color: #FFFFFF;
+            font-size: 13px;
+        }
+
+        .admin-card span {
+            color: rgba(255, 255, 255, 0.68);
+            font-size: 11px;
+        }
+
+        /* Main */
+        .main {
+            grid-column: 2;
+            min-width: 0;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 0 clamp(22px, 4vw, 52px);
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+        }
+
+        .menu-toggle,
+        .mobile-brand {
+            display: none;
+        }
+
+        .global-search {
+            position: relative;
+            width: min(410px, 44vw);
+        }
+
+        .global-search input {
+            width: 100%;
+            min-height: 41px;
+            padding: 10px 13px 10px 39px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            left: 13px;
+            color: #94A3B8;
+            font-style: normal;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon-button {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            background: #FFFFFF;
+            cursor: pointer;
+        }
+
+        .profile-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 5px 10px 5px 6px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .top-avatar {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        .content {
+            width: min(1280px, 94%);
+            margin: 32px auto 58px;
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary-dark);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .page-header {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: clamp(27px, 3vw, 35px);
+            letter-spacing: -1px;
+        }
+
+        .page-header p {
+            max-width: 780px;
+            margin: 8px 0 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .button-primary,
+        .button-outline,
+        .button-danger,
+        .action-button {
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 800;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .button-primary:hover,
+        .button-outline:hover,
+        .button-danger:hover,
+        .action-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .button-primary {
+            padding: 11px 15px;
+            color: #FFFFFF;
+            background: var(--primary);
+            box-shadow: 0 9px 18px rgba(59, 130, 246, 0.22);
+        }
+
+        .button-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .button-outline {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FFFFFF;
+        }
+
+        .button-danger {
+            padding: 10px 14px;
+            color: #FFFFFF;
+            background: var(--danger);
+        }
+
+        /* Summary */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 135px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            background: var(--surface);
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+        }
+
+        .summary-card::after {
+            content: "";
+            position: absolute;
+            width: 105px;
+            height: 105px;
+            right: -50px;
+            bottom: -58px;
+            border-radius: 50%;
+            background: var(--primary-light);
+        }
+
+        .summary-icon {
+            position: relative;
+            z-index: 1;
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 18px;
+        }
+
+        .summary-card h3 {
+            position: relative;
+            z-index: 1;
+            margin: 12px 0 4px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .summary-card strong {
+            position: relative;
+            z-index: 1;
+            display: block;
+            font-size: 26px;
+            letter-spacing: -0.8px;
+        }
+
+        .summary-card span {
+            position: relative;
+            z-index: 1;
+            display: block;
+            margin-top: 4px;
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        /* Table */
+        .history-card {
+            overflow: hidden;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 22px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 17px;
+            letter-spacing: -0.35px;
+        }
+
+        .card-header p {
+            margin: 6px 0 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .table-search {
+            width: 240px;
+            min-height: 40px;
+            padding: 10px 12px 10px 36px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .career-filter {
+            min-height: 40px;
+            padding: 9px 30px 9px 11px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1130px;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 13px 22px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FBFDFF;
+            font-size: 10px;
+            font-weight: 850;
+            letter-spacing: 0.06em;
+            text-align: left;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 15px 22px;
+            border-bottom: 1px solid #EDF2F7;
+            font-size: 12px;
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #FBFDFF;
+        }
+
+        .student-cell {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+        }
+
+        .student-avatar {
+            width: 36px;
+            height: 36px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        .student-cell strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .student-cell span {
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+
+        .riasec-code {
+            display: inline-flex;
+            gap: 3px;
+            align-items: center;
+            padding: 5px 8px;
+            border-radius: 999px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+            font-weight: 850;
+            letter-spacing: 0.04em;
+        }
+
+        .career-result {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .career-icon {
+            width: 33px;
+            height: 33px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            border-radius: 10px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 15px;
+            font-weight: 850;
+        }
+
+        .career-result strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 12px;
+        }
+
+        .career-result span {
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+
+        .score-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 8px;
+            border: 1px solid #D8EAFE;
+            border-radius: 8px;
+            color: var(--primary-dark);
+            background: #F8FBFF;
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .criteria-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            max-width: 190px;
+        }
+
+        .criterion-pill {
+            padding: 4px 6px;
+            border-radius: 7px;
+            color: #334155;
+            background: #F1F5F9;
+            font-size: 10px;
+            font-weight: 750;
+        }
+
+        .status {
+            display: inline-flex;
+            padding: 5px 8px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: 850;
+            white-space: nowrap;
+        }
+
+        .status.valid {
+            color: #166534;
+            background: var(--success-light);
+        }
+
+        .status.review {
+            color: #92400E;
+            background: var(--warning-light);
+        }
+
+        .action-row {
+            display: flex;
+            gap: 7px;
+        }
+
+        .action-button {
+            padding: 7px 9px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 11px;
+        }
+
+        .action-button.delete {
+            color: #B91C1C;
+            background: var(--danger-light);
+        }
+
+        .empty-row {
+            display: none;
+        }
+
+        .empty-row td {
+            padding: 38px 22px;
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .table-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 14px 22px;
+            border-top: 1px solid #EDF2F7;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .table-footer strong {
+            color: var(--text-primary);
+        }
+
+        /* Insight cards */
+        .insight-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .top-career-card .card-header {
+            padding-bottom: 15px;
+        }
+
+        .career-ranking {
+            display: grid;
+            gap: 0;
+            padding: 7px 22px 16px;
+        }
+
+        .ranking-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 0;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .ranking-row:last-child {
+            border-bottom: none;
+        }
+
+        .rank-number {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 9px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .ranking-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .ranking-info strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .ranking-info span {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .ranking-value {
+            color: var(--primary-dark);
+            font-size: 13px;
+            font-weight: 850;
+        }
+
+        .quality-card {
+            padding: 22px;
+        }
+
+        .quality-card h2 {
+            margin: 0;
+            font-size: 17px;
+            letter-spacing: -0.35px;
+        }
+
+        .quality-card>p {
+            margin: 6px 0 18px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .quality-list {
+            display: grid;
+            gap: 13px;
+        }
+
+        .quality-row {
+            display: grid;
+            grid-template-columns: 1fr 104px 37px;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quality-row span {
+            color: var(--text-primary);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .quality-track {
+            height: 8px;
+            overflow: hidden;
+            border-radius: 999px;
+            background: #EAF0F8;
+        }
+
+        .quality-fill {
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+        }
+
+        .quality-row strong {
+            color: var(--primary-dark);
+            font-size: 11px;
+            text-align: right;
+        }
+
+        /* Modal Detail */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            place-items: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show {
+            display: grid;
+        }
+
+        .modal {
+            width: min(100%, 760px);
+            max-height: calc(100vh - 40px);
+            overflow: auto;
+            border-radius: 18px;
+            background: #FFFFFF;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+            animation: pop 0.22s ease-out;
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+            background: #FFFFFF;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .close-button {
+            width: 32px;
+            height: 32px;
+            display: grid;
+            place-items: center;
+            border: none;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            background: #F1F5F9;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .detail-hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 22px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .student-summary {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .profile-avatar {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 14px;
+            font-weight: 850;
+        }
+
+        .student-summary h3 {
+            margin: 0 0 4px;
+            font-size: 16px;
+        }
+
+        .student-summary p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .detail-score {
+            min-width: 88px;
+            padding: 10px;
+            border: 1px solid #BFDBFE;
+            border-radius: 12px;
+            color: var(--primary-dark);
+            background: #F8FBFF;
+            text-align: center;
+        }
+
+        .detail-score strong {
+            display: block;
+            font-size: 21px;
+        }
+
+        .detail-score span {
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 22px;
+        }
+
+        .detail-card {
+            padding: 14px;
+            border: 1px solid #E6EEF7;
+            border-radius: 12px;
+            background: #FFFFFF;
+        }
+
+        .detail-card h4 {
+            margin: 0 0 8px;
+            color: var(--text-secondary);
+            font-size: 10px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .detail-card strong {
+            display: block;
+            color: var(--text-primary);
+            font-size: 14px;
+            line-height: 1.35;
+        }
+
+        .detail-card span {
+            display: block;
+            margin-top: 4px;
+            color: var(--text-secondary);
+            font-size: 10px;
+            line-height: 1.4;
+        }
+
+        .calculation-section {
+            padding: 0 22px 22px;
+        }
+
+        .calculation-section h3 {
+            margin: 0 0 12px;
+            font-size: 15px;
+        }
+
+        .score-table {
+            width: 100%;
+            min-width: 0;
+            border: 1px solid #E6EEF7;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .score-table th,
+        .score-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #EDF2F7;
+            text-align: left;
+        }
+
+        .score-table th {
+            color: var(--text-secondary);
+            background: #FBFDFF;
+            font-size: 10px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .score-table td {
+            font-size: 12px;
+        }
+
+        .score-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .result-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 13px;
+            margin-top: 14px;
+            padding: 14px;
+            border: 1px solid #BFDBFE;
+            border-radius: 13px;
+            background: #F8FBFF;
+        }
+
+        .result-banner strong {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--primary-dark);
+            font-size: 14px;
+        }
+
+        .result-banner span {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 0 22px 22px;
+        }
+
+        .confirm-card {
+            width: min(100%, 420px);
+            padding: 24px;
+            border-radius: 18px;
+            background: #FFFFFF;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+            text-align: center;
+        }
+
+        .confirm-icon {
+            width: 48px;
+            height: 48px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 14px;
+            border-radius: 14px;
+            color: #B91C1C;
+            background: var(--danger-light);
+            font-size: 21px;
+        }
+
+        .confirm-card h2 {
+            margin: 0 0 8px;
+            font-size: 18px;
+        }
+
+        .confirm-card p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .confirm-actions {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 120;
+            max-width: min(390px, 88vw);
+            padding: 13px 15px;
+            border-radius: 11px;
+            color: #FFFFFF;
+            background: #1E293B;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.22);
+            font-size: 13px;
+            line-height: 1.45;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(18px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 1080px) {
+            :root {
+                --sidebar-width: 220px;
+            }
+
+            .sidebar {
+                width: 220px;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .insight-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        @media (max-width: 780px) {
+            .app-shell {
+                display: block;
+            }
+
+            .sidebar {
+                width: min(86vw, 280px);
+                transform: translateX(-105%);
+                transition: transform 0.25s ease;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .topbar {
+                height: 64px;
+                padding: 0 4vw;
+            }
+
+            .menu-toggle {
+                width: 38px;
+                height: 38px;
+                display: grid;
+                place-items: center;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                color: var(--text-secondary);
+                background: #FFFFFF;
+                cursor: pointer;
+            }
+
+            .mobile-brand {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                color: var(--primary-dark);
+                font-size: 17px;
+                font-weight: 850;
+            }
+
+            .mobile-brand .brand-mark {
+                width: 34px;
+                height: 34px;
+                border: none;
+                background: var(--primary);
+                font-size: 15px;
+            }
+
+            .global-search {
+                display: none;
+            }
+
+            .profile-name {
+                display: none;
+            }
+
+            .content {
+                width: min(94%, 1280px);
+                margin-top: 23px;
+            }
+
+            .page-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-row {
+                flex-direction: column;
+            }
+
+            .search-box,
+            .table-search,
+            .career-filter {
+                width: 100%;
+            }
+
+            .modal-actions,
+            .confirm-actions {
+                flex-direction: column-reverse;
+            }
+
+            .modal-actions button,
+            .confirm-actions button {
+                width: 100%;
+            }
+
+            .detail-hero {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-shell">
+        <aside class="sidebar" id="sidebar">
+            <a class="brand" href="#">
+                <span class="brand-mark">✦</span>
+                <span>CareerPath</span>
+            </a>
+
+            <div class="admin-label">Panel Administrator</div>
+
+            <nav class="menu">
+                <a href="#" onclick="showToast('Halaman Dashboard akan dibuka.')"><span
+                        class="menu-icon">⌂</span>Dashboard</a>
+                <a href="#" onclick="showToast('Halaman Alternatif Karir akan dibuka.')"><span
+                        class="menu-icon">◈</span>Alternatif Karir</a>
+                <a href="#" onclick="showToast('Halaman Konfigurasi Rekomendasi akan dibuka.')"><span
+                        class="menu-icon">⚙</span>Konfigurasi Rekomendasi</a>
+                <a href="#" onclick="showToast('Halaman Data Pasar Kerja akan dibuka.')"><span
+                        class="menu-icon">▤</span>Data Pasar Kerja</a>
+                <a href="#" onclick="showToast('Halaman Data Mahasiswa akan dibuka.')"><span
+                        class="menu-icon">◉</span>Mahasiswa</a>
+                <a class="active" href="#"><span class="menu-icon">◷</span>Riwayat Rekomendasi</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="admin-card">
+                    <div class="admin-avatar">AD</div>
+                    <div>
+                        <strong>Administrator</strong>
+                        <span>admin@careerpath.id</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <section class="main">
+            <header class="topbar">
+                <button class="menu-toggle" type="button" onclick="toggleSidebar()" aria-label="Buka menu">☰</button>
+
+                <div class="mobile-brand">
+                    <span class="brand-mark">✦</span>
+                    <span>CareerPath</span>
+                </div>
+
+                <div class="global-search">
+                    <span class="search-icon">⌕</span>
+                    <input type="search" placeholder="Cari mahasiswa, karir, atau data pasar kerja..."
+                        onkeydown="handleGlobalSearch(event)">
+                </div>
+
+                <div class="top-actions">
+                    <button class="icon-button" type="button" onclick="showToast('Tidak ada notifikasi baru.')"
+                        aria-label="Notifikasi">♧</button>
+                    <button class="profile-button" type="button"
+                        onclick="showToast('Menu profil administrator akan dibuka.')">
+                        <span class="top-avatar">AD</span>
+                        <span class="profile-name">Administrator</span>
+                    </button>
+                </div>
+            </header>
+
+            <main class="content">
+                <div class="breadcrumbs">
+                    <a href="#">Dashboard</a>
+                    <span>›</span>
+                    <span>Riwayat Rekomendasi</span>
+                </div>
+
+                <section class="page-header">
+                    <div>
+                        <h1>Riwayat Rekomendasi</h1>
+                        <p>Pantau hasil perhitungan metode SAW yang telah dibuat oleh mahasiswa, termasuk alternatif
+                            karir utama, nilai preferensi, nilai setiap kriteria, dan waktu rekomendasi dihasilkan.</p>
+                    </div>
+                    <button class="button-primary" type="button"
+                        onclick="showToast('Laporan riwayat rekomendasi sedang disiapkan.')">⇩ Ekspor Laporan</button>
+                </section>
+
+                <section class="summary-grid">
+                    <article class="summary-card">
+                        <div class="summary-icon">◷</div>
+                        <h3>Total Rekomendasi</h3>
+                        <strong id="totalHistory">89</strong>
+                        <span>Rekomendasi karir yang pernah dihasilkan sistem.</span>
+                    </article>
+                    <article class="summary-card">
+                        <div class="summary-icon">◉</div>
+                        <h3>Mahasiswa Terlibat</h3>
+                        <strong id="uniqueStudents">82</strong>
+                        <span>Mahasiswa dengan minimal satu riwayat rekomendasi.</span>
+                    </article>
+                    <article class="summary-card">
+                        <div class="summary-icon">⌘</div>
+                        <h3>Karir Teratas</h3>
+                        <strong>Software Engineer</strong>
+                        <span>Paling sering menjadi ranking pertama.</span>
+                    </article>
+                    <article class="summary-card">
+                        <div class="summary-icon">✓</div>
+                        <h3>Rata-rata Preferensi</h3>
+                        <strong id="averageScore">0,87</strong>
+                        <span>Nilai preferensi rekomendasi yang ditampilkan.</span>
+                    </article>
+                </section>
+
+                <section class="history-card">
+                    <div class="card-header">
+                        <div>
+                            <h2>Daftar Riwayat Rekomendasi</h2>
+                            <p>Gunakan filter untuk melihat hasil rekomendasi berdasarkan mahasiswa atau alternatif
+                                karir utama.</p>
+                        </div>
+
+                        <div class="filter-row">
+                            <div class="search-box">
+                                <span class="search-icon">⌕</span>
+                                <input class="table-search" id="historySearch" type="search"
+                                    placeholder="Cari mahasiswa atau karir..." oninput="filterHistory()">
+                            </div>
+                            <select class="career-filter" id="careerFilter" onchange="filterHistory()">
+                                <option value="all">Semua Karir</option>
+                                <option value="Software Engineer">Software Engineer</option>
+                                <option value="Data Analyst">Data Analyst</option>
+                                <option value="UI/UX Designer">UI/UX Designer</option>
+                                <option value="Cybersecurity Analyst">Cybersecurity Analyst</option>
+                                <option value="Business Analyst">Business Analyst</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Mahasiswa</th>
+                                    <th>Hasil RIASEC</th>
+                                    <th>Rekomendasi Utama</th>
+                                    <th>Nilai Preferensi</th>
+                                    <th>Nilai Kriteria</th>
+                                    <th>Tanggal Rekomendasi</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody">
+                                <tr data-name="Mame Riyadi" data-career="Software Engineer" data-score="0.91"
+                                    data-status="valid">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar">MR</div>
+                                            <div>
+                                                <strong>Mame Riyadi</strong>
+                                                <span>Teknologi Informasi</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="riasec-code">I R C</span></td>
+                                    <td>
+                                        <div class="career-result">
+                                            <div class="career-icon">⌘</div>
+                                            <div>
+                                                <strong>Software Engineer</strong>
+                                                <span>Ranking 1 dari 8 alternatif</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="score-box">0,91</span></td>
+                                    <td>
+                                        <div class="criteria-list">
+                                            <span class="criterion-pill">C1: 0,95</span>
+                                            <span class="criterion-pill">C2: 0,88</span>
+                                            <span class="criterion-pill">C3: 0,90</span>
+                                        </div>
+                                    </td>
+                                    <td>22 Juni 2026<br><span style="color:#64748B;font-size:10px">09.18 WIB</span></td>
+                                    <td><span class="status valid">Valid</span></td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="openDetailModal(this)">Detail</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Andi Saputra" data-career="Cybersecurity Analyst" data-score="0.89"
+                                    data-status="valid">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar">AS</div>
+                                            <div>
+                                                <strong>Andi Saputra</strong>
+                                                <span>Teknik Informatika</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="riasec-code">R I E</span></td>
+                                    <td>
+                                        <div class="career-result">
+                                            <div class="career-icon">⌁</div>
+                                            <div>
+                                                <strong>Cybersecurity Analyst</strong>
+                                                <span>Ranking 1 dari 8 alternatif</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="score-box">0,89</span></td>
+                                    <td>
+                                        <div class="criteria-list">
+                                            <span class="criterion-pill">C1: 0,92</span>
+                                            <span class="criterion-pill">C2: 0,87</span>
+                                            <span class="criterion-pill">C3: 0,86</span>
+                                        </div>
+                                    </td>
+                                    <td>21 Juni 2026<br><span style="color:#64748B;font-size:10px">15.42 WIB</span></td>
+                                    <td><span class="status valid">Valid</span></td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="openDetailModal(this)">Detail</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Rizky Firmansyah" data-career="Data Analyst" data-score="0.88"
+                                    data-status="valid">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar">RF</div>
+                                            <div>
+                                                <strong>Rizky Firmansyah</strong>
+                                                <span>Ilmu Komputer</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="riasec-code">I C R</span></td>
+                                    <td>
+                                        <div class="career-result">
+                                            <div class="career-icon">▤</div>
+                                            <div>
+                                                <strong>Data Analyst</strong>
+                                                <span>Ranking 1 dari 8 alternatif</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="score-box">0,88</span></td>
+                                    <td>
+                                        <div class="criteria-list">
+                                            <span class="criterion-pill">C1: 0,91</span>
+                                            <span class="criterion-pill">C2: 0,85</span>
+                                            <span class="criterion-pill">C3: 0,88</span>
+                                        </div>
+                                    </td>
+                                    <td>20 Juni 2026<br><span style="color:#64748B;font-size:10px">10.06 WIB</span></td>
+                                    <td><span class="status valid">Valid</span></td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="openDetailModal(this)">Detail</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Siti Nurfadilah" data-career="UI/UX Designer" data-score="0.86"
+                                    data-status="valid">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar">SN</div>
+                                            <div>
+                                                <strong>Siti Nurfadilah</strong>
+                                                <span>Teknologi Informasi</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="riasec-code">A S I</span></td>
+                                    <td>
+                                        <div class="career-result">
+                                            <div class="career-icon">◌</div>
+                                            <div>
+                                                <strong>UI/UX Designer</strong>
+                                                <span>Ranking 1 dari 8 alternatif</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="score-box">0,86</span></td>
+                                    <td>
+                                        <div class="criteria-list">
+                                            <span class="criterion-pill">C1: 0,94</span>
+                                            <span class="criterion-pill">C2: 0,80</span>
+                                            <span class="criterion-pill">C3: 0,82</span>
+                                        </div>
+                                    </td>
+                                    <td>18 Juni 2026<br><span style="color:#64748B;font-size:10px">14.26 WIB</span></td>
+                                    <td><span class="status valid">Valid</span></td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="openDetailModal(this)">Detail</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Nadia Aulia" data-career="Business Analyst" data-score="0.83"
+                                    data-status="review">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar">NA</div>
+                                            <div>
+                                                <strong>Nadia Aulia</strong>
+                                                <span>Sistem Informasi</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="riasec-code">A S E</span></td>
+                                    <td>
+                                        <div class="career-result">
+                                            <div class="career-icon">◫</div>
+                                            <div>
+                                                <strong>Business Analyst</strong>
+                                                <span>Ranking 1 dari 8 alternatif</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="score-box">0,83</span></td>
+                                    <td>
+                                        <div class="criteria-list">
+                                            <span class="criterion-pill">C1: 0,90</span>
+                                            <span class="criterion-pill">C2: 0,74</span>
+                                            <span class="criterion-pill">C3: 0,86</span>
+                                        </div>
+                                    </td>
+                                    <td>17 Juni 2026<br><span style="color:#64748B;font-size:10px">11.15 WIB</span></td>
+                                    <td><span class="status review">Perlu Tinjau</span></td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="openDetailModal(this)">Detail</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr data-name="Farhan Maulana" data-career="Software Engineer" data-score="0.85"
+                                    data-status="valid">
+                                    <td>
+                                        <div class="student-cell">
+                                            <div class="student-avatar">FM</div>
+                                            <div>
+                                                <strong>Farhan Maulana</strong>
+                                                <span>Teknik Informatika</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="riasec-code">I R C</span></td>
+                                    <td>
+                                        <div class="career-result">
+                                            <div class="career-icon">⌘</div>
+                                            <div>
+                                                <strong>Software Engineer</strong>
+                                                <span>Ranking 1 dari 8 alternatif</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="score-box">0,85</span></td>
+                                    <td>
+                                        <div class="criteria-list">
+                                            <span class="criterion-pill">C1: 0,89</span>
+                                            <span class="criterion-pill">C2: 0,84</span>
+                                            <span class="criterion-pill">C3: 0,80</span>
+                                        </div>
+                                    </td>
+                                    <td>16 Juni 2026<br><span style="color:#64748B;font-size:10px">08.42 WIB</span></td>
+                                    <td><span class="status valid">Valid</span></td>
+                                    <td>
+                                        <div class="action-row"><button class="action-button"
+                                                onclick="openDetailModal(this)">Detail</button><button
+                                                class="action-button delete"
+                                                onclick="confirmDelete(this)">Hapus</button></div>
+                                    </td>
+                                </tr>
+
+                                <tr class="empty-row" id="emptyRow">
+                                    <td colspan="8">Riwayat rekomendasi tidak ditemukan.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="table-footer">
+                        <span>Menampilkan <strong id="visibleCount">6</strong> riwayat rekomendasi.</span>
+                        <span>Riwayat digunakan untuk monitoring, bukan untuk mengubah nilai mahasiswa.</span>
+                    </div>
+                </section>
+
+                <section class="insight-grid">
+                    <article class="card top-career-card">
+                        <div class="card-header">
+                            <div>
+                                <h2>Karir Paling Sering Direkomendasikan</h2>
+                                <p>Alternatif karir yang paling banyak menjadi ranking pertama.</p>
+                            </div>
+                            <button class="button-outline" type="button"
+                                onclick="showToast('Laporan statistik karir akan dibuka.')">Lihat Laporan</button>
+                        </div>
+
+                        <div class="career-ranking">
+                            <div class="ranking-row">
+                                <span class="rank-number">1</span>
+                                <div class="ranking-info">
+                                    <strong>Software Engineer</strong>
+                                    <span>Muncul pada 31 hasil rekomendasi</span>
+                                </div>
+                                <span class="ranking-value">31</span>
+                            </div>
+                            <div class="ranking-row">
+                                <span class="rank-number">2</span>
+                                <div class="ranking-info">
+                                    <strong>Data Analyst</strong>
+                                    <span>Muncul pada 24 hasil rekomendasi</span>
+                                </div>
+                                <span class="ranking-value">24</span>
+                            </div>
+                            <div class="ranking-row">
+                                <span class="rank-number">3</span>
+                                <div class="ranking-info">
+                                    <strong>UI/UX Designer</strong>
+                                    <span>Muncul pada 17 hasil rekomendasi</span>
+                                </div>
+                                <span class="ranking-value">17</span>
+                            </div>
+                            <div class="ranking-row">
+                                <span class="rank-number">4</span>
+                                <div class="ranking-info">
+                                    <strong>Cybersecurity Analyst</strong>
+                                    <span>Muncul pada 12 hasil rekomendasi</span>
+                                </div>
+                                <span class="ranking-value">12</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <aside class="card quality-card">
+                        <h2>Kualitas Data Rekomendasi</h2>
+                        <p>Ringkasan kelengkapan data yang mendukung proses perhitungan rekomendasi.</p>
+
+                        <div class="quality-list">
+                            <div class="quality-row">
+                                <span>Hasil RIASEC</span>
+                                <div class="quality-track">
+                                    <div class="quality-fill" style="width:100%"></div>
+                                </div>
+                                <strong>100%</strong>
+                            </div>
+                            <div class="quality-row">
+                                <span>Data Akademik</span>
+                                <div class="quality-track">
+                                    <div class="quality-fill" style="width:95%"></div>
+                                </div>
+                                <strong>95%</strong>
+                            </div>
+                            <div class="quality-row">
+                                <span>Data Pasar Kerja</span>
+                                <div class="quality-track">
+                                    <div class="quality-fill" style="width:100%"></div>
+                                </div>
+                                <strong>100%</strong>
+                            </div>
+                            <div class="quality-row">
+                                <span>Hasil Valid</span>
+                                <div class="quality-track">
+                                    <div class="quality-fill" style="width:94%"></div>
+                                </div>
+                                <strong>94%</strong>
+                            </div>
+                        </div>
+                    </aside>
+                </section>
+            </main>
+        </section>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal-overlay" id="detailModal">
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+            <div class="modal-header">
+                <h2 id="detailTitle">Detail Hasil Rekomendasi</h2>
+                <button class="close-button" type="button" onclick="closeDetailModal()" aria-label="Tutup">×</button>
+            </div>
+
+            <div class="detail-hero">
+                <div class="student-summary">
+                    <div class="profile-avatar" id="detailAvatar">MR</div>
+                    <div>
+                        <h3 id="detailStudentName">Mame Riyadi</h3>
+                        <p id="detailStudentProgram">Teknologi Informasi · RIASEC I R C</p>
+                    </div>
+                </div>
+                <div class="detail-score">
+                    <strong id="detailPreference">0,91</strong>
+                    <span>Nilai Preferensi</span>
+                </div>
+            </div>
+
+            <div class="detail-grid">
+                <article class="detail-card">
+                    <h4>Rekomendasi Utama</h4>
+                    <strong id="detailCareer">Software Engineer</strong>
+                    <span>Alternatif dengan ranking tertinggi</span>
+                </article>
+                <article class="detail-card">
+                    <h4>Tanggal Rekomendasi</h4>
+                    <strong id="detailDate">22 Juni 2026</strong>
+                    <span id="detailTime">09.18 WIB</span>
+                </article>
+                <article class="detail-card">
+                    <h4>Status Hasil</h4>
+                    <strong id="detailStatus">Valid</strong>
+                    <span>Data memenuhi kriteria proses rekomendasi</span>
+                </article>
+            </div>
+
+            <div class="calculation-section">
+                <h3>Rincian Nilai Kriteria SAW</h3>
+                <table class="score-table">
+                    <thead>
+                        <tr>
+                            <th>Kriteria</th>
+                            <th>Nilai Awal</th>
+                            <th>Nilai Normalisasi</th>
+                            <th>Bobot</th>
+                            <th>Nilai Terbobot</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>C1 · Minat Karir</td>
+                            <td id="detailC1Raw">0,95</td>
+                            <td id="detailC1Norm">1,00</td>
+                            <td>40%</td>
+                            <td id="detailC1Weight">0,40</td>
+                        </tr>
+                        <tr>
+                            <td>C2 · Kemampuan Akademik</td>
+                            <td id="detailC2Raw">0,88</td>
+                            <td id="detailC2Norm">0,95</td>
+                            <td>35%</td>
+                            <td id="detailC2Weight">0,33</td>
+                        </tr>
+                        <tr>
+                            <td>C3 · Kebutuhan Pasar Kerja</td>
+                            <td id="detailC3Raw">0,90</td>
+                            <td id="detailC3Norm">0,92</td>
+                            <td>25%</td>
+                            <td id="detailC3Weight">0,23</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="result-banner">
+                    <div>
+                        <strong id="detailBannerCareer">Software Engineer</strong>
+                        <span>Ditampilkan sebagai rekomendasi utama berdasarkan nilai preferensi tertinggi.</span>
+                    </div>
+                    <span class="score-box" id="detailBannerScore">0,91</span>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="button-outline" type="button" onclick="closeDetailModal()">Tutup</button>
+                <button class="button-primary" type="button" onclick="showToast('Data rekomendasi siap diekspor.')">⇩
+                    Ekspor Detail</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div class="modal-overlay" id="deleteModal">
+        <section class="confirm-card" role="dialog" aria-modal="true">
+            <div class="confirm-icon">!</div>
+            <h2>Hapus Riwayat Rekomendasi?</h2>
+            <p id="deleteText">Riwayat yang dihapus tidak dapat dikembalikan.</p>
+            <div class="confirm-actions">
+                <button class="button-outline" type="button" onclick="closeDeleteModal()">Batal</button>
+                <button class="button-danger" type="button" onclick="deleteHistory()">Hapus Riwayat</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let toastTimer;
+        let deleteTarget = null;
+
+        const careerIcons = {
+            "Software Engineer": "⌘",
+            "Data Analyst": "▤",
+            "UI/UX Designer": "◌",
+            "Cybersecurity Analyst": "⌁",
+            "Business Analyst": "◫"
+        };
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+        }
+
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function handleGlobalSearch(event) {
+            if (event.key === "Enter") {
+                const query = event.target.value.trim();
+                showToast(query ? `Mencari data untuk: ${query}` : "Masukkan kata kunci pencarian terlebih dahulu.");
+            }
+        }
+
+        function getRows() {
+            return [...document.querySelectorAll("#historyTableBody tr[data-name]")];
+        }
+
+        function filterHistory() {
+            const query = document.getElementById("historySearch").value.trim().toLowerCase();
+            const career = document.getElementById("careerFilter").value;
+            const rows = getRows();
+            let shown = 0;
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                const matchesQuery = text.includes(query);
+                const matchesCareer = career === "all" || row.dataset.career === career;
+                const visible = matchesQuery && matchesCareer;
+
+                row.style.display = visible ? "" : "none";
+                if (visible) shown += 1;
+            });
+
+            document.getElementById("visibleCount").textContent = shown;
+            document.getElementById("emptyRow").style.display = shown === 0 ? "" : "none";
+        }
+
+        function updateSummary() {
+            const rows = getRows();
+            const students = new Set(rows.map(row => row.dataset.name)).size;
+            const average = rows.length
+                ? rows.reduce((sum, row) => sum + Number(row.dataset.score || 0), 0) / rows.length
+                : 0;
+
+            document.getElementById("totalHistory").textContent = Math.max(89, rows.length);
+            document.getElementById("uniqueStudents").textContent = Math.max(82, students);
+            document.getElementById("averageScore").textContent = average
+                ? average.toFixed(2).replace(".", ",")
+                : "0,00";
+        }
+
+        function extractDetailData(row) {
+            const student = row.querySelector(".student-cell");
+            const name = student.querySelector("strong").textContent.trim();
+            const program = student.querySelector("span").textContent.trim();
+            const avatar = row.querySelector(".student-avatar").textContent.trim();
+            const riasec = row.children[1].textContent.trim();
+            const career = row.dataset.career;
+            const score = row.dataset.score.replace(".", ",");
+            const criteria = [...row.querySelectorAll(".criterion-pill")].map(item => item.textContent.trim());
+            const dateCell = row.children[5].innerText.trim().split("\n");
+            const status = row.children[6].textContent.trim();
+
+            return {
+                name,
+                program,
+                avatar,
+                riasec,
+                career,
+                score,
+                c1: criteria[0]?.split(": ")[1] || "0,00",
+                c2: criteria[1]?.split(": ")[1] || "0,00",
+                c3: criteria[2]?.split(": ")[1] || "0,00",
+                date: dateCell[0] || "-",
+                time: dateCell[1] || "-",
+                status
+            };
+        }
+
+        function openDetailModal(button) {
+            const row = button.closest("tr");
+            const data = extractDetailData(row);
+
+            document.getElementById("detailAvatar").textContent = data.avatar;
+            document.getElementById("detailStudentName").textContent = data.name;
+            document.getElementById("detailStudentProgram").textContent = `${data.program} · RIASEC ${data.riasec}`;
+            document.getElementById("detailPreference").textContent = data.score;
+            document.getElementById("detailCareer").textContent = data.career;
+            document.getElementById("detailDate").textContent = data.date;
+            document.getElementById("detailTime").textContent = data.time;
+            document.getElementById("detailStatus").textContent = data.status;
+            document.getElementById("detailC1Raw").textContent = data.c1;
+            document.getElementById("detailC2Raw").textContent = data.c2;
+            document.getElementById("detailC3Raw").textContent = data.c3;
+            document.getElementById("detailBannerCareer").textContent = data.career;
+            document.getElementById("detailBannerScore").textContent = data.score;
+
+            const c1 = Number(data.c1.replace(",", "."));
+            const c2 = Number(data.c2.replace(",", "."));
+            const c3 = Number(data.c3.replace(",", "."));
+
+            document.getElementById("detailC1Norm").textContent = Math.min(1, c1 / 0.95).toFixed(2).replace(".", ",");
+            document.getElementById("detailC2Norm").textContent = Math.min(1, c2 / 0.92).toFixed(2).replace(".", ",");
+            document.getElementById("detailC3Norm").textContent = Math.min(1, c3 / 0.90).toFixed(2).replace(".", ",");
+
+            document.getElementById("detailC1Weight").textContent = (Math.min(1, c1 / 0.95) * 0.4).toFixed(2).replace(".", ",");
+            document.getElementById("detailC2Weight").textContent = (Math.min(1, c2 / 0.92) * 0.35).toFixed(2).replace(".", ",");
+            document.getElementById("detailC3Weight").textContent = (Math.min(1, c3 / 0.90) * 0.25).toFixed(2).replace(".", ",");
+
+            document.getElementById("detailModal").classList.add("show");
+        }
+
+        function closeDetailModal() {
+            document.getElementById("detailModal").classList.remove("show");
+        }
+
+        function confirmDelete(button) {
+            deleteTarget = button.closest("tr");
+            const name = deleteTarget.dataset.name;
+            const career = deleteTarget.dataset.career;
+            document.getElementById("deleteText").textContent = `Riwayat rekomendasi ${name} dengan hasil ${career} akan dihapus.`;
+            document.getElementById("deleteModal").classList.add("show");
+        }
+
+        function closeDeleteModal() {
+            deleteTarget = null;
+            document.getElementById("deleteModal").classList.remove("show");
+        }
+
+        function deleteHistory() {
+            if (!deleteTarget) return;
+            const name = deleteTarget.dataset.name;
+            deleteTarget.remove();
+            closeDeleteModal();
+            updateSummary();
+            filterHistory();
+            showToast(`Riwayat rekomendasi ${name} berhasil dihapus.`);
+        }
+
+        document.querySelectorAll(".modal-overlay").forEach(overlay => {
+            overlay.addEventListener("click", function (event) {
+                if (event.target !== overlay) return;
+                if (overlay.id === "detailModal") closeDetailModal();
+                if (overlay.id === "deleteModal") closeDeleteModal();
+            });
+        });
+
+        updateSummary();
+    </script>
+</body>
+
+</html>

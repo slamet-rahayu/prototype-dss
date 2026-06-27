@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Akademik - CareerPath</title>
+    <style>
+        :root {
+            --primary: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-light: #DBEAFE;
+            --background: #F8FAFC;
+            --surface: #FFFFFF;
+            --border: #E2E8F0;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --success: #22C55E;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+            --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+            --radius-lg: 18px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--text-primary);
+            background: var(--background);
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            padding: 0 clamp(20px, 6vw, 96px);
+            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 11px;
+            color: var(--primary-dark);
+            font-size: 19px;
+            font-weight: 850;
+            letter-spacing: -0.45px;
+            text-decoration: none;
+        }
+
+        .brand-mark {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            color: #FFFFFF;
+            background: linear-gradient(145deg, var(--primary-dark), var(--primary));
+            box-shadow: 0 8px 18px rgba(59, 130, 246, 0.23);
+            font-size: 18px;
+        }
+
+        .navigation {
+            display: flex;
+            align-items: center;
+            gap: 22px;
+        }
+
+        .navigation a {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 650;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .navigation a:hover,
+        .navigation a.active {
+            color: var(--primary-dark);
+        }
+
+        .profile-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid var(--border);
+            padding: 6px 10px 6px 7px;
+            border-radius: 999px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .mini-avatar {
+            width: 30px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        main {
+            width: min(1180px, 92vw);
+            margin: 34px auto 70px;
+        }
+
+        .breadcrumbs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 18px;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .breadcrumbs a {
+            color: var(--primary-dark);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .page-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 22px;
+        }
+
+        .page-heading h1 {
+            margin: 0;
+            font-size: clamp(27px, 3vw, 34px);
+            letter-spacing: -0.9px;
+        }
+
+        .page-heading p {
+            max-width: 680px;
+            margin: 8px 0 0;
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .button-primary,
+        .button-outline,
+        .button-danger,
+        .table-action {
+            border: none;
+            border-radius: 10px;
+            font: inherit;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+        }
+
+        .button-primary:hover,
+        .button-outline:hover,
+        .button-danger:hover,
+        .table-action:hover {
+            transform: translateY(-1px);
+        }
+
+        .button-primary {
+            padding: 11px 15px;
+            color: #FFFFFF;
+            background: var(--primary);
+            font-size: 13px;
+            font-weight: 800;
+            box-shadow: 0 9px 18px rgba(59, 130, 246, 0.22);
+        }
+
+        .button-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .button-outline {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FFFFFF;
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 17px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            position: relative;
+            overflow: hidden;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: var(--surface);
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+        }
+
+        .summary-card::after {
+            content: "";
+            position: absolute;
+            width: 115px;
+            height: 115px;
+            right: -52px;
+            bottom: -62px;
+            border-radius: 50%;
+            background: var(--primary-light);
+        }
+
+        .summary-card .icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 19px;
+        }
+
+        .summary-card h3 {
+            position: relative;
+            z-index: 1;
+            margin: 14px 0 4px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 700;
+        }
+
+        .summary-card strong {
+            position: relative;
+            z-index: 1;
+            font-size: 27px;
+            letter-spacing: -0.9px;
+        }
+
+        .summary-card span {
+            position: relative;
+            z-index: 1;
+            display: block;
+            margin-top: 5px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.42;
+        }
+
+        .info-layout {
+            display: grid;
+            grid-template-columns: 0.8fr 1.2fr;
+            gap: 20px;
+            align-items: start;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .academic-score-card {
+            overflow: hidden;
+            padding: 23px;
+        }
+
+        .academic-score-card h2,
+        .card-header h2 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: -0.35px;
+        }
+
+        .academic-score-card>p,
+        .card-header p {
+            margin: 6px 0 0;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .score-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 26px 0 15px;
+        }
+
+        .score-ring {
+            width: 178px;
+            height: 178px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: conic-gradient(var(--primary) 0deg 317deg, #E9F0F8 317deg 360deg);
+            box-shadow: inset 0 0 0 12px #FFFFFF;
+        }
+
+        .score-ring-inner {
+            width: 136px;
+            height: 136px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: #FFFFFF;
+            text-align: center;
+        }
+
+        .score-ring-inner strong {
+            display: block;
+            font-size: 31px;
+            letter-spacing: -1px;
+        }
+
+        .score-ring-inner span {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .score-note {
+            display: flex;
+            gap: 10px;
+            padding: 14px;
+            border: 1px solid #BFDBFE;
+            border-radius: 11px;
+            color: #1E40AF;
+            background: #EFF6FF;
+            font-size: 12px;
+            line-height: 1.52;
+        }
+
+        .score-note span:first-child {
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .instruction-card {
+            padding: 23px;
+        }
+
+        .instruction-card h2 {
+            margin: 0;
+            font-size: 18px;
+            letter-spacing: -0.35px;
+        }
+
+        .instruction-card>p {
+            margin: 6px 0 18px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.52;
+        }
+
+        .instruction-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .instruction-item {
+            display: grid;
+            grid-template-columns: 30px 1fr;
+            gap: 11px;
+            align-items: start;
+            padding: 12px;
+            border: 1px solid #EDF2F7;
+            border-radius: 11px;
+            background: #FBFDFF;
+        }
+
+        .instruction-number {
+            width: 28px;
+            height: 28px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 12px;
+            font-weight: 850;
+        }
+
+        .instruction-item strong {
+            display: block;
+            margin: 1px 0 4px;
+            font-size: 13px;
+        }
+
+        .instruction-item span {
+            color: var(--text-secondary);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .table-card {
+            overflow: hidden;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid #EDF2F7;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 9px;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 220px;
+            min-height: 40px;
+            padding: 10px 12px 10px 35px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font: inherit;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            color: #94A3B8;
+            font-size: 14px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            min-width: 780px;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            padding: 13px 24px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-secondary);
+            background: #FBFDFF;
+            font-size: 11px;
+            font-weight: 850;
+            letter-spacing: 0.05em;
+            text-align: left;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 16px 24px;
+            border-bottom: 1px solid #EDF2F7;
+            color: var(--text-primary);
+            font-size: 13px;
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr:hover {
+            background: #FBFDFF;
+        }
+
+        .component-name {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            min-width: 190px;
+        }
+
+        .component-icon {
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            border-radius: 9px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .component-name strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 13px;
+        }
+
+        .component-name span {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .grade-value {
+            color: var(--primary-dark);
+            font-size: 15px;
+            font-weight: 850;
+        }
+
+        .grade-badge {
+            display: inline-flex;
+            padding: 5px 8px;
+            border-radius: 999px;
+            color: #166534;
+            background: #F0FDF4;
+            font-size: 11px;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .grade-badge.medium {
+            color: #92400E;
+            background: #FFFBEB;
+        }
+
+        .table-action {
+            padding: 7px 9px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .empty-row {
+            display: none;
+        }
+
+        .empty-row td {
+            padding: 30px 24px;
+            color: var(--text-secondary);
+            text-align: center;
+            font-size: 13px;
+        }
+
+        .table-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 14px 24px;
+            border-top: 1px solid #EDF2F7;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .table-footer strong {
+            color: var(--text-primary);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: none;
+            place-items: center;
+            padding: 20px;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show {
+            display: grid;
+        }
+
+        .modal {
+            width: min(100%, 520px);
+            border-radius: 18px;
+            background: #FFFFFF;
+            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.28);
+            overflow: hidden;
+            animation: pop 0.22s ease-out;
+        }
+
+        @keyframes pop {
+            from {
+                opacity: 0;
+                transform: translateY(10px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 20px 22px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 17px;
+        }
+
+        .close-button {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 9px;
+            color: var(--text-secondary);
+            background: #F1F5F9;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .modal form {
+            display: grid;
+            gap: 16px;
+            padding: 22px;
+        }
+
+        .form-field {
+            display: grid;
+            gap: 8px;
+        }
+
+        .form-field label {
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 750;
+        }
+
+        .form-field input,
+        .form-field select {
+            width: 100%;
+            min-height: 44px;
+            padding: 11px 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            background: #FFFFFF;
+            font: inherit;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-field input:focus,
+        .form-field select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.14);
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 0 22px 22px;
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            z-index: 80;
+            max-width: min(390px, 88vw);
+            padding: 13px 15px;
+            border-radius: 11px;
+            color: #FFFFFF;
+            background: #1E293B;
+            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.22);
+            font-size: 13px;
+            line-height: 1.45;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(18px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        footer {
+            margin-top: 38px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-align: center;
+        }
+
+        @media (max-width: 960px) {
+            .info-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 760px) {
+            .topbar {
+                height: 64px;
+                padding: 0 4vw;
+            }
+
+            .navigation {
+                display: none;
+            }
+
+            .profile-label {
+                display: none;
+            }
+
+            main {
+                width: min(94vw, 1180px);
+                margin-top: 22px;
+            }
+
+            .page-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .header-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .search-box,
+            .search-box input {
+                width: 100%;
+            }
+
+            .header-actions .button-primary {
+                width: 100%;
+            }
+
+            .table-footer {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topbar">
+        <a class="brand" href="#">
+            <span class="brand-mark">✦</span>
+            <span>CareerPath</span>
+        </a>
+
+        <nav class="navigation">
+            <a href="#">Beranda</a>
+            <a href="#">Tes RIASEC</a>
+            <a href="#">Rekomendasi</a>
+            <a class="active" href="#">Profil</a>
+        </nav>
+
+        <button class="profile-button" onclick="showToast('Menu profil belum dihubungkan pada contoh ini.')">
+            <span class="mini-avatar">MR</span>
+            <span class="profile-label">Mame Riyadi</span>
+        </button>
+    </header>
+
+    <main>
+        <div class="breadcrumbs">
+            <a href="#">Beranda</a>
+            <span>›</span>
+            <a href="#">Profil</a>
+            <span>›</span>
+            <span>Data Akademik</span>
+        </div>
+
+        <section class="page-heading">
+            <div>
+                <h1>Data Akademik</h1>
+                <p>Kelola nilai komponen akademik yang digunakan sebagai kriteria kemampuan akademik atau C2 dalam
+                    proses rekomendasi karir.</p>
+            </div>
+            <button class="button-primary" onclick="openModal()">+ Tambah Data Akademik</button>
+        </section>
+
+        <section class="summary-grid">
+            <article class="summary-card">
+                <div class="icon">◫</div>
+                <h3>Komponen Terisi</h3>
+                <strong id="componentCount">5</strong>
+                <span>Dari 5 komponen akademik yang tersedia.</span>
+            </article>
+
+            <article class="summary-card">
+                <div class="icon">★</div>
+                <h3>Rata-rata Nilai</h3>
+                <strong id="averageScore">87,2</strong>
+                <span>Rata-rata nilai dari seluruh komponen akademik.</span>
+            </article>
+
+            <article class="summary-card">
+                <div class="icon">✓</div>
+                <h3>Status Data</h3>
+                <strong id="dataStatus">Lengkap</strong>
+                <span>Data akademik siap digunakan untuk rekomendasi.</span>
+            </article>
+        </section>
+
+        <section class="info-layout">
+            <article class="card academic-score-card">
+                <h2>Ringkasan Kemampuan Akademik</h2>
+                <p>Nilai ini merupakan ringkasan data akademik yang telah Anda masukkan.</p>
+
+                <div class="score-wrap">
+                    <div class="score-ring" id="scoreRing">
+                        <div class="score-ring-inner">
+                            <div>
+                                <strong id="scoreRingValue">87,2</strong>
+                                <span>Nilai rata-rata</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="score-note">
+                    <span>ℹ</span>
+                    <span>Nilai akademik akan dipadukan dengan pemetaan kebutuhan akademik setiap alternatif karir untuk
+                        menghasilkan nilai C2.</span>
+                </div>
+            </article>
+
+            <article class="card instruction-card">
+                <h2>Petunjuk Pengisian</h2>
+                <p>Masukkan nilai berdasarkan komponen akademik yang relevan dengan bidang teknologi informasi.</p>
+
+                <div class="instruction-list">
+                    <div class="instruction-item">
+                        <div class="instruction-number">1</div>
+                        <div>
+                            <strong>Pilih komponen akademik</strong>
+                            <span>Pilih kelompok mata kuliah atau komponen penilaian yang akan diisi.</span>
+                        </div>
+                    </div>
+
+                    <div class="instruction-item">
+                        <div class="instruction-number">2</div>
+                        <div>
+                            <strong>Masukkan nilai</strong>
+                            <span>Gunakan rentang nilai 0 sampai 100 agar nilai dapat diproses secara konsisten.</span>
+                        </div>
+                    </div>
+
+                    <div class="instruction-item">
+                        <div class="instruction-number">3</div>
+                        <div>
+                            <strong>Perbarui bila diperlukan</strong>
+                            <span>Anda dapat mengubah nilai apabila ada pembaruan data akademik pada semester
+                                berikutnya.</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="card table-card">
+            <div class="card-header">
+                <div>
+                    <h2>Daftar Nilai Akademik</h2>
+                    <p>Data berikut digunakan untuk membentuk nilai kemampuan akademik mahasiswa.</p>
+                </div>
+
+                <div class="header-actions">
+                    <div class="search-box">
+                        <span class="search-icon">⌕</span>
+                        <input id="searchInput" type="search" placeholder="Cari komponen..." oninput="filterTable()">
+                    </div>
+                    <button class="button-outline"
+                        onclick="showToast('Fitur impor data belum dihubungkan pada contoh ini.')">Impor Data</button>
+                </div>
+            </div>
+
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Komponen Akademik</th>
+                            <th>Deskripsi</th>
+                            <th>Nilai</th>
+                            <th>Status</th>
+                            <th>Terakhir Diperbarui</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="academicTableBody">
+                        <tr data-component="Pemrograman">
+                            <td>
+                                <div class="component-name">
+                                    <div class="component-icon">⌘</div>
+                                    <div>
+                                        <strong>Pemrograman</strong>
+                                        <span>Komponen akademik</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Dasar pemrograman, pemrograman web, dan pengembangan aplikasi.</td>
+                            <td><span class="grade-value">92</span></td>
+                            <td><span class="grade-badge">Sangat Baik</span></td>
+                            <td>14 Juni 2026</td>
+                            <td><button class="table-action" onclick="editRow(this)">Ubah</button></td>
+                        </tr>
+
+                        <tr data-component="Basis Data">
+                            <td>
+                                <div class="component-name">
+                                    <div class="component-icon">▤</div>
+                                    <div>
+                                        <strong>Basis Data</strong>
+                                        <span>Komponen akademik</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Perancangan basis data, SQL, dan manajemen data.</td>
+                            <td><span class="grade-value">88</span></td>
+                            <td><span class="grade-badge">Sangat Baik</span></td>
+                            <td>14 Juni 2026</td>
+                            <td><button class="table-action" onclick="editRow(this)">Ubah</button></td>
+                        </tr>
+
+                        <tr data-component="Analisis dan Perancangan Sistem">
+                            <td>
+                                <div class="component-name">
+                                    <div class="component-icon">◫</div>
+                                    <div>
+                                        <strong>Analisis dan Perancangan Sistem</strong>
+                                        <span>Komponen akademik</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Analisis kebutuhan, pemodelan sistem, dan perancangan solusi.</td>
+                            <td><span class="grade-value">86</span></td>
+                            <td><span class="grade-badge">Sangat Baik</span></td>
+                            <td>14 Juni 2026</td>
+                            <td><button class="table-action" onclick="editRow(this)">Ubah</button></td>
+                        </tr>
+
+                        <tr data-component="Jaringan dan Keamanan">
+                            <td>
+                                <div class="component-name">
+                                    <div class="component-icon">⌁</div>
+                                    <div>
+                                        <strong>Jaringan dan Keamanan</strong>
+                                        <span>Komponen akademik</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Jaringan komputer, keamanan informasi, dan infrastruktur TI.</td>
+                            <td><span class="grade-value">84</span></td>
+                            <td><span class="grade-badge medium">Baik</span></td>
+                            <td>14 Juni 2026</td>
+                            <td><button class="table-action" onclick="editRow(this)">Ubah</button></td>
+                        </tr>
+
+                        <tr data-component="Data dan Kecerdasan Buatan">
+                            <td>
+                                <div class="component-name">
+                                    <div class="component-icon">◌</div>
+                                    <div>
+                                        <strong>Data dan Kecerdasan Buatan</strong>
+                                        <span>Komponen akademik</span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>Statistika, analitik data, dan konsep kecerdasan buatan.</td>
+                            <td><span class="grade-value">86</span></td>
+                            <td><span class="grade-badge">Sangat Baik</span></td>
+                            <td>14 Juni 2026</td>
+                            <td><button class="table-action" onclick="editRow(this)">Ubah</button></td>
+                        </tr>
+
+                        <tr class="empty-row" id="emptyRow">
+                            <td colspan="6">Komponen akademik tidak ditemukan.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-footer">
+                <span>Menampilkan <strong id="tableCount">5</strong> komponen akademik.</span>
+                <span>Nilai dapat diperbarui sewaktu-waktu sesuai data akademik terbaru.</span>
+            </div>
+        </section>
+
+        <footer>
+            CareerPath · Sistem Rekomendasi Karir untuk Mahasiswa Tingkat Akhir Bidang Teknologi Informasi
+        </footer>
+    </main>
+
+    <div class="modal-overlay" id="modalOverlay" aria-hidden="true">
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+            <div class="modal-header">
+                <h2 id="modalTitle">Tambah Data Akademik</h2>
+                <button class="close-button" type="button" onclick="closeModal()" aria-label="Tutup">×</button>
+            </div>
+
+            <form id="academicForm">
+                <input type="hidden" id="editIndex">
+
+                <div class="form-field">
+                    <label for="componentName">Komponen akademik</label>
+                    <select id="componentName" required>
+                        <option value="" selected disabled>Pilih komponen akademik</option>
+                        <option>Pemrograman</option>
+                        <option>Basis Data</option>
+                        <option>Analisis dan Perancangan Sistem</option>
+                        <option>Jaringan dan Keamanan</option>
+                        <option>Data dan Kecerdasan Buatan</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="academicScore">Nilai</label>
+                    <input id="academicScore" type="number" min="0" max="100" step="0.01"
+                        placeholder="Masukkan nilai 0 - 100" required>
+                </div>
+
+                <div class="form-field">
+                    <label for="description">Keterangan</label>
+                    <input id="description" type="text" placeholder="Contoh: Nilai rata-rata mata kuliah terkait"
+                        required>
+                </div>
+            </form>
+
+            <div class="modal-actions">
+                <button class="button-outline" type="button" onclick="closeModal()">Batal</button>
+                <button class="button-primary" type="submit" form="academicForm">Simpan Data</button>
+            </div>
+        </section>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let toastTimer;
+
+        const descriptions = {
+            "Pemrograman": "Dasar pemrograman, pemrograman web, dan pengembangan aplikasi.",
+            "Basis Data": "Perancangan basis data, SQL, dan manajemen data.",
+            "Analisis dan Perancangan Sistem": "Analisis kebutuhan, pemodelan sistem, dan perancangan solusi.",
+            "Jaringan dan Keamanan": "Jaringan komputer, keamanan informasi, dan infrastruktur TI.",
+            "Data dan Kecerdasan Buatan": "Statistika, analitik data, dan konsep kecerdasan buatan."
+        };
+
+        const icons = {
+            "Pemrograman": "⌘",
+            "Basis Data": "▤",
+            "Analisis dan Perancangan Sistem": "◫",
+            "Jaringan dan Keamanan": "⌁",
+            "Data dan Kecerdasan Buatan": "◌"
+        };
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.classList.add("show");
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove("show"), 2800);
+        }
+
+        function openModal() {
+            document.getElementById("modalTitle").textContent = "Tambah Data Akademik";
+            document.getElementById("academicForm").reset();
+            document.getElementById("editIndex").value = "";
+            document.getElementById("modalOverlay").classList.add("show");
+            document.getElementById("modalOverlay").setAttribute("aria-hidden", "false");
+        }
+
+        function closeModal() {
+            document.getElementById("modalOverlay").classList.remove("show");
+            document.getElementById("modalOverlay").setAttribute("aria-hidden", "true");
+        }
+
+        function getStatus(score) {
+            if (score >= 85) {
+                return { label: "Sangat Baik", className: "" };
+            }
+            if (score >= 70) {
+                return { label: "Baik", className: "medium" };
+            }
+            return { label: "Perlu Ditingkatkan", className: "medium" };
+        }
+
+        function formatScore(score) {
+            return Number(score).toLocaleString("id-ID", { maximumFractionDigits: 2 });
+        }
+
+        function dateNow() {
+            return new Intl.DateTimeFormat("id-ID", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric"
+            }).format(new Date());
+        }
+
+        function updateSummary() {
+            const rows = [...document.querySelectorAll("#academicTableBody tr[data-component]")];
+            const scores = rows.map(row => Number(row.querySelector(".grade-value").textContent.replace(",", ".")));
+            const average = scores.length ? scores.reduce((sum, score) => sum + score, 0) / scores.length : 0;
+            const formattedAverage = formatScore(average);
+
+            document.getElementById("componentCount").textContent = scores.length;
+            document.getElementById("averageScore").textContent = formattedAverage;
+            document.getElementById("scoreRingValue").textContent = formattedAverage;
+            document.getElementById("tableCount").textContent = scores.length;
+
+            const percentage = Math.max(0, Math.min(100, average));
+            document.getElementById("scoreRing").style.background =
+                `conic-gradient(var(--primary) 0deg ${percentage * 3.6}deg, #E9F0F8 ${percentage * 3.6}deg 360deg)`;
+
+            const dataStatus = document.getElementById("dataStatus");
+            if (scores.length >= 5) {
+                dataStatus.textContent = "Lengkap";
+            } else {
+                dataStatus.textContent = "Belum Lengkap";
+            }
+        }
+
+        function filterTable() {
+            const query = document.getElementById("searchInput").value.trim().toLowerCase();
+            const rows = [...document.querySelectorAll("#academicTableBody tr[data-component]")];
+            let visible = 0;
+
+            rows.forEach(row => {
+                const content = row.textContent.toLowerCase();
+                const match = content.includes(query);
+                row.style.display = match ? "" : "none";
+                if (match) visible += 1;
+            });
+
+            document.getElementById("emptyRow").style.display = visible ? "none" : "";
+            document.getElementById("tableCount").textContent = visible;
+        }
+
+        function editRow(button) {
+            const row = button.closest("tr");
+            const rows = [...document.querySelectorAll("#academicTableBody tr[data-component]")];
+            const index = rows.indexOf(row);
+
+            const component = row.dataset.component;
+            const score = row.querySelector(".grade-value").textContent.trim();
+            const description = row.cells[1].textContent.trim();
+
+            document.getElementById("modalTitle").textContent = "Ubah Data Akademik";
+            document.getElementById("editIndex").value = index;
+            document.getElementById("componentName").value = component;
+            document.getElementById("academicScore").value = score.replace(",", ".");
+            document.getElementById("description").value = description;
+
+            document.getElementById("modalOverlay").classList.add("show");
+            document.getElementById("modalOverlay").setAttribute("aria-hidden", "false");
+        }
+
+        document.getElementById("componentName").addEventListener("change", function () {
+            const selected = this.value;
+            if (descriptions[selected]) {
+                document.getElementById("description").value = descriptions[selected];
+            }
+        });
+
+        document.getElementById("academicForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const component = document.getElementById("componentName").value;
+            const score = Number(document.getElementById("academicScore").value);
+            const description = document.getElementById("description").value.trim();
+            const editIndex = document.getElementById("editIndex").value;
+            const status = getStatus(score);
+            const icon = icons[component] || "◫";
+            const today = dateNow();
+
+            const rowHtml = `
+        <td>
+          <div class="component-name">
+            <div class="component-icon">${icon}</div>
+            <div>
+              <strong>${component}</strong>
+              <span>Komponen akademik</span>
+            </div>
+          </div>
+        </td>
+        <td>${description}</td>
+        <td><span class="grade-value">${formatScore(score)}</span></td>
+        <td><span class="grade-badge ${status.className}">${status.label}</span></td>
+        <td>${today}</td>
+        <td><button class="table-action" onclick="editRow(this)">Ubah</button></td>
+      `;
+
+            const rows = [...document.querySelectorAll("#academicTableBody tr[data-component]")];
+
+            if (editIndex !== "") {
+                const row = rows[Number(editIndex)];
+                row.dataset.component = component;
+                row.innerHTML = rowHtml;
+                showToast("Data akademik berhasil diperbarui.");
+            } else {
+                const duplicate = rows.find(row => row.dataset.component === component);
+                if (duplicate) {
+                    showToast("Komponen ini sudah tersedia. Gunakan tombol Ubah untuk memperbarui nilainya.");
+                    return;
+                }
+
+                const row = document.createElement("tr");
+                row.dataset.component = component;
+                row.innerHTML = rowHtml;
+                document.getElementById("academicTableBody").insertBefore(row, document.getElementById("emptyRow"));
+                showToast("Data akademik berhasil ditambahkan.");
+            }
+
+            closeModal();
+            updateSummary();
+            filterTable();
+        });
+
+        document.getElementById("modalOverlay").addEventListener("click", function (event) {
+            if (event.target === this) {
+                closeModal();
+            }
+        });
+
+        updateSummary();
+    </script>
+</body>
+
+</html>
