@@ -18,6 +18,9 @@ export default function Home() {
   const [toast, setToast] = useState({ show: false, message: '' });
   const navigate = useNavigate();
 
+  const topCareer = sawResults && sawResults.length > 0 ? sawResults[0] : null;
+  const topCareerData = topCareer && careers ? careers[topCareer.name] : null;
+
   const triggerToast = (msg) => {
     setToast({ show: true, message: msg });
   };
@@ -73,10 +76,10 @@ export default function Home() {
 
           <div className="flex flex-wrap gap-3.5">
             <button 
-              onClick={() => navigate('/riasec')}
+              onClick={() => navigate('/rekomendasi')}
               className="px-6 py-3 rounded-xl bg-white text-primary-dark hover:text-primary font-black text-sm shadow-lg hover:translate-y-[-1px] transition-all duration-200"
             >
-              Mulai Tes RIASEC
+              Lihat Hasil Rekomendasi
             </button>
             <button 
               onClick={() => document.getElementById('karir').scrollIntoView({ behavior: 'smooth' })}
@@ -135,7 +138,7 @@ export default function Home() {
                 onClick={() => navigate('/profile')}
                 className="text-xs font-black text-primary hover:text-primary-dark flex items-center gap-1 hover:underline"
               >
-                Mulai <ArrowRight className="w-3.5 h-3.5" />
+                {/* Mulai <ArrowRight className="w-3.5 h-3.5" /> */}
               </button>
             </div>
           </article>
@@ -159,7 +162,7 @@ export default function Home() {
                 onClick={() => navigate('/riasec')}
                 className="text-xs font-black text-primary hover:text-primary-dark flex items-center gap-1 hover:underline"
               >
-                Mulai <ArrowRight className="w-3.5 h-3.5" />
+                {/* Mulai <ArrowRight className="w-3.5 h-3.5" /> */}
               </button>
             </div>
           </article>
@@ -213,30 +216,95 @@ export default function Home() {
             )}
           </div>
 
-          <div className="p-6 flex-1 flex items-center justify-center">
-            {hasRiasec ? (
-              <div className="w-full flex items-center gap-4 bg-blue-50/50 border border-blue-100 rounded-xl p-5 hover:bg-blue-50 transition-colors">
-                <span className="w-14 h-14 shrink-0 rounded-2xl text-primary font-black bg-white shadow-md shadow-blue-500/5 text-2xl grid place-items-center">
-                  {sawResults[0]?.icon || '✦'}
-                </span>
-                <div className="min-w-0">
-                  <span className="text-[10px] text-primary font-bold uppercase tracking-wider block mb-1">Rekomendasi Utama</span>
-                  <h4 className="text-base font-black text-slate-900 mb-0.5">{sawResults[0]?.name || 'Software Engineer'}</h4>
-                  <p className="text-slate-500 text-xs truncate max-w-sm md:max-w-md">{sawResults[0]?.subtitle || 'Pengembangan perangkat lunak dan solusi digital'}</p>
+          <div className="p-6 flex-1 flex flex-col justify-between">
+            {hasRiasec && topCareer ? (
+              <div className="w-full bg-gradient-to-br from-blue-50/70 via-indigo-50/30 to-white border border-blue-100/80 rounded-2xl p-6 hover:shadow-md transition-all duration-300 flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-5">
+                    <div className="flex items-center gap-4">
+                      <span className="w-16 h-16 rounded-2xl text-primary font-black bg-white border border-blue-100 shadow-md shadow-blue-500/5 text-3xl grid place-items-center shrink-0">
+                        {topCareer.icon || '✦'}
+                      </span>
+                      <div>
+                        <span className="inline-flex px-2 py-0.5 bg-blue-100/70 text-primary-dark border border-blue-200/50 rounded-lg text-[9px] font-black uppercase tracking-wider mb-1">
+                          Rekomendasi Utama
+                        </span>
+                        <h4 className="text-base font-black text-slate-900 leading-tight">{topCareer.name}</h4>
+                        <p className="text-slate-500 text-xs mt-0.5">{topCareer.subtitle}</p>
+                      </div>
+                    </div>
+                    <div className="bg-primary/5 border border-primary/10 rounded-xl px-4 py-2 text-right sm:self-center self-start shrink-0">
+                      <span className="text-slate-400 text-[10px] font-bold block mb-0.5">Skor SAW</span>
+                      <strong className="text-2xl font-black text-primary-dark leading-none">{topCareer.score}</strong>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4 pt-4 border-t border-slate-100">
+                    <div>
+                      <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block mb-1.5">Kecocokan Minat</span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {topCareerData?.riasecMapped?.map(tag => (
+                          <span key={tag} className="px-2.5 py-0.5 bg-white border border-slate-200/80 rounded-md text-slate-600 text-[10px] font-black shadow-sm">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-slate-400 text-[10px] font-bold uppercase tracking-wider block mb-1">Kebutuhan Pasar Kerja</span>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-700 font-bold mt-1">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span>{topCareer.market?.vacancy || '520'} Lowongan</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* <p className="text-slate-600 text-xs leading-relaxed mb-6">
+                    {topCareer.description}
+                  </p> */}
                 </div>
-                <div className="ml-auto text-right">
-                  <span className="text-[10px] text-slate-400 font-bold block">Skor SAW</span>
-                  <strong className="text-lg font-black text-primary-dark">{sawResults[0]?.score || '0.91'}</strong>
+
+                <div className="flex flex-col sm:flex-row gap-3 mt-auto">
+                  <button 
+                    onClick={() => navigate(`/eksplorasi/${topCareer.name}`)}
+                    className="flex-1 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl text-xs font-black shadow-lg shadow-blue-500/10 transition-colors"
+                  >
+                    Eksplorasi Peran
+                  </button>
+                  <button 
+                    onClick={() => navigate('/rekomendasi')}
+                    className="px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl text-xs font-black transition-colors"
+                  >
+                    Lihat Perhitungan
+                  </button>
                 </div>
               </div>
             ) : (
-              <div className="w-full flex items-center gap-4 bg-blue-50/30 border border-dashed border-blue-200 rounded-xl p-5">
-                <span className="w-11 h-11 shrink-0 rounded-xl text-primary bg-primary-light text-xl grid place-items-center">
+              <div className="w-full bg-slate-50 border border-dashed border-slate-200 rounded-2xl p-8 text-center flex flex-col items-center justify-center flex-1">
+                <span className="w-16 h-16 rounded-2xl bg-blue-50 text-primary text-3xl grid place-items-center mb-4">
                   ✦
                 </span>
-                <div>
-                  <h4 className="text-sm font-black text-slate-900 mb-0.5">Belum ada hasil rekomendasi</h4>
-                  <p className="text-slate-500 text-xs">Mulai dengan melengkapi profil dan mengikuti tes minat karir RIASEC.</p>
+                <h4 className="text-base font-black text-slate-900 mb-1">Rekomendasi Karir Belum Siap</h4>
+                <p className="text-slate-500 text-xs max-w-sm mx-auto mb-6 leading-relaxed">
+                  Kami membandingkan bakat, minat, dan kemampuan Anda dengan kebutuhan industri. Selesaikan Tes RIASEC dan isi nilai akademik Anda untuk melihat hasilnya.
+                </p>
+                <div className="flex gap-3">
+                  {!hasRiasec && (
+                    <button 
+                      onClick={() => navigate('/riasec')}
+                      className="px-5 py-2.5 bg-primary text-white rounded-xl text-xs font-black shadow-md"
+                    >
+                      Mulai Tes RIASEC
+                    </button>
+                  )}
+                  {!hasAcademic && (
+                    <button 
+                      onClick={() => navigate('/akademik')}
+                      className="px-5 py-2.5 bg-white border border-slate-250 text-slate-700 rounded-xl text-xs font-black"
+                    >
+                      Isi Nilai Akademik
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -253,21 +321,21 @@ export default function Home() {
               <div className="flex items-center justify-between py-2 border-b border-slate-50">
                 <div>
                   <h4 className="text-xs font-black text-slate-800">Software Development</h4>
-                  <span className="text-[10px] text-slate-400">Peran pengembang perangkat lunak</span>
+                  <span className="text-[10px] text-slate-400">Data diperbarui: 22 Juni 2026</span>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black text-emerald-800 bg-emerald-50">100 Lowongan</span>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-slate-50">
                 <div>
                   <h4 className="text-xs font-black text-slate-800">Data & Analytics</h4>
-                  <span className="text-[10px] text-slate-400">Peran analitik, data, dan kecerdasan buatan</span>
+                  <span className="text-[10px] text-slate-400">Data diperbarui: 22 Juni 2026</span>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black text-emerald-800 bg-emerald-50">200 Lowongan</span>
               </div>
               <div className="flex items-center justify-between py-2">
                 <div>
                   <h4 className="text-xs font-black text-slate-800">Cybersecurity</h4>
-                  <span className="text-[10px] text-slate-400">Peran keamanan informasi dan infrastruktur</span>
+                  <span className="text-[10px] text-slate-400">Data diperbarui: 22 Juni 2026</span>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black text-emerald-800 bg-emerald-50">150 Lowongan</span>
               </div>

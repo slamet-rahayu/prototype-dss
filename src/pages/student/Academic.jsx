@@ -50,6 +50,8 @@ export default function Academic() {
   const [componentName, setComponentName] = useState('');
   const [academicScore, setAcademicScore] = useState('');
   const [description, setDescription] = useState('');
+  const [semester, setSemester] = useState('Semester 7');
+  const [academicYear, setAcademicYear] = useState('2025/2026');
 
   const triggerToast = (msg) => {
     setToast({ show: true, message: msg });
@@ -75,6 +77,8 @@ export default function Academic() {
     setComponentName(item.name);
     setAcademicScore(item.grade);
     setDescription(item.desc);
+    setSemester(item.semester || 'Semester 7');
+    setAcademicYear(item.academicYear || '2025/2026');
     setIsModalOpen(true);
   };
 
@@ -91,6 +95,8 @@ export default function Academic() {
     setComponentName('');
     setAcademicScore('');
     setDescription('');
+    setSemester('Semester 7');
+    setAcademicYear('2025/2026');
     setIsModalOpen(true);
   };
 
@@ -127,6 +133,8 @@ export default function Academic() {
             name: componentName,
             grade: scoreVal,
             desc: description,
+            semester: semester,
+            academicYear: academicYear,
             status: statusObj.label,
             updated: today,
             icon
@@ -149,6 +157,8 @@ export default function Academic() {
         name: componentName,
         desc: description,
         grade: scoreVal,
+        semester: semester,
+        academicYear: academicYear,
         status: statusObj.label,
         updated: today,
         icon
@@ -312,12 +322,6 @@ export default function Academic() {
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             </div>
-            <button 
-              onClick={() => triggerToast('Fitur impor data belum dihubungkan pada contoh ini.')}
-              className="px-4 py-2 border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-500 font-bold text-xs rounded-xl transition-all"
-            >
-              Impor Data
-            </button>
           </div>
         </div>
 
@@ -343,7 +347,11 @@ export default function Academic() {
                       </span>
                       <div>
                         <strong className="text-slate-800 block font-bold">{item.name}</strong>
-                        <span className="text-[10px] text-slate-450">Komponen akademik</span>
+                        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium">
+                          <span>{item.semester || 'Semester 7'}</span>
+                          <span className="text-slate-350">•</span>
+                          <span>TA {item.academicYear || '2025/2026'}</span>
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -434,6 +442,36 @@ export default function Academic() {
               className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-4 focus:ring-blue-500/10 text-sm"
               required
             />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-2">
+              <label htmlFor="semester" className="font-bold text-slate-700 text-xs">Semester</label>
+              <select 
+                id="semester"
+                value={semester}
+                onChange={(e) => setSemester(e.target.value)}
+                className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-4 focus:ring-blue-500/10 text-sm cursor-pointer"
+                required
+              >
+                {Array.from({ length: 8 }, (_, i) => `Semester ${i + 1}`).map(sem => (
+                  <option key={sem} value={sem}>{sem}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid gap-2">
+              <label htmlFor="academicYear" className="font-bold text-slate-700 text-xs">Tahun Akademik</label>
+              <input 
+                id="academicYear"
+                type="text"
+                placeholder="Misal: 2025/2026"
+                value={academicYear}
+                onChange={(e) => setAcademicYear(e.target.value)}
+                className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-4 focus:ring-blue-500/10 text-sm"
+                required
+              />
+            </div>
           </div>
 
           <div className="grid gap-2">

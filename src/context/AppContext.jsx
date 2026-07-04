@@ -27,11 +27,11 @@ const DEFAULT_USER = {
 };
 
 const DEFAULT_ACADEMIC = [
-  { id: 1, name: "Pemrograman", desc: "Dasar pemrograman, pemrograman web, dan pengembangan aplikasi.", grade: 92, status: "Sangat Baik", updated: "14 Juni 2026", icon: "⌘" },
-  { id: 2, name: "Basis Data", desc: "Perancangan basis data, SQL, dan manajemen data.", grade: 88, status: "Sangat Baik", updated: "14 Juni 2026", icon: "▤" },
-  { id: 3, name: "Analisis dan Perancangan Sistem", desc: "Analisis kebutuhan, pemodelan sistem, dan perancangan solusi.", grade: 86, status: "Sangat Baik", updated: "14 Juni 2026", icon: "◫" },
-  { id: 4, name: "Jaringan dan Keamanan", desc: "Jaringan komputer, keamanan informasi, dan infrastruktur TI.", grade: 84, status: "Baik", updated: "14 Juni 2026", icon: "⌁" },
-  { id: 5, name: "Data dan Kecerdasan Buatan", desc: "Statistika, analitik data, dan konsep kecerdasan buatan.", grade: 86, status: "Sangat Baik", updated: "14 Juni 2026", icon: "◌" }
+  { id: 1, name: "Pemrograman", desc: "Dasar pemrograman, pemrograman web, dan pengembangan aplikasi.", grade: 92, status: "Sangat Baik", updated: "14 Juni 2026", icon: "⌘", semester: "Semester 7", academicYear: "2025/2026" },
+  { id: 2, name: "Basis Data", desc: "Perancangan basis data, SQL, dan manajemen data.", grade: 88, status: "Sangat Baik", updated: "14 Juni 2026", icon: "▤", semester: "Semester 7", academicYear: "2025/2026" },
+  { id: 3, name: "Analisis dan Perancangan Sistem", desc: "Analisis kebutuhan, pemodelan sistem, dan perancangan solusi.", grade: 86, status: "Sangat Baik", updated: "14 Juni 2026", icon: "◫", semester: "Semester 7", academicYear: "2025/2026" },
+  { id: 4, name: "Jaringan dan Keamanan", desc: "Jaringan komputer, keamanan informasi, dan infrastruktur TI.", grade: 84, status: "Baik", updated: "14 Juni 2026", icon: "⌁", semester: "Semester 7", academicYear: "2025/2026" },
+  { id: 5, name: "Data dan Kecerdasan Buatan", desc: "Statistika, analitik data, dan konsep kecerdasan buatan.", grade: 86, status: "Sangat Baik", updated: "14 Juni 2026", icon: "◌", semester: "Semester 7", academicYear: "2025/2026" }
 ];
 
 const DEFAULT_RIASEC_RESULT = {

@@ -82,7 +82,7 @@ export default function Profile() {
         </div>
         <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-black rounded-full">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          Profil aktif
+          Akun aktif
         </span>
       </section>
 
@@ -152,9 +152,6 @@ export default function Profile() {
                   style={{ width: `${completionScore}%` }}
                 />
               </div>
-              <p className="text-[10px] text-slate-400 leading-relaxed font-medium">
-                Lengkapi data akademik dan ikuti tes RIASEC untuk memperoleh rekomendasi karir.
-              </p>
             </div>
           </div>
         </aside>
@@ -284,13 +281,6 @@ export default function Profile() {
               </div>
             </div>
 
-            <div className="p-4 border border-blue-100 bg-blue-50/50 rounded-xl text-blue-800 text-[11px] leading-relaxed flex gap-2">
-              <span className="font-bold text-sm leading-none shrink-0">ℹ</span>
-              <span>
-                Data profil digunakan sebagai informasi pendukung. Nilai akademik dan hasil tes RIASEC dikelola pada halaman terpisah agar proses rekomendasi tetap terstruktur.
-              </span>
-            </div>
-
             <div className="flex items-center justify-end gap-3 pt-2">
               <button
                 type="reset"
@@ -316,7 +306,7 @@ export default function Profile() {
           <div>
             <h3 className="text-sm font-black text-slate-900 mb-1">Data Akademik</h3>
             <p className="text-slate-500 text-xs leading-relaxed mb-4">
-              Lengkapi data kemampuan akademik untuk digunakan sebagai kriteria C2 pada perhitungan rekomendasi.
+              Lengkapi data akademik dan ikuti tes RIASEC melalui halaman yang tersedia untuk memperoleh hasil rekomendasi karir.
             </p>
 
             <div className="flex items-center justify-between gap-4 p-4 border border-blue-100 bg-blue-50/30 rounded-xl">
