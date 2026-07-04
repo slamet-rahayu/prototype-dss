@@ -76,10 +76,10 @@ export default function Home() {
 
           <div className="flex flex-wrap gap-3.5">
             <button 
-              onClick={() => navigate('/rekomendasi')}
+              onClick={() => navigate((hasRiasec && hasAcademic) ? '/rekomendasi' : (hasRiasec ? '/akademik' : '/riasec'))}
               className="px-6 py-3 rounded-xl bg-white text-primary-dark hover:text-primary font-black text-sm shadow-lg hover:translate-y-[-1px] transition-all duration-200"
             >
-              Lihat Hasil Rekomendasi
+              {(hasRiasec && hasAcademic) ? 'Lihat Hasil Rekomendasi' : (hasRiasec ? 'Lengkapi Akademik' : 'Mulai Tes RIASEC')}
             </button>
             <button 
               onClick={() => document.getElementById('karir').scrollIntoView({ behavior: 'smooth' })}
@@ -159,10 +159,10 @@ export default function Home() {
                 ● {getStepStatus(2).text}
               </span>
               <button 
-                onClick={() => navigate('/riasec')}
+                onClick={() => navigate(hasRiasec ? '/riasec/hasil' : '/riasec')}
                 className="text-xs font-black text-primary hover:text-primary-dark flex items-center gap-1 hover:underline"
               >
-                {/* Mulai <ArrowRight className="w-3.5 h-3.5" /> */}
+                {hasRiasec ? 'Lihat Hasil' : 'Mulai'} <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </article>

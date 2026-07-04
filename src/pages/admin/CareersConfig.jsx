@@ -158,7 +158,7 @@ export default function CareersConfig() {
         <article className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[110px]">
           <div className="absolute right-[-20px] bottom-[-20px] w-20 h-20 rounded-full bg-primary-light/35 -z-0" />
           <div className="relative z-10">
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Status Kriteria</span>
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Status Alternatif</span>
             <strong className="text-2xl font-black text-slate-900 block leading-none">Aktif</strong>
             <span className="text-[10px] text-slate-400 font-medium">Semua memiliki pemetaan RIASEC</span>
           </div>
@@ -203,7 +203,8 @@ export default function CareersConfig() {
                 <th className="px-6 py-3.5">Deskripsi</th>
                 <th className="px-6 py-3.5">Kode RIASEC</th>
                 <th className="px-6 py-3.5 text-center">Lowongan Pasar</th>
-                <th className="px-6 py-3.5">Lokasi Utama</th>
+                <th className="px-6 py-3.5">Cakupan Pencarian</th>
+                <th className="px-6 py-3.5">Status</th>
                 <th className="px-6 py-3.5 text-center">Aksi</th>
               </tr>
             </thead>
@@ -235,7 +236,12 @@ export default function CareersConfig() {
                     {data.marketDemand?.vacancy || '0'}
                   </td>
                   <td className="px-6 py-4 text-slate-500 font-medium">
-                    {data.marketDemand?.location || 'Jakarta, Remote'}
+                    Singapore
+                  </td>
+                  <td>
+                    <div className="flex items-center justify-center">
+                      <span className="px-2 py-0.5 bg-primary-light text-primary-dark font-extrabold rounded text-[10px]">Aktif</span>
+                    </div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-2">
@@ -270,7 +276,7 @@ export default function CareersConfig() {
 
         <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between text-slate-400 text-xs font-medium">
           <span>Menampilkan <strong>{filteredCareers.length}</strong> alternatif karir.</span>
-          <span>Perubahan pada alternatif akan mempengaruhi hasil normalisasi SAW.</span>
+          <span>Perubahan data alternatif karir, pemetaan RIASEC, atau bobot akademik akan digunakan pada proses rekomendasi berikutnya.</span>
         </div>
       </section>
 

@@ -117,13 +117,7 @@ export default function StudentsConfig() {
           <h1 className="text-2.5xl md:text-3.5xl font-black text-slate-900 tracking-tight leading-none">Manajemen Mahasiswa</h1>
           <p className="text-slate-500 text-sm mt-2">Kelola data mahasiswa terdaftar, data credential login, dan status kelengkapan data rekomendasinya.</p>
         </div>
-        <button 
-          onClick={handleOpenAddModal}
-          className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-extrabold rounded-xl shadow-md active:scale-95 transition-all w-full md:w-auto justify-center"
-        >
-          <Plus className="w-4 h-4" />
-          Tambah Mahasiswa
-        </button>
+        
       </section>
 
       {/* Stats Summary Grid */}

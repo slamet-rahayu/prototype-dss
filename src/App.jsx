@@ -13,6 +13,7 @@ import Home from './pages/student/Home';
 import Profile from './pages/student/Profile';
 import Academic from './pages/student/Academic';
 import RiasecQuiz from './pages/student/RiasecQuiz';
+import RiasecResult from './pages/student/RiasecResult';
 import Recommendations from './pages/student/Recommendations';
 import CareerDetail from './pages/student/CareerDetail';
 import CareerCatalog from './pages/student/CareerCatalog';
@@ -62,7 +63,7 @@ const AdminLayout = ({ children }) => {
       <Sidebar />
       <div className="flex-1 min-h-screen flex flex-col overflow-y-auto">
         <header className="h-[72px] bg-white border-b border-slate-200/85 px-8 flex items-center justify-between sticky top-0 z-10">
-          <h2 className="text-sm font-black text-slate-700 tracking-tight">Sistem Pendukung Keputusan Pemilihan Karir TI</h2>
+          <h2 className="text-sm font-black text-slate-700 tracking-tight">Sistem Pendukung Keputusan Rekomendasi Karir TI</h2>
           <span className="text-xs font-bold text-slate-400">Mode: Administrator</span>
         </header>
         <div className="flex-1 w-full bg-slate-50">
@@ -106,6 +107,13 @@ function AppRoutes() {
         <AuthGuard allowedRoles={['student']}>
           <StudentLayout>
             <RiasecQuiz />
+          </StudentLayout>
+        </AuthGuard>
+      } />
+      <Route path="/riasec/hasil" element={
+        <AuthGuard allowedRoles={['student']}>
+          <StudentLayout>
+            <RiasecResult />
           </StudentLayout>
         </AuthGuard>
       } />

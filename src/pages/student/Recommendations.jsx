@@ -2,12 +2,12 @@ import React, { useContext, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AppContext } from '../../context/AppContext';
 import Toast from '../../components/Toast';
-import { 
-  Award, 
-  MapPin, 
-  TrendingUp, 
-  Info, 
-  HelpCircle, 
+import {
+  Award,
+  MapPin,
+  TrendingUp,
+  Info,
+  HelpCircle,
   Briefcase,
   ChevronRight,
   ShieldCheck,
@@ -48,7 +48,7 @@ export default function Recommendations() {
           </p>
           <div className="grid gap-3">
             {!hasAcademic && (
-              <button 
+              <button
                 onClick={() => navigate('/akademik')}
                 className="w-full py-2.5 bg-primary text-white font-extrabold text-xs rounded-xl shadow-md"
               >
@@ -56,7 +56,7 @@ export default function Recommendations() {
               </button>
             )}
             {!hasRiasec && (
-              <button 
+              <button
                 onClick={() => navigate('/riasec')}
                 className="w-full py-2.5 bg-primary text-white font-extrabold text-xs rounded-xl shadow-md"
               >
@@ -109,7 +109,7 @@ export default function Recommendations() {
         <section className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary-dark via-blue-600 to-primary text-white p-8 md:p-10 shadow-xl shadow-blue-500/20 mb-6 flex flex-col lg:flex-row gap-8 justify-between items-stretch">
           {/* Glow circle overlay */}
           <div className="absolute top-0 right-0 w-80 h-80 rounded-full border border-white/5 translate-x-12 -translate-y-24 bg-white/5" />
-          
+
           <div className="flex-1 relative z-10 flex flex-col justify-between">
             <div>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 border border-white/20 bg-white/10 rounded-full text-xs font-black uppercase tracking-wider mb-4 animate-pulse">
@@ -130,8 +130,7 @@ export default function Recommendations() {
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
               <span className="px-3 py-1.5 bg-white/10 border border-white/10 rounded-lg font-bold">RIASEC: {topResult.tags[0] || 'I R C'}</span>
-              <span className="px-3 py-1.5 bg-white/10 border border-white/10 rounded-lg font-bold">Tren pasar meningkat</span>
-              <span className="px-3 py-1.5 bg-white/10 border border-white/10 rounded-lg font-bold">{topResult.market?.vacancy || '500'}+ lowongan</span>
+              <span className="px-3 py-1.5 bg-white/10 border border-white/10 rounded-lg font-bold">{topResult.market?.vacancy || '500'} lowongan</span>
             </div>
           </div>
 
@@ -176,14 +175,13 @@ export default function Recommendations() {
 
           <div className="px-6 py-2 divide-y divide-slate-100">
             {sawResults.slice(0, 5).map((item, index) => (
-              <button 
+              <button
                 key={item.name}
                 onClick={() => setSelectedCareerName(item.name)}
-                className={`w-full grid grid-cols-12 items-center gap-3 py-3.5 px-3 -mx-3 rounded-xl text-left border-0 transition-all ${
-                  selectedCareerName === item.name 
-                    ? 'bg-blue-50/40 text-primary-dark font-bold' 
-                    : 'bg-transparent text-slate-800 hover:bg-slate-50/50'
-                }`}
+                className={`w-full grid grid-cols-12 items-center gap-3 py-3.5 px-3 -mx-3 rounded-xl text-left border-0 transition-all ${selectedCareerName === item.name
+                  ? 'bg-blue-50/40 text-primary-dark font-bold'
+                  : 'bg-transparent text-slate-800 hover:bg-slate-50/50'
+                  }`}
               >
                 <div className="col-span-1">
                   <span className="w-7 h-7 rounded-lg bg-primary-light text-primary-dark text-xs font-black grid place-items-center">
@@ -195,8 +193,8 @@ export default function Recommendations() {
                   <span className="text-[10px] text-slate-400 block truncate font-medium">{item.subtitle}</span>
                 </div>
                 <div className="hidden md:block col-span-3 h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-gradient-to-r from-primary to-primary-dark rounded-full" 
+                  <div
+                    className="h-full bg-gradient-to-r from-primary to-primary-dark rounded-full"
                     style={{ width: `${item.scoreVal * 100}%` }}
                   />
                 </div>
@@ -281,32 +279,22 @@ export default function Recommendations() {
             <h3 className="text-sm font-black text-slate-900 mb-0.5">Informasi Pasar Kerja</h3>
             <p className="text-slate-500 text-xs mb-5">Gambaran kebutuhan pasar kerja untuk {selectedCareer.name}.</p>
 
-            <div className="grid grid-cols-2 gap-3 mb-5">
+            <div className="grid grid-cols-2 gap-3 mb-2">
               <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex flex-col justify-between">
                 <span className="text-slate-400 text-[10px] font-bold block mb-1">Jumlah Lowongan</span>
-                <strong className="text-lg font-black text-primary-dark">{selectedCareer.market?.vacancy || '500'}+</strong>
-                <span className="text-[10px] text-emerald-800 font-bold block mt-1">{selectedCareer.market?.trend || '↗ Tren meningkat'}</span>
+                <strong className="text-lg font-black text-primary-dark">{selectedCareer.market?.vacancy || '500'}</strong>
               </div>
               <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 flex flex-col justify-between">
-                <span className="text-slate-400 text-[10px] font-bold block mb-1">Lokasi Dominan</span>
-                <strong className="text-sm font-black text-slate-800 leading-tight block truncate">{selectedCareer.market?.short || 'Jakarta'}</strong>
-                <span className="text-[10px] text-slate-400 block mt-1">{selectedCareer.market?.shortNote || 'dan peluang remote'}</span>
+                <span className="text-slate-400 text-[10px] font-bold block mb-1">Cakupan Pencarian</span>
+                <strong className="text-sm font-black text-slate-800 leading-tight block truncate">Singapore</strong>
               </div>
             </div>
 
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-2">Keterampilan yang sering dibutuhkan</span>
-            <div className="flex flex-wrap gap-1.5 mb-5">
-              {selectedCareer.market?.skills?.map(skill => (
-                <span key={skill} className="px-2.5 py-1 bg-slate-100 text-slate-700 text-[10px] font-bold rounded-lg">{skill}</span>
-              ))}
-            </div>
-
-            <span className="text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-1">Lokasi</span>
-            <strong className="text-xs font-bold text-slate-800 leading-relaxed block mb-4">{selectedCareer.market?.location || 'Jakarta, Bandung, dan Remote'}</strong>
-
-            <p className="text-[10.5px] text-slate-450 leading-relaxed border-t border-slate-100 pt-3">
+            <p className="text-xs text-slate-450 leading-relaxed">
               {selectedCareer.market?.note || 'Data pasar kerja ini digunakan sebagai salah satu pertimbangan dalam kriteria kebutuhan pasar kerja (C3).'}
             </p>
+
+            <span className="text-[10.5px] italic text-slate-800 leading-relaxed block mt-2">Data diperbarui pada tanggal 1 Juli 2026 melalui adzuna.com</span>
           </article>
 
           {/* Calculations step info */}
@@ -355,7 +343,7 @@ export default function Recommendations() {
       )}
 
       {/* Toast */}
-      <Toast 
+      <Toast
         show={toast.show}
         message={toast.message}
         onClose={() => setToast({ show: false, message: '' })}

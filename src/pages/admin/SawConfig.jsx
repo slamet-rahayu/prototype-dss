@@ -365,7 +365,7 @@ export default function SawConfig() {
                       <td className="px-6 py-4"><span className="w-8 h-8 rounded-lg bg-primary-light text-primary-dark font-extrabold grid place-items-center text-[11px]">C3</span></td>
                       <td className="px-6 py-4">
                         <strong className="text-slate-800 block font-bold">Kebutuhan Pasar Kerja</strong>
-                        <span className="text-[10px] text-slate-400 font-medium">Informasi kebutuhan pasar kerja untuk setiap karir.</span>
+                        <span className="text-[10px] text-slate-400 font-medium">Nilai kebutuhan pasar kerja berdasarkan jumlah lowongan terbaru pada setiap alternatif karir.</span>
                       </td>
                       <td className="px-6 py-4 text-slate-500 font-medium">Data Pasar Kerja</td>
                       <td className="px-6 py-4 text-center"><span className="px-2.5 py-0.5 rounded-full text-[10px] font-black text-emerald-800 bg-emerald-50">Benefit</span></td>
@@ -467,9 +467,9 @@ export default function SawConfig() {
                     </button>
                     <button 
                       onClick={() => handleDeleteComponent(comp.id)}
-                      className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-black text-[10px] transition-colors"
+                      className="px-2.5 py-1 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-600 font-black text-[10px] transition-colors"
                     >
-                      Hapus
+                      Nonaktifkan
                     </button>
                   </div>
                 </div>
