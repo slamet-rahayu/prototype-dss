@@ -21,11 +21,25 @@ export function calculateSaw({
   // 1. Calculate raw C1, C2, C3 scores for each career
   const rawResults = Object.entries(careers).map(([name, data]) => {
     // --- C1: Minat ---
-    // Average of student's scores for RIASEC categories mapped to this career
+    // Weighted sum of student's scores based on suitability weights per RIASEC type
     let c1Raw = 0;
-    if (riasecScores && data.riasecMapped && data.riasecMapped.length > 0) {
-      const sum = data.riasecMapped.reduce((acc, code) => acc + (riasecScores[code] || 0), 0);
-      c1Raw = sum / (15 * data.riasecMapped.length); // Normalize to 0-1 (max score per category is 15)
+    if (riasecScores) {
+      const rWeights = data.riasecWeights;
+      if (rWeights) {
+        let weightedScoreSum = 0;
+        let wSum = 0;
+        Object.entries(rWeights).forEach(([code, weight]) => {
+          if (weight > 0) {
+            weightedScoreSum += (riasecScores[code] || 0) * weight;
+            wSum += weight;
+          }
+        });
+        c1Raw = wSum > 0 ? (weightedScoreSum / wSum) / 15 : 0;
+      } else if (data.riasecMapped && data.riasecMapped.length > 0) {
+        // Fallback for backward compatibility
+        const sum = data.riasecMapped.reduce((acc, code) => acc + (riasecScores[code] || 0), 0);
+        c1Raw = sum / (15 * data.riasecMapped.length);
+      }
     }
 
     // --- C2: Akademik ---

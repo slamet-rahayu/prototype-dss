@@ -1,4 +1,4 @@
-import React, { useContext, useState, useMemo } from 'react';
+import React, { useContext, useState, useMemo, useEffect } from 'react';
 import { AppContext } from '../../context/AppContext';
 import Modal from '../../components/Modal';
 import Toast from '../../components/Toast';
@@ -27,7 +27,8 @@ export default function SawConfig() {
   const { 
     sawWeights, setSawWeights, 
     academicComponents, setAcademicComponents,
-    careers, setCareers
+    careers, setCareers,
+    riasecQuestions, setRiasecQuestions
   } = useContext(AppContext);
 
   const [activeTab, setActiveTab] = useState('criteria');
@@ -47,13 +48,22 @@ export default function SawConfig() {
 
   // Tab 3: RIASEC mapping state
   const [selectedMappingCareer, setSelectedMappingCareer] = useState(Object.keys(careers)[0] || '');
-  const [riasecChecks, setRiasecChecks] = useState({
-    R: false, I: false, A: false, S: false, E: false, C: false
+  const [riasecWeightsState, setRiasecWeightsState] = useState({
+    R: 0, I: 0, A: 0, S: 0, E: 0, C: 0
   });
 
   // Tab 4: Academic weights per career state
   const [selectedAcademicCareer, setSelectedAcademicCareer] = useState(Object.keys(careers)[0] || '');
   const [academicWeightsMap, setAcademicWeightsMap] = useState({});
+
+  // Tab 5: RIASEC Questions CRUD state
+  const [isQuestionModalOpen, setIsQuestionModalOpen] = useState(false);
+  const [questionEditId, setQuestionEditId] = useState(null);
+  const [questionType, setQuestionType] = useState('R');
+  const [questionText, setQuestionText] = useState('');
+  const [questionSearchQuery, setQuestionSearchQuery] = useState('');
+  const [questionCategoryFilter, setQuestionCategoryFilter] = useState('ALL');
+  const [questionCurrentPage, setQuestionCurrentPage] = useState(1);
 
   const triggerToast = (msg) => {
     setToast({ show: true, message: msg });
@@ -74,6 +84,9 @@ export default function SawConfig() {
 
   // --- Tab 1: Save weights ---
   const criteriaTotal = Number(c1W) + Number(c2W) + Number(c3W);
+
+  // --- Tab 3: RIASEC weights total ---
+  const riasecWeightsTotal = Object.values(riasecWeightsState).reduce((sum, w) => sum + Number(w || 0), 0);
 
   const handleSaveWeights = () => {
     if (criteriaTotal !== 100) {
@@ -151,36 +164,47 @@ export default function SawConfig() {
   const handleLoadMapping = (careerName) => {
     setSelectedMappingCareer(careerName);
     const careerData = careers[careerName];
-    if (careerData && careerData.riasecMapped) {
-      const checks = { R: false, I: false, A: false, S: false, E: false, C: false };
-      careerData.riasecMapped.forEach(code => {
-        checks[code] = true;
-      });
-      setRiasecChecks(checks);
+    const weights = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
+    if (careerData) {
+      if (careerData.riasecWeights) {
+        Object.entries(careerData.riasecWeights).forEach(([code, val]) => {
+          weights[code] = val;
+        });
+      } else if (careerData.riasecMapped) {
+        // Fallback to map existing arrays to equal weights summing to 100
+        const count = careerData.riasecMapped.length;
+        const equalWeight = count > 0 ? Math.round(100 / count) : 0;
+        careerData.riasecMapped.forEach(code => {
+          weights[code] = equalWeight;
+        });
+      }
     }
+    setRiasecWeightsState(weights);
   };
 
-  const handleRiasecCheckChange = (code) => {
-    setRiasecChecks(prev => ({
+  const handleRiasecWeightChange = (code, val) => {
+    const numeric = Math.max(0, Math.min(100, Number(val) || 0));
+    setRiasecWeightsState(prev => ({
       ...prev,
-      [code]: !prev[code]
+      [code]: numeric
     }));
   };
 
   const handleSaveMapping = () => {
-    const selectedCodes = Object.entries(riasecChecks)
-      .filter(([code, checked]) => checked)
+    const activeCodes = Object.entries(riasecWeightsState)
+      .filter(([_, w]) => w > 0)
       .map(([code]) => code);
 
-    if (selectedCodes.length === 0) {
-      triggerToast("Pilih setidaknya satu tipe RIASEC.");
+    if (activeCodes.length === 0) {
+      triggerToast("Masukkan bobot untuk setidaknya satu tipe RIASEC.");
       return;
     }
 
     const updated = { ...careers };
     updated[selectedMappingCareer] = {
       ...updated[selectedMappingCareer],
-      riasecMapped: selectedCodes
+      riasecMapped: activeCodes,
+      riasecWeights: riasecWeightsState
     };
     setCareers(updated);
     triggerToast(`Pemetaan RIASEC untuk "${selectedMappingCareer}" berhasil disimpan.`);
@@ -230,6 +254,81 @@ export default function SawConfig() {
     setCareers(updated);
     triggerToast(`Bobot kualifikasi akademik untuk "${selectedAcademicCareer}" berhasil disimpan.`);
   };
+
+  // --- Tab 5: RIASEC Questions CRUD handlers ---
+  const handleOpenAddQuestion = () => {
+    setQuestionEditId(null);
+    setQuestionType('R');
+    setQuestionText('');
+    setIsQuestionModalOpen(true);
+  };
+
+  const handleEditQuestion = (item) => {
+    setQuestionEditId(item.id);
+    setQuestionType(item.type);
+    setQuestionText(item.text);
+    setIsQuestionModalOpen(true);
+  };
+
+  const handleDeleteQuestion = (id) => {
+    if (window.confirm("Hapus pernyataan soal tes RIASEC ini?")) {
+      const updated = riasecQuestions.filter(q => q.id !== id);
+      setRiasecQuestions(updated);
+      triggerToast("Pernyataan soal berhasil dihapus.");
+    }
+  };
+
+  const handleSaveQuestion = (e) => {
+    e.preventDefault();
+    if (!questionText.trim()) {
+      triggerToast("Pernyataan soal tidak boleh kosong.");
+      return;
+    }
+
+    if (questionEditId !== null) {
+      // Edit
+      const updated = riasecQuestions.map(q => {
+        if (q.id === questionEditId) {
+          return { ...q, type: questionType, text: questionText };
+        }
+        return q;
+      });
+      setRiasecQuestions(updated);
+      triggerToast("Pernyataan soal berhasil diperbarui.");
+    } else {
+      // Add
+      const newQuestion = {
+        id: Date.now(),
+        type: questionType,
+        text: questionText
+      };
+      setRiasecQuestions([...riasecQuestions, newQuestion]);
+      triggerToast("Pernyataan soal berhasil ditambahkan.");
+    }
+    setIsQuestionModalOpen(false);
+  };
+
+  useEffect(() => {
+    setQuestionCurrentPage(1);
+  }, [questionSearchQuery, questionCategoryFilter]);
+
+  const filteredQuestions = useMemo(() => {
+    const questionsList = riasecQuestions || [];
+    return questionsList.filter(q => {
+      const matchesSearch = q.text.toLowerCase().includes(questionSearchQuery.toLowerCase());
+      const matchesCategory = questionCategoryFilter === 'ALL' || q.type === questionCategoryFilter;
+      return matchesSearch && matchesCategory;
+    });
+  }, [riasecQuestions, questionSearchQuery, questionCategoryFilter]);
+
+  const itemsPerPage = 5;
+  const totalItems = filteredQuestions.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+  const paginatedQuestions = useMemo(() => {
+    const startIndex = (questionCurrentPage - 1) * itemsPerPage;
+    return filteredQuestions.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredQuestions, questionCurrentPage]);
 
   return (
     <main className="w-full max-w-6xl mx-auto px-4 py-8 animate-fade-in">
@@ -284,6 +383,14 @@ export default function SawConfig() {
           }`}
         >
           Bobot Akademik Karir
+        </button>
+        <button 
+          onClick={() => switchTab('riasec-questions')} 
+          className={`flex-1 min-w-[160px] py-2.5 rounded-xl text-xs font-black tracking-tight transition-all duration-200 ${
+            activeTab === 'riasec-questions' ? 'bg-primary-light text-primary-dark shadow-sm' : 'text-slate-500 hover:bg-slate-50'
+          }`}
+        >
+          Kelola Soal RIASEC
         </button>
       </div>
 
@@ -434,46 +541,82 @@ export default function SawConfig() {
           </div>
 
           <article className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+            <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between flex-wrap gap-4">
               <div>
                 <h2 className="text-base font-black text-slate-900">Daftar Komponen Akademik</h2>
                 <p className="text-slate-500 text-xs mt-0.5">Kelola kelompok mata kuliah atau bidang penilaian akademik yang digunakan sistem.</p>
               </div>
               <button 
                 onClick={handleOpenCompAdd}
-                className="flex items-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-extrabold rounded-xl shadow-md active:scale-95 transition-all"
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-primary hover:bg-primary-dark text-white text-xs font-extrabold rounded-xl shadow-md cursor-pointer transition-all active:scale-95 shrink-0"
               >
-                <Plus className="w-4.5 h-4.5" />
+                <Plus className="w-4 h-4" />
                 Tambah Komponen
               </button>
             </div>
 
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              {academicComponents.map((comp) => (
-                <div key={comp.id} className="relative border border-slate-100 rounded-xl p-4 bg-slate-50/30 hover:border-blue-200 transition-all flex items-start gap-3.5 group">
-                  <span className="w-10 h-10 rounded-xl bg-primary-light text-primary-dark text-lg font-black grid place-items-center shrink-0">
-                    {comp.icon || '◫'}
-                  </span>
-                  <div className="min-w-0 pr-16">
-                    <h4 className="text-sm font-black text-slate-800 mb-1">{comp.name}</h4>
-                    <p className="text-slate-500 text-[11px] leading-relaxed line-clamp-2">{comp.desc}</p>
-                  </div>
-                  <div className="absolute top-4 right-4 flex gap-1.5">
-                    <button 
-                      onClick={() => handleEditComponent(comp)}
-                      className="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-primary-dark font-black text-[10px] transition-colors"
-                    >
-                      Ubah
-                    </button>
-                    <button 
-                      onClick={() => handleDeleteComponent(comp.id)}
-                      className="px-2.5 py-1 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-600 font-black text-[10px] transition-colors"
-                    >
-                      Nonaktifkan
-                    </button>
-                  </div>
-                </div>
-              ))}
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left border-collapse min-w-[600px]">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100 text-[10px] text-slate-400 uppercase font-black tracking-wider">
+                    <th className="px-6 py-3.5 text-center w-16">No</th>
+                    <th className="px-6 py-3.5 text-center w-20">Ikon</th>
+                    <th className="px-6 py-3.5 w-56">Komponen Akademik</th>
+                    <th className="px-6 py-3.5">Deskripsi</th>
+                    <th className="px-6 py-3.5 text-center w-28">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs">
+                  {academicComponents.map((comp, idx) => (
+                    <tr key={comp.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 text-center text-slate-400 font-bold">
+                        {idx + 1}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="inline-flex w-8 h-8 rounded-lg bg-primary-light text-primary-dark font-black text-sm items-center justify-center">
+                          {comp.icon || '◫'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-slate-800 font-bold">
+                        {comp.name}
+                      </td>
+                      <td className="px-6 py-4 text-slate-500 leading-relaxed">
+                        {comp.desc}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-2">
+                          <button 
+                            onClick={() => handleEditComponent(comp)}
+                            className="p-1.5 rounded-lg bg-blue-50 text-primary-dark hover:bg-blue-100 transition-colors cursor-pointer"
+                            title="Ubah"
+                          >
+                            <Sliders className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteComponent(comp.id)}
+                            className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors cursor-pointer"
+                            title="Hapus"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {academicComponents.length === 0 && (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
+                        Komponen akademik belum tersedia.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between text-slate-400 text-xs font-medium">
+              <span>Total <strong>{academicComponents.length}</strong> komponen akademik terdaftar.</span>
+              <span>Data ini terintegrasi dengan kriteria C2.</span>
             </div>
           </article>
         </section>
@@ -522,32 +665,62 @@ export default function SawConfig() {
                 </div>
               )}
 
-              {/* Checks grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {Object.keys(TYPE_INFO).map((code) => (
-                  <div key={code} className="relative">
-                    <input 
-                      type="checkbox" 
-                      id={`chk-${code}`} 
-                      checked={riasecChecks[code] || false}
-                      onChange={() => handleRiasecCheckChange(code)}
-                      className="absolute opacity-0 pointer-events-none"
-                    />
-                    <label 
-                      htmlFor={`chk-${code}`}
-                      className={`flex flex-col justify-center gap-1.5 p-3.5 border rounded-xl cursor-pointer select-none transition-all duration-150 min-h-[74px] ${
-                        riasecChecks[code] 
-                          ? 'border-primary bg-blue-50/50 text-primary-dark font-bold' 
-                          : 'border-slate-200 bg-white hover:bg-slate-50/80 text-slate-700'
-                      }`}
-                    >
-                      <strong className="text-base font-black leading-none block">{code}</strong>
-                      <span className={`text-[9.5px] leading-tight font-medium ${riasecChecks[code] ? 'text-primary-dark' : 'text-slate-400'}`}>
-                        {TYPE_INFO[code].name}
-                      </span>
-                    </label>
-                  </div>
-                ))}
+              {/* Weights Table list */}
+              <div className="overflow-x-auto w-full border border-slate-100 rounded-xl">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-[10px] text-slate-400 uppercase font-black tracking-wider">
+                      <th className="px-4 py-3">Tipe RIASEC</th>
+                      <th className="px-4 py-3">Status</th>
+                      <th className="px-4 py-3 text-right">Bobot Kesesuaian (%)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {Object.entries(TYPE_INFO).map(([code, info]) => {
+                      const weight = riasecWeightsState[code] || 0;
+                      const isLinked = weight > 0;
+                      return (
+                        <tr key={code} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="px-4 py-3">
+                            <div>
+                              <strong className="text-slate-800 font-bold block">{code} - {info.name}</strong>
+                              <span className="text-[10px] text-slate-400 block leading-tight mt-0.5">{info.description}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                              isLinked 
+                                ? 'text-primary-dark bg-blue-50 border border-blue-100'
+                                : 'text-slate-400 bg-slate-50 border border-slate-200'
+                            }`}>
+                              {isLinked ? 'Terhubung' : 'Terputus'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <input 
+                              type="number"
+                              min="0"
+                              max="100"
+                              value={weight}
+                              onChange={(e) => handleRiasecWeightChange(code, e.target.value)}
+                              className="w-16 px-2 py-1 text-right bg-white border border-slate-200 rounded-lg outline-none focus:border-primary text-xs"
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200/60 rounded-xl text-slate-700 text-xs font-bold mt-2">
+                <span className="flex items-center gap-1.5">
+                  Total Persentase Bobot:
+                  <span className="text-[10px] text-slate-400 font-normal">(Sebaiknya berjumlah 100%)</span>
+                </span>
+                <span className={`text-sm font-black ${riasecWeightsTotal === 100 ? 'text-emerald-600' : 'text-amber-600'}`}>
+                  {riasecWeightsTotal}%
+                </span>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
@@ -573,13 +746,27 @@ export default function SawConfig() {
               
               <div className="grid gap-3 text-xs">
                 {Object.entries(careers).map(([name, data]) => (
-                  <div key={name} className="flex items-center gap-3 py-2 border-b border-slate-50">
+                  <div key={name} className="flex items-center gap-3 py-2 border-b border-slate-100">
                     <span className="w-8 h-8 rounded-lg bg-primary-light text-primary-dark font-extrabold text-[11px] grid place-items-center shrink-0">
                       {name.split(' ').map(w => w[0]).join('')}
                     </span>
                     <div className="min-w-0 flex-1">
                       <strong className="text-slate-800 font-black block truncate leading-tight mb-0.5">{name}</strong>
-                      <span className="text-[10px] text-slate-400 block truncate leading-none">RIASEC: {data.riasecMapped.join(', ')}</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {data.riasecWeights ? (
+                          Object.entries(data.riasecWeights).filter(([_, w]) => w > 0).map(([code, w]) => (
+                            <span key={code} className="text-[9px] bg-slate-50 border border-slate-200 text-slate-550 font-extrabold px-1 rounded">
+                              {code}: {w}%
+                            </span>
+                          ))
+                        ) : (
+                          data.riasecMapped && data.riasecMapped.map(code => (
+                            <span key={code} className="text-[9px] bg-slate-50 border border-slate-200 text-slate-550 font-extrabold px-1 rounded">
+                              {code}
+                            </span>
+                          ))
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -765,6 +952,140 @@ export default function SawConfig() {
         </section>
       )}
 
+      {/* --- TAB PANEL 5: Kelola Soal RIASEC --- */}
+      {activeTab === 'riasec-questions' && (
+        <section className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between animate-fade-in">
+          <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between flex-wrap gap-4">
+            <div>
+              <h2 className="text-base font-black text-slate-900">Daftar Soal/Pernyataan Tes RIASEC</h2>
+              <p className="text-slate-500 text-xs mt-0.5">Kelola butir pernyataan kuesioner RIASEC yang digunakan untuk pemetaan minat karir mahasiswa.</p>
+            </div>
+
+            <div className="flex items-center gap-3 flex-wrap">
+              {/* Category Filter */}
+              <select 
+                value={questionCategoryFilter}
+                onChange={(e) => setQuestionCategoryFilter(e.target.value)}
+                className="px-3 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:border-primary text-xs cursor-pointer"
+              >
+                <option value="ALL">Semua Kategori</option>
+                <option value="R">R - Realistic</option>
+                <option value="I">I - Investigative</option>
+                <option value="A">A - Artistic</option>
+                <option value="S">S - Social</option>
+                <option value="E">E - Enterprising</option>
+                <option value="C">C - Conventional</option>
+              </select>
+
+              <div className="relative">
+                <input 
+                  type="search"
+                  placeholder="Cari pernyataan..."
+                  value={questionSearchQuery}
+                  onChange={(e) => setQuestionSearchQuery(e.target.value)}
+                  className="w-48 sm:w-60 pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl outline-none focus:border-primary focus:ring-4 focus:ring-blue-500/10 text-xs transition-all"
+                />
+                <HelpCircle className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+              </div>
+              <button 
+                onClick={handleOpenAddQuestion}
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-primary hover:bg-primary-dark text-white text-xs font-extrabold rounded-xl transition-all cursor-pointer shadow-md shadow-blue-500/10 active:scale-95"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Tambah Soal
+              </button>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left border-collapse min-w-[600px]">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-100 text-[10px] text-slate-400 uppercase font-black tracking-wider">
+                  <th className="px-6 py-3.5 text-center w-16">No</th>
+                  <th className="px-6 py-3.5 text-center w-24">Tipe</th>
+                  <th className="px-6 py-3.5">Pernyataan Soal</th>
+                  <th className="px-6 py-3.5 text-center w-28">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs">
+                {paginatedQuestions.map((item, idx) => {
+                  const absoluteIdx = (questionCurrentPage - 1) * itemsPerPage + idx + 1;
+                  return (
+                    <tr key={item.id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 text-center text-slate-400 font-bold">
+                        {absoluteIdx}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="inline-flex px-2.5 py-0.5 rounded-lg bg-blue-50 border border-blue-200 text-primary-dark font-black">
+                          {item.type}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-slate-700 font-medium leading-relaxed">
+                        {item.text}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-2">
+                          <button 
+                            onClick={() => handleEditQuestion(item)}
+                            className="p-1.5 rounded-lg bg-blue-50 text-primary-dark hover:bg-blue-100 transition-colors cursor-pointer"
+                            title="Ubah"
+                          >
+                            <Sliders className="w-3.5 h-3.5" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteQuestion(item.id)}
+                            className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors cursor-pointer"
+                            title="Hapus"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {paginatedQuestions.length === 0 && (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-12 text-center text-slate-400">
+                      Pernyataan soal RIASEC tidak ditemukan.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between flex-wrap gap-4 text-slate-400 text-xs font-medium">
+            <span>
+              Menampilkan <strong>{totalItems > 0 ? (questionCurrentPage - 1) * itemsPerPage + 1 : 0}</strong> - <strong>{Math.min(totalItems, questionCurrentPage * itemsPerPage)}</strong> dari <strong>{totalItems}</strong> pernyataan.
+            </span>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2">
+                <button 
+                  onClick={() => setQuestionCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={questionCurrentPage === 1}
+                  className="px-3 py-1.5 border border-slate-200 hover:border-slate-350 hover:bg-white text-slate-550 font-black rounded-lg disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                >
+                  Sebelumnya
+                </button>
+                <span className="font-bold px-1">
+                  {questionCurrentPage} / {totalPages}
+                </span>
+                <button 
+                  onClick={() => setQuestionCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={questionCurrentPage === totalPages}
+                  className="px-3 py-1.5 border border-slate-200 hover:border-slate-350 hover:bg-white text-slate-550 font-black rounded-lg disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+                >
+                  Selanjutnya
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Reusable Component Modal */}
       <Modal 
         isOpen={isCompModalOpen} 
@@ -828,6 +1149,61 @@ export default function SawConfig() {
               className="px-5 py-2 bg-primary hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl shadow-md active:scale-95"
             >
               Simpan Data
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* RIASEC Question Modal */}
+      <Modal 
+        isOpen={isQuestionModalOpen} 
+        title={questionEditId !== null ? "Ubah Soal RIASEC" : "Tambah Soal RIASEC"} 
+        onClose={() => setIsQuestionModalOpen(false)}
+      >
+        <form onSubmit={handleSaveQuestion} className="grid gap-4 text-sm">
+          <div className="grid gap-2">
+            <label htmlFor="questionType" className="font-bold text-slate-700 text-xs">Tipe RIASEC</label>
+            <select 
+              id="questionType"
+              value={questionType}
+              onChange={(e) => setQuestionType(e.target.value)}
+              className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-primary text-sm cursor-pointer"
+              required
+            >
+              <option value="R">R - Realistic</option>
+              <option value="I">I - Investigative</option>
+              <option value="A">A - Artistic</option>
+              <option value="S">S - Social</option>
+              <option value="E">E - Enterprising</option>
+              <option value="C">C - Conventional</option>
+            </select>
+          </div>
+
+          <div className="grid gap-2">
+            <label htmlFor="questionText" className="font-bold text-slate-700 text-xs">Pernyataan Soal</label>
+            <textarea 
+              id="questionText"
+              value={questionText}
+              onChange={(e) => setQuestionText(e.target.value)}
+              placeholder="Masukkan butir pernyataan minat..."
+              className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl outline-none focus:border-primary text-sm min-h-[90px] leading-relaxed"
+              required
+            />
+          </div>
+
+          <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100">
+            <button 
+              type="button" 
+              onClick={() => setIsQuestionModalOpen(false)}
+              className="px-4 py-2 border border-slate-200 hover:border-slate-350 hover:bg-slate-50 text-slate-500 font-bold text-xs rounded-xl"
+            >
+              Batal
+            </button>
+            <button 
+              type="submit"
+              className="px-5 py-2 bg-primary hover:bg-primary-dark text-white font-extrabold text-xs rounded-xl shadow-md active:scale-95"
+            >
+              Simpan Soal
             </button>
           </div>
         </form>

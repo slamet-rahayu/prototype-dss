@@ -12,7 +12,8 @@ const STORAGE_KEYS = {
   CAREERS: 'careerpath-careers',
   STUDENTS: 'careerpath-students',
   SCHEDULER: 'careerpath-scheduler',
-  HISTORY: 'careerpath-history'
+  HISTORY: 'careerpath-history',
+  RIASEC_QUESTIONS: 'careerpath-riasec-questions'
 };
 
 const DEFAULT_USER = {
@@ -34,6 +35,27 @@ const DEFAULT_ACADEMIC = [
   { id: 5, name: "Data dan Kecerdasan Buatan", desc: "Statistika, analitik data, dan konsep kecerdasan buatan.", grade: 86, status: "Sangat Baik", updated: "14 Juni 2026", icon: "◌", semester: "Semester 7", academicYear: "2025/2026" }
 ];
 
+const DEFAULT_RIASEC_QUESTIONS = [
+  { id: 1, type: "R", text: "Saya tertarik merakit, memperbaiki, atau menguji perangkat keras dan perangkat teknis." },
+  { id: 2, type: "R", text: "Saya menikmati aktivitas yang menghasilkan sesuatu secara nyata melalui alat, sistem, atau teknologi." },
+  { id: 3, type: "R", text: "Saya tertarik memahami cara kerja jaringan, perangkat komputer, atau infrastruktur teknologi." },
+  { id: 4, type: "I", text: "Saya menikmati memecahkan masalah yang membutuhkan analisis dan penalaran yang mendalam." },
+  { id: 5, type: "I", text: "Saya tertarik mencari pola dari data untuk memahami suatu permasalahan." },
+  { id: 6, type: "I", text: "Saya senang mempelajari konsep baru dan menguji berbagai kemungkinan solusi." },
+  { id: 7, type: "A", text: "Saya tertarik membuat desain visual, ide kreatif, atau pengalaman digital yang menarik." },
+  { id: 8, type: "A", text: "Saya menikmati kebebasan untuk mengekspresikan gagasan melalui karya atau rancangan." },
+  { id: 9, type: "A", text: "Saya tertarik mengembangkan tampilan aplikasi agar lebih mudah dan menyenangkan digunakan." },
+  { id: 10, type: "S", text: "Saya menikmati membantu orang lain memahami masalah atau mempelajari hal baru." },
+  { id: 11, type: "S", text: "Saya tertarik bekerja dalam tim dan mendengarkan kebutuhan orang lain." },
+  { id: 12, type: "S", text: "Saya senang memberikan arahan atau dukungan ketika seseorang mengalami kesulitan." },
+  { id: 13, type: "E", text: "Saya tertarik memimpin diskusi dan mengajak orang lain mencapai suatu tujuan." },
+  { id: 14, type: "E", text: "Saya nyaman menyampaikan ide serta meyakinkan orang lain terhadap suatu solusi." },
+  { id: 15, type: "E", text: "Saya tertarik pada perencanaan, pengambilan keputusan, dan pengembangan peluang." },
+  { id: 16, type: "C", text: "Saya nyaman bekerja dengan data, aturan, dan prosedur yang terstruktur." },
+  { id: 17, type: "C", text: "Saya teliti dalam mengatur informasi, dokumentasi, atau rincian pekerjaan." },
+  { id: 18, type: "C", text: "Saya menikmati pekerjaan yang membutuhkan ketepatan, keteraturan, dan konsistensi." }
+];
+
 const DEFAULT_RIASEC_RESULT = {
   scores: { R: 12, I: 14, A: 10, S: 8, E: 9, C: 11 },
   top: ["I", "R", "C"],
@@ -48,6 +70,7 @@ const DEFAULT_CAREERS = {
     description: "Mengembangkan, menguji, dan memelihara aplikasi atau sistem perangkat lunak.",
     subtitle: "Pengembangan perangkat lunak dan solusi digital",
     riasecMapped: ["I", "R", "C"],
+    riasecWeights: { R: 30, I: 50, A: 0, S: 0, E: 0, C: 20 },
     academicWeights: { "Pemrograman": 35, "Basis Data": 25, "Analisis dan Perancangan Sistem": 20, "Jaringan dan Keamanan": 10, "Data dan Kecerdasan Buatan": 10 },
     marketDemandScore: 90,
     marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Software Engineer.", vacancy: "520", trend: "↗ Tren meningkat", short: "Jakarta", shortNote: "dan peluang remote", location: "Jakarta, Bandung, dan Remote", skills: ["Java", "JavaScript", "SQL", "Git", "REST API"], note: "Data pasar kerja ini digunakan sebagai salah satu pertimbangan dalam kriteria kebutuhan pasar kerja (C3)." }
@@ -57,6 +80,7 @@ const DEFAULT_CAREERS = {
     description: "Menganalisis data, menghasilkan wawasan, dan membuat laporan visual.",
     subtitle: "Analisis, pengolahan, dan visualisasi data",
     riasecMapped: ["I", "C", "R"],
+    riasecWeights: { R: 20, I: 50, A: 0, S: 0, E: 0, C: 30 },
     academicWeights: { "Pemrograman": 15, "Basis Data": 35, "Analisis dan Perancangan Sistem": 15, "Jaringan dan Keamanan": 5, "Data dan Kecerdasan Buatan": 30 },
     marketDemandScore: 88,
     marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Data Analyst.", vacancy: "340", trend: "↗ Tren meningkat", short: "Jakarta", shortNote: "dan kota besar lain", location: "Jakarta, Tangerang, dan Surabaya", skills: ["SQL", "Excel", "Power BI", "Python", "Statistics"], note: "Peran Data Analyst banyak dibutuhkan untuk membantu organisasi mengambil keputusan berbasis data." }
@@ -66,6 +90,7 @@ const DEFAULT_CAREERS = {
     description: "Melindungi infrastruktur jaringan, data, dan sistem dari ancaman keamanan siber.",
     subtitle: "Keamanan informasi dan perlindungan sistem",
     riasecMapped: ["R", "I", "E"],
+    riasecWeights: { R: 50, I: 30, A: 0, S: 0, E: 20, C: 0 },
     academicWeights: { "Pemrograman": 15, "Basis Data": 15, "Analisis dan Perancangan Sistem": 15, "Jaringan dan Keamanan": 45, "Data dan Kecerdasan Buatan": 10 },
     marketDemandScore: 84,
     marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Cybersecurity Analyst.", vacancy: "210", trend: "↗ Tren meningkat", short: "Jakarta", shortNote: "dan pusat industri", location: "Jakarta, Bandung, dan Batam", skills: ["Network", "SIEM", "Security", "Linux", "Incident Response"], note: "Permintaan meningkat karena organisasi membutuhkan perlindungan sistem, data, dan infrastruktur digital." }
@@ -75,6 +100,7 @@ const DEFAULT_CAREERS = {
     description: "Menjembatani kebutuhan bisnis dengan solusi teknologi informasi yang tepat.",
     subtitle: "Analisis kebutuhan bisnis dan solusi teknologi",
     riasecMapped: ["I", "S", "E"],
+    riasecWeights: { R: 0, I: 50, A: 0, S: 30, E: 20, C: 0 },
     academicWeights: { "Pemrograman": 10, "Basis Data": 20, "Analisis dan Perancangan Sistem": 45, "Jaringan dan Keamanan": 15, "Data dan Kecerdasan Buatan": 10 },
     marketDemandScore: 86,
     marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Business Analyst.", vacancy: "310", trend: "→ Tren stabil", short: "Jakarta", shortNote: "dan wilayah penyangga", location: "Jakarta, Tangerang, dan Bekasi", skills: ["Requirement Analysis", "BPMN", "Communication", "Documentation", "SQL"], note: "Business Analyst diperlukan untuk menerjemahkan kebutuhan bisnis menjadi kebutuhan sistem yang terstruktur." }
@@ -84,6 +110,7 @@ const DEFAULT_CAREERS = {
     description: "Merancang antarmuka pengguna (UI) dan alur pengalaman pengguna (UX) untuk produk digital.",
     subtitle: "Desain pengalaman pengguna dan produk digital",
     riasecMapped: ["A", "S", "I"],
+    riasecWeights: { R: 0, I: 20, A: 50, S: 30, E: 0, C: 0 },
     academicWeights: { "Pemrograman": 20, "Basis Data": 10, "Analisis dan Perancangan Sistem": 40, "Jaringan dan Keamanan": 10, "Data dan Kecerdasan Buatan": 20 },
     marketDemandScore: 80,
     marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk UI/UX Designer.", vacancy: "260", trend: "→ Tren stabil", short: "Bandung", shortNote: "dan kota kreatif", location: "Jakarta, Bandung, dan Yogyakarta", skills: ["Figma", "Wireframe", "User Research", "Prototype", "Design System"], note: "Posisi UI/UX Designer berfokus pada pengembangan pengalaman dan antarmuka produk digital." }
@@ -93,6 +120,7 @@ const DEFAULT_CAREERS = {
     description: "Mengintegrasikan tim developer (Dev) dengan operasional TI (Ops) untuk mengotomatisasi pengujian, perilisan, dan pemeliharaan infrastruktur cloud.",
     subtitle: "Otomatisasi infrastruktur dan rilis kode",
     riasecMapped: ["R", "I", "C"],
+    riasecWeights: { R: 40, I: 30, A: 0, S: 0, E: 0, C: 30 },
     academicWeights: { "Pemrograman": 25, "Basis Data": 20, "Analisis dan Perancangan Sistem": 15, "Jaringan dan Keamanan": 30, "Data dan Kecerdasan Buatan": 10 },
     marketDemandScore: 87,
     marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk DevOps Engineer.", vacancy: "220", trend: "↗ Tren meningkat", short: "Jakarta", shortNote: "dan peluang remote", location: "Jakarta, Tangerang, dan Remote", skills: ["Docker", "Kubernetes", "AWS", "CI/CD Pipelines", "Linux Shell"], note: "DevOps Engineer sangat diminati seiring adopsi cloud computing oleh startup dan korporasi." }
@@ -102,6 +130,7 @@ const DEFAULT_CAREERS = {
     description: "Menguji keandalan perangkat lunak, merancang skenario pengujian automated/manual, mengidentifikasi bug, dan menjaga standar perilisan.",
     subtitle: "Pengujian kualitas dan keandalan sistem software",
     riasecMapped: ["C", "I", "R"],
+    riasecWeights: { R: 20, I: 35, A: 0, S: 0, E: 0, C: 45 },
     academicWeights: { "Pemrograman": 25, "Basis Data": 20, "Analisis dan Perancangan Sistem": 25, "Jaringan dan Keamanan": 15, "Data dan Kecerdasan Buatan": 15 },
     marketDemandScore: 82,
     marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Quality Assurance Engineer.", vacancy: "190", trend: "→ Tren stabil", short: "Jakarta", shortNote: "dan kota besar", location: "Jakarta, Bandung, dan Surabaya", skills: ["Selenium", "Cypress", "Postman", "QA Sprints", "SQL Testing"], note: "QA Engineer bertugas menjamin perangkat lunak bebas dari kecacatan mayor sebelum dilepas ke publik." }
@@ -111,6 +140,7 @@ const DEFAULT_CAREERS = {
     description: "Mengelola, mengamankan, mengoptimalkan, dan memelihara sistem database (DBMS) untuk kelancaran akses informasi organisasi.",
     subtitle: "Manajemen, performa, dan keamanan basis data",
     riasecMapped: ["C", "I", "R"],
+    riasecWeights: { R: 20, I: 30, A: 0, S: 0, E: 0, C: 50 },
     academicWeights: { "Pemrograman": 15, "Basis Data": 45, "Analisis dan Perancangan Sistem": 20, "Jaringan dan Keamanan": 15, "Data dan Kecerdasan Buatan": 5 },
     marketDemandScore: 78,
     marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Database Administrator.", vacancy: "110", trend: "→ Tren stabil", short: "Jakarta", shortNote: "dan wilayah perkantoran", location: "Jakarta, Bekasi, dan Cikarang", skills: ["SQL Tuning", "Oracle Database", "PostgreSQL", "Backup & Recovery", "NoSQL"], note: "Database Administrator menjaga performa database agar tidak mengalami downtime." }
@@ -120,6 +150,7 @@ const DEFAULT_CAREERS = {
     description: "Mengkonfigurasi, memelihara, mengamankan, dan menganalisis infrastruktur jaringan komputer lokal (LAN) maupun luas (WAN).",
     subtitle: "Pengelolaan dan pemeliharaan jaringan organisasi",
     riasecMapped: ["R", "C", "I"],
+    riasecWeights: { R: 50, I: 20, A: 0, S: 0, E: 0, C: 30 },
     academicWeights: { "Pemrograman": 10, "Basis Data": 15, "Analisis dan Perancangan Sistem": 15, "Jaringan dan Keamanan": 50, "Data dan Kecerdasan Buatan": 10 },
     marketDemandScore: 76,
     marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Network Administrator.", vacancy: "135", trend: "→ Tren stabil", short: "Jakarta", shortNote: "dan penyedia infrastruktur", location: "Jakarta, Surabaya, dan Medan", skills: ["Cisco Routing", "Mikrotik RouterOS", "TCP/IP Protocol", "Firewalls", "Network Topology"], note: "Network Administrator bertanggung jawab atas keandalan koneksi internal dan eksternal perusahaan." }
@@ -175,7 +206,17 @@ export const AppProvider = ({ children }) => {
     const saved = localStorage.getItem(STORAGE_KEYS.CAREERS);
     if (saved) {
       const parsed = JSON.parse(saved);
-      return { ...DEFAULT_CAREERS, ...parsed };
+      const merged = {};
+      Object.keys(DEFAULT_CAREERS).forEach(key => {
+        const defaultCareer = DEFAULT_CAREERS[key];
+        const parsedCareer = parsed[key] || {};
+        merged[key] = {
+          ...defaultCareer,
+          ...parsedCareer,
+          riasecWeights: parsedCareer.riasecWeights || defaultCareer.riasecWeights
+        };
+      });
+      return merged;
     }
     return DEFAULT_CAREERS;
   });
@@ -193,6 +234,11 @@ export const AppProvider = ({ children }) => {
   const [recommendationHistory, setRecommendationHistory] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.HISTORY);
     return saved ? JSON.parse(saved) : DEFAULT_HISTORY;
+  });
+
+  const [riasecQuestions, setRiasecQuestions] = useState(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.RIASEC_QUESTIONS);
+    return saved ? JSON.parse(saved) : DEFAULT_RIASEC_QUESTIONS;
   });
 
   const [sawResults, setSawResults] = useState([]);
@@ -246,6 +292,10 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(recommendationHistory));
   }, [recommendationHistory]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.RIASEC_QUESTIONS, JSON.stringify(riasecQuestions));
+  }, [riasecQuestions]);
 
   const login = (email, password) => {
     if (email === 'admin@careerpath.id') {
@@ -305,6 +355,8 @@ export const AppProvider = ({ children }) => {
       setSchedulerJobs,
       recommendationHistory,
       setRecommendationHistory,
+      riasecQuestions,
+      setRiasecQuestions,
       sawResults
     }}>
       {children}

@@ -4,31 +4,7 @@ import { AppContext } from '../../context/AppContext';
 import Toast from '../../components/Toast';
 import { ArrowLeft, ArrowRight, RotateCcw, Award, CheckCircle, Info } from 'lucide-react';
 
-const QUESTIONS = [
-  { type: "R", text: "Saya tertarik merakit, memperbaiki, atau menguji perangkat keras dan perangkat teknis." },
-  { type: "R", text: "Saya menikmati aktivitas yang menghasilkan sesuatu secara nyata melalui alat, sistem, atau teknologi." },
-  { type: "R", text: "Saya tertarik memahami cara kerja jaringan, perangkat komputer, atau infrastruktur teknologi." },
 
-  { type: "I", text: "Saya menikmati memecahkan masalah yang membutuhkan analisis dan penalaran yang mendalam." },
-  { type: "I", text: "Saya tertarik mencari pola dari data untuk memahami suatu permasalahan." },
-  { type: "I", text: "Saya senang mempelajari konsep baru dan menguji berbagai kemungkinan solusi." },
-
-  { type: "A", text: "Saya tertarik membuat desain visual, ide kreatif, atau pengalaman digital yang menarik." },
-  { type: "A", text: "Saya menikmati kebebasan untuk mengekspresikan gagasan melalui karya atau rancangan." },
-  { type: "A", text: "Saya tertarik mengembangkan tampilan aplikasi agar lebih mudah dan menyenangkan digunakan." },
-
-  { type: "S", text: "Saya menikmati membantu orang lain memahami masalah atau mempelajari hal baru." },
-  { type: "S", text: "Saya tertarik bekerja dalam tim dan mendengarkan kebutuhan orang lain." },
-  { type: "S", text: "Saya senang memberikan arahan atau dukungan ketika seseorang mengalami kesulitan." },
-
-  { type: "E", text: "Saya tertarik memimpin diskusi dan mengajak orang lain mencapai suatu tujuan." },
-  { type: "E", text: "Saya nyaman menyampaikan ide serta meyakinkan orang lain terhadap suatu solusi." },
-  { type: "E", text: "Saya tertarik pada perencanaan, pengambilan keputusan, dan pengembangan peluang." },
-
-  { type: "C", text: "Saya nyaman bekerja dengan data, aturan, dan prosedur yang terstruktur." },
-  { type: "C", text: "Saya teliti dalam mengatur informasi, dokumentasi, atau rincian pekerjaan." },
-  { type: "C", text: "Saya menikmati pekerjaan yang membutuhkan ketepatan, keteraturan, dan konsistensi." }
-];
 
 const TYPE_INFO = {
   R: {
@@ -72,11 +48,18 @@ const OPTIONS_SCALE = [
 ];
 
 export default function RiasecQuiz() {
-  const { riasecProgress, setRiasecProgress, riasecResult, setRiasecResult } = useContext(AppContext);
+  const { riasecProgress, setRiasecProgress, riasecResult, setRiasecResult, riasecQuestions } = useContext(AppContext);
   const navigate = useNavigate();
 
+  const QUESTIONS = riasecQuestions || [];
+
   const [currentIndex, setCurrentIndex] = useState(riasecProgress.currentIndex || 0);
-  const [answers, setAnswers] = useState(riasecProgress.answers || Array(QUESTIONS.length).fill(null));
+  const [answers, setAnswers] = useState(() => {
+    if (riasecProgress.answers && riasecProgress.answers.length === QUESTIONS.length) {
+      return riasecProgress.answers;
+    }
+    return Array(QUESTIONS.length).fill(null);
+  });
   const [isQuizForced, setIsQuizForced] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '' });
 

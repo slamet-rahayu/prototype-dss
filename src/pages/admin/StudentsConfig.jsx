@@ -5,11 +5,8 @@ import Toast from '../../components/Toast';
 import { 
   Search, 
   Trash2, 
-  Edit3, 
-  Plus, 
-  Users, 
-  ShieldAlert,
-  UserCheck
+  Eye,
+  X
 } from 'lucide-react';
 
 export default function StudentsConfig() {
@@ -115,7 +112,7 @@ export default function StudentsConfig() {
       <section className="flex items-start md:items-end justify-between gap-4 flex-col md:flex-row mb-8 w-full">
         <div>
           <h1 className="text-2.5xl md:text-3.5xl font-black text-slate-900 tracking-tight leading-none">Manajemen Mahasiswa</h1>
-          <p className="text-slate-500 text-sm mt-2">Kelola data mahasiswa terdaftar, data credential login, dan status kelengkapan data rekomendasinya.</p>
+          <p className="text-slate-500 text-sm mt-2">Memantau data mahasiswa, status akun, dan kelengkapan data rekomendasi.</p>
         </div>
         
       </section>
@@ -157,7 +154,6 @@ export default function StudentsConfig() {
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between flex-wrap gap-4">
           <div>
             <h2 className="text-base font-black text-slate-900">Daftar Mahasiswa</h2>
-            <p className="text-slate-500 text-xs mt-0.5">Kelola credential data mahasiswa, program studi, dan progress pengerjaannya.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -178,7 +174,7 @@ export default function StudentsConfig() {
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-[10px] text-slate-400 uppercase font-black tracking-wider">
-                <th className="px-6 py-3.5">NIM & Mahasiswa</th>
+                <th className="px-6 py-3.5">Mahasiswa</th>
                 <th className="px-6 py-3.5">Alamat Email</th>
                 <th className="px-6 py-3.5">Program Studi</th>
                 <th className="px-6 py-3.5">Semester</th>
@@ -196,7 +192,6 @@ export default function StudentsConfig() {
                       </span>
                       <div>
                         <strong className="text-slate-800 block font-bold">{item.name}</strong>
-                        <span className="text-[10px] text-slate-400 font-medium">NIM: {item.nim}</span>
                       </div>
                     </div>
                   </td>
@@ -223,16 +218,16 @@ export default function StudentsConfig() {
                       <button 
                         onClick={() => handleEdit(item)}
                         className="p-1.5 rounded-lg bg-blue-50 text-primary-dark hover:bg-blue-100 transition-colors"
-                        title="Ubah"
+                        title="Lihat Detail"
                       >
-                        <Edit3 className="w-3.5 h-3.5" />
+                        <Eye className="w-3.5 h-3.5" />
                       </button>
                       <button 
                         onClick={() => handleDelete(item.id)}
-                        className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
-                        title="Hapus"
+                        className="p-1.5 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors"
+                        title="Nonaktifkan"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </td>

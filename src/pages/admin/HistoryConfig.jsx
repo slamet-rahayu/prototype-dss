@@ -64,7 +64,7 @@ export default function HistoryConfig() {
       <section className="flex items-start md:items-end justify-between gap-4 flex-col md:flex-row mb-8 w-full">
         <div>
           <h1 className="text-2.5xl md:text-3.5xl font-black text-slate-900 tracking-tight leading-none">Riwayat Rekomendasi</h1>
-          <p className="text-slate-500 text-sm mt-2">Pantau log perhitungan rekomendasi karir mahasiswa tingkat akhir menggunakan metode SAW yang tersimpan di sistem.</p>
+          <p className="text-slate-500 text-sm mt-2">Pantau Daftar Riwayat Rekomendasi karir mahasiswa.</p>
         </div>
       </section>
 
@@ -81,17 +81,17 @@ export default function HistoryConfig() {
         <article className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[110px]">
           <div className="absolute right-[-20px] bottom-[-20px] w-20 h-20 rounded-full bg-primary-light/35 -z-0" />
           <div className="relative z-10">
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Status Valid</span>
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Rekomendasi Hari Ini</span>
             <strong className="text-2xl font-black text-slate-900 block leading-none">{validCount}</strong>
-            <span className="text-[10px] text-slate-400 font-medium">Rekomendasi disetujui sistem</span>
+            <span className="text-[10px] text-slate-400 font-medium">Rekomendasi karir mahasiswa hari ini</span>
           </div>
         </article>
         <article className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[110px]">
           <div className="absolute right-[-20px] bottom-[-20px] w-20 h-20 rounded-full bg-primary-light/35 -z-0" />
           <div className="relative z-10">
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Perlu Review</span>
-            <strong className="text-2xl font-black text-slate-900 block leading-none">{reviewCount}</strong>
-            <span className="text-[10px] text-slate-400 font-medium">Rekomendasi butuh pemeriksaan</span>
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Total Mahasiswa dengan Riwayat</span>
+            <strong className="text-2xl font-black text-slate-900 block leading-none">3/4</strong>
+            <span className="text-[10px] text-slate-400 font-medium">Total Mahasiswa dengan Rekomendasi</span>
           </div>
         </article>
       </section>
@@ -100,8 +100,8 @@ export default function HistoryConfig() {
       <section className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden flex flex-col justify-between">
         <div className="px-6 py-5 border-b border-slate-100 flex items-center justify-between flex-wrap gap-4">
           <div>
-            <h2 className="text-base font-black text-slate-900">Daftar Log Riwayat Rekomendasi</h2>
-            <p className="text-slate-500 text-xs mt-0.5">Daftar riwayat rekomendasi karir mahasiswa hasil kalkulasi algoritma SAW.</p>
+            <h2 className="text-base font-black text-slate-900">Daftar Riwayat Rekomendasi</h2>
+            <p className="text-slate-500 text-xs mt-0.5">Daftar hasil perhitungan rekomendasi karir mahasiswa menggunakan metode SAW.</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -122,12 +122,11 @@ export default function HistoryConfig() {
           <table className="w-full text-left border-collapse min-w-[850px]">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-[10px] text-slate-400 uppercase font-black tracking-wider">
-                <th className="px-6 py-3.5">NIM & Mahasiswa</th>
+                <th className="px-6 py-3.5">Mahasiswa</th>
                 <th className="px-6 py-3.5 text-center">Kode RIASEC</th>
                 <th className="px-6 py-3.5">Rekomendasi Teratas</th>
                 <th className="px-6 py-3.5 text-center">Skor SAW</th>
                 <th className="px-6 py-3.5">Tanggal Kalkulasi</th>
-                <th className="px-6 py-3.5 text-center">Status</th>
                 <th className="px-6 py-3.5 text-center">Aksi</th>
               </tr>
             </thead>
@@ -141,7 +140,6 @@ export default function HistoryConfig() {
                       </span>
                       <div>
                         <strong className="text-slate-800 block font-bold">{item.name}</strong>
-                        <span className="text-[10px] text-slate-400 font-medium">NIM: {item.nim}</span>
                       </div>
                     </div>
                   </td>
@@ -159,15 +157,6 @@ export default function HistoryConfig() {
                   <td className="px-6 py-4 text-slate-500 font-medium leading-relaxed">
                     {item.date}
                   </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-black ${
-                      item.status === 'Valid' 
-                        ? 'text-emerald-800 bg-emerald-50' 
-                        : 'text-amber-800 bg-amber-50'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-2">
                       <button 
@@ -176,13 +165,6 @@ export default function HistoryConfig() {
                         title="Lihat Rincian"
                       >
                         <Eye className="w-3.5 h-3.5" />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(item.id)}
-                        className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
-                        title="Hapus Log"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   </td>

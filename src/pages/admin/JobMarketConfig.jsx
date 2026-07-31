@@ -1,4 +1,4 @@
-import React, { useContext, useState, useMemo } from 'react';
+import React, { useContext, useState, useMemo, useEffect } from 'react';
 import { AppContext } from '../../context/AppContext';
 import Modal from '../../components/Modal';
 import Toast from '../../components/Toast';
@@ -18,6 +18,7 @@ export default function JobMarketConfig() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '' });
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Form states
   const [selectedCareerKey, setSelectedCareerKey] = useState('');
@@ -74,6 +75,10 @@ export default function JobMarketConfig() {
     setIsModalOpen(false);
   };
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
   const filteredMarketList = useMemo(() => {
     return Object.entries(careers).filter(([name, data]) => 
       name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -81,6 +86,15 @@ export default function JobMarketConfig() {
       (data.marketDemand?.skills || []).some(s => s.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [careers, searchQuery]);
+
+  const itemsPerPage = 5;
+  const totalItems = filteredMarketList.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+  const paginatedMarketList = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredMarketList.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredMarketList, currentPage]);
 
   return (
     <main className="w-full max-w-6xl mx-auto px-4 py-8 animate-fade-in">
@@ -95,7 +109,7 @@ export default function JobMarketConfig() {
       <section className="flex items-start md:items-end justify-between gap-4 flex-col md:flex-row mb-8 w-full">
         <div>
           <h1 className="text-2.5xl md:text-3.5xl font-black text-slate-900 tracking-tight leading-none">Data Pasar Kerja</h1>
-          <p className="text-slate-500 text-sm mt-2">Pantau dan kelola database lowongan pekerjaan bidang TI yang digunakan sebagai nilai kualifikasi kriteria C3.</p>
+          <p className="text-slate-500 text-sm mt-2">Pantau data jumlah lowongan kerja bidang teknologi informasi yang digunakan sebagai dasar perhitungan kriteria kebutuhan pasar kerja atau C3.</p>
         </div>
       </section>
 
@@ -104,16 +118,16 @@ export default function JobMarketConfig() {
         <article className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[110px]">
           <div className="absolute right-[-20px] bottom-[-20px] w-20 h-20 rounded-full bg-primary-light/35 -z-0" />
           <div className="relative z-10">
-            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Rerata Indeks Pasar</span>
-            <strong className="text-2xl font-black text-slate-900 block leading-none">85.6</strong>
-            <span className="text-[10px] text-slate-400 font-medium">Kategori kualifikasi C3</span>
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Karir Berhasil Disinkronkan</span>
+            <strong className="text-2xl font-black text-slate-900 block leading-none">9/9</strong>
+            <span className="text-[10px] text-slate-400 font-medium">Alternatif karir</span>
           </div>
         </article>
         <article className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[110px]">
           <div className="absolute right-[-20px] bottom-[-20px] w-20 h-20 rounded-full bg-primary-light/35 -z-0" />
           <div className="relative z-10">
             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Total Lowongan</span>
-            <strong className="text-2xl font-black text-slate-900 block leading-none">1.640+</strong>
+            <strong className="text-2xl font-black text-slate-900 block leading-none">1.640</strong>
             <span className="text-[10px] text-slate-400 font-medium">Lowongan kerja TI terindeks</span>
           </div>
         </article>
@@ -122,7 +136,7 @@ export default function JobMarketConfig() {
           <div className="relative z-10">
             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Status Sinkronisasi</span>
             <strong className="text-2xl font-black text-slate-900 block leading-none">Otomatis</strong>
-            <span className="text-[10px] text-slate-400 font-medium">Melalui scheduler Scraper IT</span>
+            <span className="text-[10px] text-slate-400 font-medium">Melalui scheduler</span>
           </div>
         </article>
       </section>
@@ -154,15 +168,14 @@ export default function JobMarketConfig() {
             <thead>
               <tr className="bg-slate-50 border-b border-slate-100 text-[10px] text-slate-400 uppercase font-black tracking-wider">
                 <th className="px-6 py-3.5">Alternatif Karir</th>
-                <th className="px-6 py-3.5 text-center">Indeks C3 (0-100)</th>
                 <th className="px-6 py-3.5 text-center">Lowongan Kerja</th>
-                <th className="px-6 py-3.5">Keterampilan Utama</th>
-                <th className="px-6 py-3.5">Lokasi Utama</th>
+                <th className="px-6 py-3.5">Cakupan Pencarian</th>
+                <th className="px-6 py-3.5">Tanggal Pembaruan</th>
                 <th className="px-6 py-3.5 text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-xs">
-              {filteredMarketList.map(([name, data]) => (
+              {paginatedMarketList.map(([name, data]) => (
                 <tr key={name} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -173,43 +186,64 @@ export default function JobMarketConfig() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <strong className="text-base font-black text-primary-dark leading-none">{data.marketDemandScore || 80}</strong>
-                  </td>
-                  <td className="px-6 py-4 text-center">
                     <div className="inline-flex items-center gap-1">
                       <strong className="text-slate-800 font-bold">{data.marketDemand?.vacancy || '200'}</strong>
-                      <span className="text-[10px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-black">{data.marketDemand?.trend || '↗'}</span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-wrap gap-1">
-                      {data.marketDemand?.skills?.map(skill => (
-                        <span key={skill} className="px-2 py-0.5 bg-slate-100 text-slate-600 font-bold rounded text-[10px]">{skill}</span>
-                      ))}
                     </div>
                   </td>
                   <td className="px-6 py-4 text-slate-500 font-medium leading-relaxed">
-                    {data.marketDemand?.location || 'Jakarta, Remote'}
+                    Singapore
+                  </td>
+                  <td className="px-6 py-4 text-slate-500 font-medium leading-relaxed">
+                    4 Juli 2026, 12:05 WIB
                   </td>
                   <td className="px-6 py-4 text-center">
                     <button 
                       onClick={() => handleEdit(name, data)}
-                      className="px-2.5 py-1.5 rounded-lg bg-blue-50 text-primary-dark hover:bg-blue-100 font-black text-[10px] transition-colors"
+                      className="px-2.5 py-1.5 rounded-lg bg-blue-50 text-primary-dark hover:bg-blue-100 font-black text-[10px] cursor-pointer transition-colors"
                     >
-                      Ubah
+                      Lihat Detail
                     </button>
                   </td>
                 </tr>
               ))}
-              {filteredMarketList.length === 0 && (
+              {paginatedMarketList.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-slate-400">
+                  <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
                     Data pasar kerja tidak ditemukan.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination Bar */}
+        <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between flex-wrap gap-4 text-slate-400 text-xs font-medium">
+          <span>
+            Menampilkan <strong>{totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</strong> - <strong>{Math.min(totalItems, currentPage * itemsPerPage)}</strong> dari <strong>{totalItems}</strong> data pasar kerja.
+          </span>
+
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1.5 border border-slate-200 hover:border-slate-350 hover:bg-white text-slate-550 font-black rounded-lg disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+              >
+                Sebelumnya
+              </button>
+              <span className="font-bold px-1">
+                {currentPage} / {totalPages}
+              </span>
+              <button 
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1.5 border border-slate-200 hover:border-slate-350 hover:bg-white text-slate-550 font-black rounded-lg disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:bg-transparent transition-all cursor-pointer"
+              >
+                Selanjutnya
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
