@@ -1,99 +1,152 @@
-import React, { useContext } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+"use client";
+
+import React, { useContext, useState } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { AppContext } from '../context/AppContext';
+import ThemeToggle from './ThemeToggle';
+import { Menu, X, Compass, User, LogOut } from 'lucide-react';
 
 export default function Navbar() {
-  const { user, logout, login } = useContext(AppContext);
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { user, logout } = useContext(AppContext);
+  const pathname = usePathname();
+  const router = useRouter();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const handleRoleToggle = (e) => {
-    const roleSelected = e.target.value;
-    if (roleSelected === 'admin') {
-      login('admin@careerpath.id', 'password');
-      navigate('/admin');
-    } else {
-      login('mameriyadi6@gmail.com', 'password');
-      navigate('/');
-    }
-  };
+  const navItems = [
+    { label: 'Beranda', path: '/' },
+    { label: 'Data Akademik', path: '/akademik' },
+    { label: 'Tes RIASEC', path: '/riasec' },
+    { label: 'Hasil Rekomendasi', path: '/rekomendasi' },
+    { label: 'Katalog Karir', path: '/eksplorasi' },
+    { label: 'Profil', path: '/profile' }
+  ];
 
   const isActive = (path) => {
-    return location.pathname === path ? 'text-primary-dark bg-blue-50/70' : 'text-slate-500 hover:text-primary-dark hover:bg-slate-50';
+    return pathname === path;
   };
 
   return (
-    <header className="sticky top-0 z-40 h-[72px] flex items-center justify-between gap-6 px-6 md:px-12 bg-white/90 border-b border-slate-200/80 backdrop-blur-md">
-      <Link to="/" className="flex items-center gap-2.5 text-lg font-black text-primary-dark tracking-tight hover:opacity-95 transition-opacity">
-        <span className="w-10 h-10 grid place-items-center rounded-xl text-white font-bold bg-gradient-to-br from-primary-dark to-primary shadow-lg shadow-blue-500/20 text-lg">
-          ✦
-        </span>
-        <span>CareerPath</span>
-      </Link>
-
-      {user && user.role === 'student' && (
-        <nav className="hidden md:flex items-center gap-1.5">
-          <Link to="/" className={`px-3.5 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${isActive('/')}`}>
-            Beranda
-          </Link>
-          <Link to="/akademik" className={`px-3.5 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${isActive('/akademik')}`}>
-            Data Akademik
-          </Link>
-          <Link to="/riasec" className={`px-3.5 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${isActive('/riasec')}`}>
-            Tes RIASEC
-          </Link>
-          <Link to="/rekomendasi" className={`px-3.5 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${isActive('/rekomendasi')}`}>
-            Hasil Rekomendasi
-          </Link>
-          <Link to="/profile" className={`px-3.5 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${isActive('/profile')}`}>
-            Profil
-          </Link>
-        </nav>
-      )}
-
-      <div className="flex items-center gap-3">
-        {/* Role Toggle for Prototype Convenience */}
-        {user && (
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs">
-            <span className="text-slate-400 font-bold">Role:</span>
-            <select 
-              value={user.role} 
-              onChange={handleRoleToggle}
-              className="bg-transparent font-bold text-slate-700 outline-none cursor-pointer"
+    <header className="sticky top-0 z-40 h-16 bg-surface border-b border-divider transition-colors duration-150">
+      <div className="max-w-6xl mx-auto h-full px-4 sm:px-6 flex items-center justify-between gap-4">
+        {/* Brand identity: Purposeful academic decision support emblem */}
+        <Link 
+          href="/" 
+          className="flex items-center gap-2.5 text-content-primary hover:opacity-90 transition-opacity"
+        >
+          <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold shadow-xs">
+            {/* Geometric career pathway compass icon */}
+            <svg 
+              className="w-4.5 h-4.5" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2.2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              aria-hidden="true"
             >
-              <option value="student">Mahasiswa</option>
-              <option value="admin">Admin</option>
-            </select>
+              <polygon points="12 2 15 9 22 12 15 15 12 22 9 15 2 12 9 9" />
+              <circle cx="12" cy="12" r="2" fill="currentColor" />
+            </svg>
           </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-bold tracking-tight text-content-primary leading-tight">CareerPath TI</span>
+            <span className="text-[10px] font-medium text-content-muted leading-none">SPK Rekomendasi Karir</span>
+          </div>
+        </Link>
+
+        {/* Student Navigation */}
+        {user && String(user.role || '').toLowerCase() === 'student' && (
+          <nav className="hidden lg:flex items-center gap-1">
+            {navItems.map((item) => {
+              const active = isActive(item.path);
+              return (
+                <Link
+                  key={item.path}
+                  href={item.path}
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors duration-150 ${
+                    active 
+                      ? 'bg-subsurface text-primary font-bold border-b-2 border-primary' 
+                      : 'text-content-secondary hover:text-content-primary hover:bg-subsurface/60'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
         )}
 
-        {user ? (
-          <div className="flex items-center gap-2">
+        {/* Actions bar */}
+        <div className="flex items-center gap-2.5">
+          <ThemeToggle size="sm" />
+
+          {user ? (
+            <div className="flex items-center gap-2">
+              <Link 
+                href="/profile" 
+                className="flex items-center gap-2 px-2.5 py-1 rounded-lg border border-divider hover:bg-subsurface text-content-primary text-xs font-semibold transition-colors duration-150"
+                title="Lihat Profil Mahasiswa"
+              >
+                <span className="w-6 h-6 rounded-md bg-primary/10 text-primary dark:bg-primary/20 dark:text-sky-300 font-bold text-[11px] flex items-center justify-center">
+                  {user.initials || 'MR'}
+                </span>
+                <span className="hidden md:inline max-w-[120px] truncate">{user.name}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary/10 text-primary font-bold hidden sm:inline">
+                  Mahasiswa
+                </span>
+              </Link>
+              <button 
+                onClick={() => { logout(); router.push('/login'); }} 
+                className="p-1.5 text-content-muted hover:text-danger hover:bg-subsurface rounded-lg transition-colors duration-150"
+                title="Keluar"
+                aria-label="Keluar"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
             <Link 
-              to={user.role === 'admin' ? '/admin' : '/profile'} 
-              className="flex items-center gap-2.5 px-3 py-1.5 rounded-full border border-slate-200/80 hover:border-blue-300 bg-white hover:bg-blue-50/30 text-slate-800 text-sm font-bold transition-all duration-200"
+              href="/login" 
+              className="px-3.5 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary-dark transition-colors duration-150"
             >
-              <span className="w-7 h-7 grid place-items-center rounded-full bg-primary-light text-primary-dark font-extrabold text-[11px]">
-                {user.initials || 'US'}
-              </span>
-              <span className="hidden sm:inline pr-1 font-bold text-slate-700">{user.name}</span>
+              Masuk
             </Link>
-            <button 
-              onClick={() => { logout(); navigate('/login'); }} 
-              className="px-3.5 py-2 border border-slate-200 rounded-lg text-xs font-bold text-slate-500 hover:text-danger hover:border-danger transition-all duration-200"
+          )}
+
+          {/* Mobile hamburger menu toggle */}
+          {user && String(user.role || '').toLowerCase() === 'student' && (
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-1.5 rounded-lg border border-divider text-content-secondary hover:text-content-primary hover:bg-subsurface focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label={mobileMenuOpen ? 'Tutup navigasi' : 'Buka navigasi'}
             >
-              Keluar
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
-          </div>
-        ) : (
-          <Link 
-            to="/login" 
-            className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:bg-primary-dark transition-all duration-200 shadow-md shadow-blue-500/10"
-          >
-            Masuk
-          </Link>
-        )}
+          )}
+        </div>
       </div>
+
+      {/* Mobile navigation drawer */}
+      {mobileMenuOpen && user && String(user.role || '').toLowerCase() === 'student' && (
+        <div className="lg:hidden bg-surface border-b border-divider px-4 py-3 grid gap-1 animate-slide-down shadow-md">
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              href={item.path}
+              onClick={() => setMobileMenuOpen(false)}
+              className={`px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                isActive(item.path)
+                  ? 'bg-subsurface text-primary font-bold'
+                  : 'text-content-secondary hover:text-content-primary hover:bg-subsurface'
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      )}
     </header>
   );
 }

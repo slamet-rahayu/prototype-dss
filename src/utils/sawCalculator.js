@@ -49,8 +49,8 @@ export function calculateSaw({
       let weightedSum = 0;
       let weightSum = 0;
       Object.entries(data.academicWeights).forEach(([compName, compWeight]) => {
-        const gradeObj = studentGrades.find(g => g.name === compName);
-        const gradeValue = gradeObj ? gradeObj.grade : 0;
+        const gradeObj = studentGrades.find(g => (g?.name || g?.subjectName || g?.subject?.name) === compName);
+        const gradeValue = gradeObj ? Number(gradeObj.grade) || 0 : 0;
         weightedSum += gradeValue * compWeight;
         weightSum += compWeight;
       });

@@ -1,9 +1,13 @@
 import React from 'react';
 
-export default function Card({ children, className = '' }) {
+export default function Card({ children, className = '', as = 'div', ...props }) {
+  const Component = as;
   return (
-    <div className={`bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden ${className}`}>
+    <Component 
+      className={`bg-surface border border-divider rounded-xl shadow-xs transition-colors duration-150 ${className}`}
+      {...props}
+    >
       {children}
-    </div>
+    </Component>
   );
 }

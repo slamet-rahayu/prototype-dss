@@ -1,5 +1,8 @@
-import React, { createContext, useState, useEffect } from 'react';
+"use client";
+
+import React, { createContext, useState, useEffect, useRef } from 'react';
 import { calculateSaw } from '../utils/sawCalculator';
+import { apiRequest } from '../utils/apiClient';
 
 export const AppContext = createContext();
 
@@ -13,7 +16,8 @@ const STORAGE_KEYS = {
   STUDENTS: 'careerpath-students',
   SCHEDULER: 'careerpath-scheduler',
   HISTORY: 'careerpath-history',
-  RIASEC_QUESTIONS: 'careerpath-riasec-questions'
+  RIASEC_QUESTIONS: 'careerpath-riasec-questions',
+  THEME: 'careerpath-theme'
 };
 
 const DEFAULT_USER = {
@@ -73,7 +77,7 @@ const DEFAULT_CAREERS = {
     riasecWeights: { R: 30, I: 50, A: 0, S: 0, E: 0, C: 20 },
     academicWeights: { "Pemrograman": 35, "Basis Data": 25, "Analisis dan Perancangan Sistem": 20, "Jaringan dan Keamanan": 10, "Data dan Kecerdasan Buatan": 10 },
     marketDemandScore: 90,
-    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Software Engineer.", vacancy: "520", trend: "↗ Tren meningkat", short: "Jakarta", shortNote: "dan peluang remote", location: "Jakarta, Bandung, dan Remote", skills: ["Java", "JavaScript", "SQL", "Git", "REST API"], note: "Data pasar kerja ini digunakan sebagai salah satu pertimbangan dalam kriteria kebutuhan pasar kerja (C3)." }
+    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Software Engineer.", vacancy: "520", trend: "Tren meningkat", short: "Jakarta", shortNote: "dan peluang remote", location: "Jakarta, Bandung, dan Remote", skills: ["Java", "JavaScript", "SQL", "Git", "REST API"], note: "Data pasar kerja ini digunakan sebagai salah satu pertimbangan dalam kriteria kebutuhan pasar kerja (C3)." }
   },
   "Data Analyst": {
     icon: "▤",
@@ -83,7 +87,7 @@ const DEFAULT_CAREERS = {
     riasecWeights: { R: 20, I: 50, A: 0, S: 0, E: 0, C: 30 },
     academicWeights: { "Pemrograman": 15, "Basis Data": 35, "Analisis dan Perancangan Sistem": 15, "Jaringan dan Keamanan": 5, "Data dan Kecerdasan Buatan": 30 },
     marketDemandScore: 88,
-    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Data Analyst.", vacancy: "340", trend: "↗ Tren meningkat", short: "Jakarta", shortNote: "dan kota besar lain", location: "Jakarta, Tangerang, dan Surabaya", skills: ["SQL", "Excel", "Power BI", "Python", "Statistics"], note: "Peran Data Analyst banyak dibutuhkan untuk membantu organisasi mengambil keputusan berbasis data." }
+    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Data Analyst.", vacancy: "340", trend: "Tren meningkat", short: "Jakarta", shortNote: "dan kota besar lain", location: "Jakarta, Tangerang, dan Surabaya", skills: ["SQL", "Excel", "Power BI", "Python", "Statistics"], note: "Peran Data Analyst banyak dibutuhkan untuk membantu organisasi mengambil keputusan berbasis data." }
   },
   "Cybersecurity Analyst": {
     icon: "⌁",
@@ -93,7 +97,7 @@ const DEFAULT_CAREERS = {
     riasecWeights: { R: 50, I: 30, A: 0, S: 0, E: 20, C: 0 },
     academicWeights: { "Pemrograman": 15, "Basis Data": 15, "Analisis dan Perancangan Sistem": 15, "Jaringan dan Keamanan": 45, "Data dan Kecerdasan Buatan": 10 },
     marketDemandScore: 84,
-    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Cybersecurity Analyst.", vacancy: "210", trend: "↗ Tren meningkat", short: "Jakarta", shortNote: "dan pusat industri", location: "Jakarta, Bandung, dan Batam", skills: ["Network", "SIEM", "Security", "Linux", "Incident Response"], note: "Permintaan meningkat karena organisasi membutuhkan perlindungan sistem, data, dan infrastruktur digital." }
+    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Cybersecurity Analyst.", vacancy: "210", trend: "Tren meningkat", short: "Jakarta", shortNote: "dan pusat industri", location: "Jakarta, Bandung, dan Batam", skills: ["Network", "SIEM", "Security", "Linux", "Incident Response"], note: "Permintaan meningkat karena organisasi membutuhkan perlindungan sistem, data, dan infrastruktur digital." }
   },
   "Business Analyst": {
     icon: "◫",
@@ -103,7 +107,7 @@ const DEFAULT_CAREERS = {
     riasecWeights: { R: 0, I: 50, A: 0, S: 30, E: 20, C: 0 },
     academicWeights: { "Pemrograman": 10, "Basis Data": 20, "Analisis dan Perancangan Sistem": 45, "Jaringan dan Keamanan": 15, "Data dan Kecerdasan Buatan": 10 },
     marketDemandScore: 86,
-    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Business Analyst.", vacancy: "310", trend: "→ Tren stabil", short: "Jakarta", shortNote: "dan wilayah penyangga", location: "Jakarta, Tangerang, dan Bekasi", skills: ["Requirement Analysis", "BPMN", "Communication", "Documentation", "SQL"], note: "Business Analyst diperlukan untuk menerjemahkan kebutuhan bisnis menjadi kebutuhan sistem yang terstruktur." }
+    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Business Analyst.", vacancy: "310", trend: "Tren stabil", short: "Jakarta", shortNote: "dan wilayah penyangga", location: "Jakarta, Tangerang, dan Bekasi", skills: ["Requirement Analysis", "BPMN", "Communication", "Documentation", "SQL"], note: "Business Analyst diperlukan untuk menerjemahkan kebutuhan bisnis menjadi kebutuhan sistem yang terstruktur." }
   },
   "UI/UX Designer": {
     icon: "◌",
@@ -113,7 +117,7 @@ const DEFAULT_CAREERS = {
     riasecWeights: { R: 0, I: 20, A: 50, S: 30, E: 0, C: 0 },
     academicWeights: { "Pemrograman": 20, "Basis Data": 10, "Analisis dan Perancangan Sistem": 40, "Jaringan dan Keamanan": 10, "Data dan Kecerdasan Buatan": 20 },
     marketDemandScore: 80,
-    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk UI/UX Designer.", vacancy: "260", trend: "→ Tren stabil", short: "Bandung", shortNote: "dan kota kreatif", location: "Jakarta, Bandung, dan Yogyakarta", skills: ["Figma", "Wireframe", "User Research", "Prototype", "Design System"], note: "Posisi UI/UX Designer berfokus pada pengembangan pengalaman dan antarmuka produk digital." }
+    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk UI/UX Designer.", vacancy: "260", trend: "Tren stabil", short: "Bandung", shortNote: "dan kota kreatif", location: "Jakarta, Bandung, dan Yogyakarta", skills: ["Figma", "Wireframe", "User Research", "Prototype", "Design System"], note: "Posisi UI/UX Designer berfokus pada pengembangan pengalaman dan antarmuka produk digital." }
   },
   "DevOps Engineer": {
     icon: "⚙",
@@ -123,7 +127,7 @@ const DEFAULT_CAREERS = {
     riasecWeights: { R: 40, I: 30, A: 0, S: 0, E: 0, C: 30 },
     academicWeights: { "Pemrograman": 25, "Basis Data": 20, "Analisis dan Perancangan Sistem": 15, "Jaringan dan Keamanan": 30, "Data dan Kecerdasan Buatan": 10 },
     marketDemandScore: 87,
-    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk DevOps Engineer.", vacancy: "220", trend: "↗ Tren meningkat", short: "Jakarta", shortNote: "dan peluang remote", location: "Jakarta, Tangerang, dan Remote", skills: ["Docker", "Kubernetes", "AWS", "CI/CD Pipelines", "Linux Shell"], note: "DevOps Engineer sangat diminati seiring adopsi cloud computing oleh startup dan korporasi." }
+    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk DevOps Engineer.", vacancy: "220", trend: "Tren meningkat", short: "Jakarta", shortNote: "dan peluang remote", location: "Jakarta, Tangerang, dan Remote", skills: ["Docker", "Kubernetes", "AWS", "CI/CD Pipelines", "Linux Shell"], note: "DevOps Engineer sangat diminati seiring adopsi cloud computing oleh startup dan korporasi." }
   },
   "Quality Assurance Engineer": {
     icon: "★",
@@ -133,7 +137,7 @@ const DEFAULT_CAREERS = {
     riasecWeights: { R: 20, I: 35, A: 0, S: 0, E: 0, C: 45 },
     academicWeights: { "Pemrograman": 25, "Basis Data": 20, "Analisis dan Perancangan Sistem": 25, "Jaringan dan Keamanan": 15, "Data dan Kecerdasan Buatan": 15 },
     marketDemandScore: 82,
-    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Quality Assurance Engineer.", vacancy: "190", trend: "→ Tren stabil", short: "Jakarta", shortNote: "dan kota besar", location: "Jakarta, Bandung, dan Surabaya", skills: ["Selenium", "Cypress", "Postman", "QA Sprints", "SQL Testing"], note: "QA Engineer bertugas menjamin perangkat lunak bebas dari kecacatan mayor sebelum dilepas ke publik." }
+    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Quality Assurance Engineer.", vacancy: "190", trend: "Tren stabil", short: "Jakarta", shortNote: "dan kota besar", location: "Jakarta, Bandung, dan Surabaya", skills: ["Selenium", "Cypress", "Postman", "QA Sprints", "SQL Testing"], note: "QA Engineer bertugas menjamin perangkat lunak bebas dari kecacatan mayor sebelum dilepas ke publik." }
   },
   "Database Administrator": {
     icon: "▤",
@@ -143,7 +147,7 @@ const DEFAULT_CAREERS = {
     riasecWeights: { R: 20, I: 30, A: 0, S: 0, E: 0, C: 50 },
     academicWeights: { "Pemrograman": 15, "Basis Data": 45, "Analisis dan Perancangan Sistem": 20, "Jaringan dan Keamanan": 15, "Data dan Kecerdasan Buatan": 5 },
     marketDemandScore: 78,
-    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Database Administrator.", vacancy: "110", trend: "→ Tren stabil", short: "Jakarta", shortNote: "dan wilayah perkantoran", location: "Jakarta, Bekasi, dan Cikarang", skills: ["SQL Tuning", "Oracle Database", "PostgreSQL", "Backup & Recovery", "NoSQL"], note: "Database Administrator menjaga performa database agar tidak mengalami downtime." }
+    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Database Administrator.", vacancy: "110", trend: "Tren stabil", short: "Jakarta", shortNote: "dan wilayah perkantoran", location: "Jakarta, Bekasi, dan Cikarang", skills: ["SQL Tuning", "Oracle Database", "PostgreSQL", "Backup & Recovery", "NoSQL"], note: "Database Administrator menjaga performa database agar tidak mengalami downtime." }
   },
   "Network Administrator": {
     icon: "⌁",
@@ -153,9 +157,9 @@ const DEFAULT_CAREERS = {
     riasecWeights: { R: 50, I: 20, A: 0, S: 0, E: 0, C: 30 },
     academicWeights: { "Pemrograman": 10, "Basis Data": 15, "Analisis dan Perancangan Sistem": 15, "Jaringan dan Keamanan": 50, "Data dan Kecerdasan Buatan": 10 },
     marketDemandScore: 76,
-    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Network Administrator.", vacancy: "135", trend: "→ Tren stabil", short: "Jakarta", shortNote: "dan penyedia infrastruktur", location: "Jakarta, Surabaya, dan Medan", skills: ["Cisco Routing", "Mikrotik RouterOS", "TCP/IP Protocol", "Firewalls", "Network Topology"], note: "Network Administrator bertanggung jawab atas keandalan koneksi internal dan eksternal perusahaan." }
+    marketDemand: { title: "Gambaran kebutuhan pasar kerja untuk Network Administrator.", vacancy: "135", trend: "Tren stabil", short: "Jakarta", shortNote: "dan penyedia infrastruktur", location: "Jakarta, Surabaya, dan Medan", skills: ["Cisco Routing", "Mikrotik RouterOS", "TCP/IP Protocol", "Firewalls", "Network Topology"], note: "Network Administrator bertanggung jawab atas keandalan koneksi internal dan eksternal perusahaan." }
   }
-};;
+};
 
 const DEFAULT_STUDENTS = [
   { id: 1, nim: "20220801001", name: "Mame Riyadi", email: "mameriyadi6@gmail.com", studyProgram: "Teknologi Informasi", semester: "Semester 7", status: "Lengkap" },
@@ -177,69 +181,163 @@ const DEFAULT_HISTORY = [
 ];
 
 export const AppProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.USER);
-    return saved ? JSON.parse(saved) : DEFAULT_USER;
-  });
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const [academicComponents, setAcademicComponents] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.ACADEMIC);
-    return saved ? JSON.parse(saved) : DEFAULT_ACADEMIC;
-  });
+  const [user, setUser] = useState(null);
+  const [academicComponents, setAcademicComponents] = useState(DEFAULT_ACADEMIC);
+  const [riasecProgress, setRiasecProgress] = useState({ currentIndex: 0, answers: Array(18).fill(null) });
+  const [riasecResult, setRiasecResult] = useState(DEFAULT_RIASEC_RESULT);
+  const [sawWeights, setSawWeights] = useState(DEFAULT_SAW_WEIGHTS);
+  const [careers, setCareers] = useState(DEFAULT_CAREERS);
+  const [students, setStudents] = useState(DEFAULT_STUDENTS);
+  const [schedulerJobs, setSchedulerJobs] = useState(DEFAULT_SCHEDULER);
+  const [recommendationHistory, setRecommendationHistory] = useState(DEFAULT_HISTORY);
+  const [riasecQuestions, setRiasecQuestions] = useState(DEFAULT_RIASEC_QUESTIONS);
+  const [theme, setTheme] = useState('light');
 
-  const [riasecProgress, setRiasecProgress] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.RIASEC_PROGRESS);
-    return saved ? JSON.parse(saved) : { currentIndex: 0, answers: Array(18).fill(null) };
-  });
+  // Load state from localStorage on client mount and verify authoritative session with backend
+  useEffect(() => {
+    try {
+      const savedUser = localStorage.getItem(STORAGE_KEYS.USER);
+      const token = localStorage.getItem('careerpath-jwt-token');
 
-  const [riasecResult, setRiasecResult] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.RIASEC_RESULT);
-    return saved ? JSON.parse(saved) : DEFAULT_RIASEC_RESULT;
-  });
+      if (token && savedUser && savedUser !== 'null') {
+        try {
+          const parsed = JSON.parse(savedUser);
+          if (parsed && (parsed.email || parsed.role)) {
+            const initialRole = String(parsed.role || 'student').toLowerCase();
+            setUser({
+              ...parsed,
+              role: initialRole
+            });
+            if (typeof document !== 'undefined') {
+              document.cookie = `careerpath-token=${token}; path=/; max-age=604800; SameSite=Lax`;
+              document.cookie = `careerpath-role=${initialRole}; path=/; max-age=604800; SameSite=Lax`;
+            }
+          } else {
+            setUser(null);
+          }
+        } catch {
+          setUser(null);
+        }
 
-  const [sawWeights, setSawWeights] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SAW_WEIGHTS);
-    return saved ? JSON.parse(saved) : DEFAULT_SAW_WEIGHTS;
-  });
+        // Authoritative verification against backend database via JWT
+        apiRequest('/auth/me')
+          .then(res => {
+            if (res?.data) {
+              const verifiedUser = formatUserObject(res.data);
+              setUser(verifiedUser);
+              localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(verifiedUser));
+              if (typeof document !== 'undefined') {
+                document.cookie = `careerpath-token=${token}; path=/; max-age=604800; SameSite=Lax`;
+                document.cookie = `careerpath-role=${verifiedUser.role}; path=/; max-age=604800; SameSite=Lax`;
+              }
+            }
+          })
+          .catch(() => {
+            localStorage.removeItem('careerpath-jwt-token');
+            localStorage.removeItem(STORAGE_KEYS.USER);
+            if (typeof document !== 'undefined') {
+              document.cookie = 'careerpath-token=; path=/; max-age=0; SameSite=Lax';
+              document.cookie = 'careerpath-role=; path=/; max-age=0; SameSite=Lax';
+            }
+            setUser(null);
+          });
+      } else {
+        localStorage.removeItem(STORAGE_KEYS.USER);
+        if (typeof document !== 'undefined') {
+          document.cookie = 'careerpath-token=; path=/; max-age=0; SameSite=Lax';
+          document.cookie = 'careerpath-role=; path=/; max-age=0; SameSite=Lax';
+        }
+        setUser(null);
+      }
 
-  const [careers, setCareers] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.CAREERS);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      const merged = {};
-      Object.keys(DEFAULT_CAREERS).forEach(key => {
-        const defaultCareer = DEFAULT_CAREERS[key];
-        const parsedCareer = parsed[key] || {};
-        merged[key] = {
-          ...defaultCareer,
-          ...parsedCareer,
-          riasecWeights: parsedCareer.riasecWeights || defaultCareer.riasecWeights
-        };
-      });
-      return merged;
+      const savedAcademic = localStorage.getItem(STORAGE_KEYS.ACADEMIC);
+      if (savedAcademic) {
+        try {
+          const parsed = JSON.parse(savedAcademic);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const sanitized = parsed.map((item, idx) => ({
+              ...item,
+              id: item?.id || `grd-${idx + 1}`,
+              name: item?.name || item?.subjectName || item?.subject?.name || `Mata Kuliah ${idx + 1}`,
+              desc: item?.desc || item?.description || item?.subject?.description || '',
+              icon: item?.icon || '⌘',
+              grade: Number(item?.grade) || 0
+            }));
+            setAcademicComponents(sanitized);
+          }
+        } catch {
+          // If JSON parse fails, default will remain
+        }
+      }
+
+      const savedProgress = localStorage.getItem(STORAGE_KEYS.RIASEC_PROGRESS);
+      if (savedProgress) setRiasecProgress(JSON.parse(savedProgress));
+
+      const savedResult = localStorage.getItem(STORAGE_KEYS.RIASEC_RESULT);
+      if (savedResult) setRiasecResult(JSON.parse(savedResult));
+
+      const savedWeights = localStorage.getItem(STORAGE_KEYS.SAW_WEIGHTS);
+      if (savedWeights) setSawWeights(JSON.parse(savedWeights));
+
+      const savedCareers = localStorage.getItem(STORAGE_KEYS.CAREERS);
+      if (savedCareers) {
+        const parsed = JSON.parse(savedCareers);
+        const merged = {};
+        Object.keys(DEFAULT_CAREERS).forEach(key => {
+          const defaultCareer = DEFAULT_CAREERS[key];
+          const parsedCareer = parsed[key] || {};
+          merged[key] = {
+            ...defaultCareer,
+            ...parsedCareer,
+            riasecWeights: parsedCareer.riasecWeights || defaultCareer.riasecWeights
+          };
+        });
+        setCareers(merged);
+      }
+
+      const savedStudents = localStorage.getItem(STORAGE_KEYS.STUDENTS);
+      if (savedStudents) setStudents(JSON.parse(savedStudents));
+
+      const savedScheduler = localStorage.getItem(STORAGE_KEYS.SCHEDULER);
+      if (savedScheduler) setSchedulerJobs(JSON.parse(savedScheduler));
+
+      const savedHistory = localStorage.getItem(STORAGE_KEYS.HISTORY);
+      if (savedHistory) setRecommendationHistory(JSON.parse(savedHistory));
+
+      const savedQuestions = localStorage.getItem(STORAGE_KEYS.RIASEC_QUESTIONS);
+      if (savedQuestions) setRiasecQuestions(JSON.parse(savedQuestions));
+
+      const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME);
+      if (savedTheme) {
+        setTheme(savedTheme);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme('dark');
+      }
+    } catch (e) {
+      console.error('Error hydrating state from localStorage:', e);
+    } finally {
+      setIsLoaded(true);
     }
-    return DEFAULT_CAREERS;
-  });
+  }, []);
 
-  const [students, setStudents] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.STUDENTS);
-    return saved ? JSON.parse(saved) : DEFAULT_STUDENTS;
-  });
+  const isDarkMode = theme === 'dark';
 
-  const [schedulerJobs, setSchedulerJobs] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SCHEDULER);
-    return saved ? JSON.parse(saved) : DEFAULT_SCHEDULER;
-  });
+  useEffect(() => {
+    if (!isLoaded) return;
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem(STORAGE_KEYS.THEME, theme);
+  }, [theme, isLoaded]);
 
-  const [recommendationHistory, setRecommendationHistory] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.HISTORY);
-    return saved ? JSON.parse(saved) : DEFAULT_HISTORY;
-  });
-
-  const [riasecQuestions, setRiasecQuestions] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.RIASEC_QUESTIONS);
-    return saved ? JSON.parse(saved) : DEFAULT_RIASEC_QUESTIONS;
-  });
+  const toggleDarkMode = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   const [sawResults, setSawResults] = useState([]);
 
@@ -256,74 +354,136 @@ export const AppProvider = ({ children }) => {
     }
   }, [riasecResult, academicComponents, careers, sawWeights]);
 
-  // Sync state to local storage
+  // Sync state to local storage after initial hydration
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
-  }, [user]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.ACADEMIC, JSON.stringify(academicComponents));
-  }, [academicComponents]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.RIASEC_PROGRESS, JSON.stringify(riasecProgress));
-  }, [riasecProgress]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.RIASEC_RESULT, JSON.stringify(riasecResult));
-  }, [riasecResult]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.SAW_WEIGHTS, JSON.stringify(sawWeights));
-  }, [sawWeights]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.CAREERS, JSON.stringify(careers));
-  }, [careers]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
-  }, [students]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.SCHEDULER, JSON.stringify(schedulerJobs));
-  }, [schedulerJobs]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(recommendationHistory));
-  }, [recommendationHistory]);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.RIASEC_QUESTIONS, JSON.stringify(riasecQuestions));
-  }, [riasecQuestions]);
-
-  const login = (email, password) => {
-    if (email === 'admin@careerpath.id') {
-      const adminUser = {
-        name: "Administrator",
-        email: "admin@careerpath.id",
-        role: "admin",
-        initials: "AD"
-      };
-      setUser(adminUser);
-      return adminUser;
+    if (!isLoaded) return;
+    if (user) {
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
     } else {
-      const studentUser = {
-        ...DEFAULT_USER,
-        email: email,
-        name: email.split('@')[0].split('.').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-        initials: email.charAt(0).toUpperCase() + (email.charAt(1) || '').toUpperCase()
-      };
-      setUser(studentUser);
-      return studentUser;
+      localStorage.removeItem(STORAGE_KEYS.USER);
     }
+  }, [user, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    localStorage.setItem(STORAGE_KEYS.ACADEMIC, JSON.stringify(academicComponents));
+  }, [academicComponents, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    localStorage.setItem(STORAGE_KEYS.RIASEC_PROGRESS, JSON.stringify(riasecProgress));
+  }, [riasecProgress, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    localStorage.setItem(STORAGE_KEYS.RIASEC_RESULT, JSON.stringify(riasecResult));
+  }, [riasecResult, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    localStorage.setItem(STORAGE_KEYS.SAW_WEIGHTS, JSON.stringify(sawWeights));
+  }, [sawWeights, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    localStorage.setItem(STORAGE_KEYS.CAREERS, JSON.stringify(careers));
+  }, [careers, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    localStorage.setItem(STORAGE_KEYS.STUDENTS, JSON.stringify(students));
+  }, [students, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    localStorage.setItem(STORAGE_KEYS.SCHEDULER, JSON.stringify(schedulerJobs));
+  }, [schedulerJobs, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(recommendationHistory));
+  }, [recommendationHistory, isLoaded]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    localStorage.setItem(STORAGE_KEYS.RIASEC_QUESTIONS, JSON.stringify(riasecQuestions));
+  }, [riasecQuestions, isLoaded]);
+
+  const formatUserObject = (beUser) => {
+    const studentInfo = beUser.student || {};
+    const role = (beUser.role || 'STUDENT').toLowerCase();
+    const name = studentInfo.fullName || (role === 'admin' ? 'Administrator' : beUser.email.split('@')[0]);
+    const initials = (name || beUser.email)
+      .trim().split(/\s+/).slice(0, 2).map(p => p[0]?.toUpperCase()).join('') || 'US';
+
+    return {
+      id: beUser.id,
+      email: beUser.email,
+      role,
+      name,
+      initials,
+      nim: studentInfo.nim || '',
+      university: studentInfo.university || 'Universitas Esa Unggul',
+      studyProgram: studentInfo.studyProgram || 'Teknologi Informasi',
+      semester: studentInfo.semester || 'Semester 7',
+      domicile: studentInfo.domicile || 'Jakarta, Indonesia'
+    };
   };
 
-  const logout = () => {
+  const login = async (email, password) => {
+    const res = await apiRequest('/auth/login', {
+      method: 'POST',
+      body: { email, password }
+    });
+
+    if (res.data?.token) {
+      localStorage.setItem('careerpath-jwt-token', res.data.token);
+      const userObj = formatUserObject(res.data.user);
+      setUser(userObj);
+      if (typeof document !== 'undefined') {
+        document.cookie = `careerpath-token=${res.data.token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `careerpath-role=${userObj.role}; path=/; max-age=604800; SameSite=Lax`;
+      }
+      return userObj;
+    }
+    throw new Error(res.message || 'Kredensial tidak valid');
+  };
+
+  const register = async ({ fullName, email, password, nim, studyProgram, university }) => {
+    const res = await apiRequest('/auth/register', {
+      method: 'POST',
+      body: { fullName, email, password, nim, studyProgram, university }
+    });
+
+    if (res.data?.token) {
+      localStorage.setItem('careerpath-jwt-token', res.data.token);
+      const userObj = formatUserObject(res.data.user);
+      setUser(userObj);
+      if (typeof document !== 'undefined') {
+        document.cookie = `careerpath-token=${res.data.token}; path=/; max-age=604800; SameSite=Lax`;
+        document.cookie = `careerpath-role=${userObj.role}; path=/; max-age=604800; SameSite=Lax`;
+      }
+      return userObj;
+    }
+    throw new Error(res.message || 'Pendaftaran gagal');
+  };
+
+  const logout = async () => {
+    try {
+      await apiRequest('/auth/logout', { method: 'POST' });
+    } catch {
+      // Ignore network errors during logout
+    }
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('careerpath-jwt-token');
+      localStorage.removeItem(STORAGE_KEYS.USER);
+      document.cookie = 'careerpath-token=; path=/; max-age=0; SameSite=Lax';
+      document.cookie = 'careerpath-role=; path=/; max-age=0; SameSite=Lax';
+    }
     setUser(null);
   };
 
-  const updateProfile = (data) => {
+  const updateProfile = async (data) => {
     setUser(prev => ({
       ...prev,
       ...data,
@@ -331,12 +491,28 @@ export const AppProvider = ({ children }) => {
         ? data.name.trim().split(/\s+/).slice(0, 2).map(p => p.charAt(0).toUpperCase()).join('')
         : prev.initials
     }));
+
+    try {
+      await apiRequest('/auth/profile', {
+        method: 'PUT',
+        body: {
+          fullName: data.name,
+          university: data.university,
+          studyProgram: data.studyProgram,
+          semester: data.semester,
+          domicile: data.domicile
+        }
+      });
+    } catch (e) {
+      console.warn('Could not sync profile to backend:', e.message);
+    }
   };
 
   return (
     <AppContext.Provider value={{
       user,
       login,
+      register,
       logout,
       updateProfile,
       academicComponents,
@@ -357,7 +533,12 @@ export const AppProvider = ({ children }) => {
       setRecommendationHistory,
       riasecQuestions,
       setRiasecQuestions,
-      sawResults
+      sawResults,
+      theme,
+      setTheme,
+      isDarkMode,
+      toggleDarkMode,
+      isLoaded
     }}>
       {children}
     </AppContext.Provider>

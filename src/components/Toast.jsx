@@ -1,4 +1,7 @@
+"use client";
+
 import React, { useEffect } from 'react';
+import { CheckCircle2, X } from 'lucide-react';
 
 export default function Toast({ show, message, onClose, duration = 3000 }) {
   useEffect(() => {
@@ -13,15 +16,19 @@ export default function Toast({ show, message, onClose, duration = 3000 }) {
   if (!show) return null;
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 max-w-sm bg-slate-900 text-white px-5 py-3.5 rounded-xl shadow-2xl transition-all duration-300 transform translate-y-0 opacity-100 border border-slate-800 animate-slide-in">
-      <span className="text-primary-light text-base font-bold">✦</span>
-      <p className="text-sm font-medium pr-2 leading-relaxed">{message}</p>
+    <div 
+      className="fixed bottom-6 right-6 z-50 flex items-center gap-3 max-w-sm bg-slate-900 text-slate-100 dark:bg-slate-800 dark:text-slate-100 px-4 py-3 rounded-lg shadow-lg border border-slate-700 animate-slide-down"
+      role="status"
+      aria-live="polite"
+    >
+      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" aria-hidden="true" />
+      <p className="text-xs font-medium leading-relaxed flex-1">{message}</p>
       <button 
         onClick={onClose} 
-        className="ml-auto text-slate-400 hover:text-white transition-colors duration-150 text-lg font-bold focus:outline-none"
-        aria-label="Tutup"
+        className="text-slate-400 hover:text-white transition-colors duration-150 p-1 rounded focus-visible:ring-1 focus-visible:ring-white"
+        aria-label="Tutup notifikasi"
       >
-        &times;
+        <X className="w-3.5 h-3.5" />
       </button>
     </div>
   );

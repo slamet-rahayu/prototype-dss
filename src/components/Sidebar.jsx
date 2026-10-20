@@ -1,111 +1,122 @@
+"use client";
+
 import React, { useContext } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { AppContext } from '../context/AppContext';
 import { 
   LayoutDashboard, 
-  BookOpen, 
-  Settings, 
   Briefcase, 
+  Sliders, 
+  TrendingUp, 
   Users, 
   History, 
   Clock, 
-  LogOut,
-  UserCheck
+  LogOut
 } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 export default function Sidebar() {
-  const { user, logout, login } = useContext(AppContext);
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const handleRoleToggle = (e) => {
-    const roleSelected = e.target.value;
-    if (roleSelected === 'student') {
-      login('mameriyadi6@gmail.com', 'password');
-      navigate('/');
-    }
-  };
+  const { user, logout } = useContext(AppContext);
+  const pathname = usePathname();
+  const router = useRouter();
 
   const menuItems = [
-    { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
-    { name: 'Alternatif Karir', path: '/admin/alternatif', icon: BookOpen },
-    { name: 'Konfigurasi Rekomendasi', path: '/admin/konfigurasi', icon: Settings },
-    { name: 'Data Pasar Kerja', path: '/admin/pasar-kerja', icon: Briefcase },
-    { name: 'Mahasiswa', path: '/admin/mahasiswa', icon: Users },
+    { name: 'Dashboard Admin', path: '/admin', icon: LayoutDashboard },
+    { name: 'Alternatif Karir TI', path: '/admin/alternatif', icon: Briefcase },
+    { name: 'Konfigurasi Bobot SAW', path: '/admin/konfigurasi', icon: Sliders },
+    { name: 'Data Pasar Kerja', path: '/admin/pasar-kerja', icon: TrendingUp },
+    { name: 'Data Mahasiswa', path: '/admin/mahasiswa', icon: Users },
     { name: 'Riwayat Rekomendasi', path: '/admin/riwayat', icon: History },
-    { name: 'Manajemen Scheduler', path: '/admin/scheduler', icon: Clock },
+    { name: 'Scheduler Pasar Kerja', path: '/admin/scheduler', icon: Clock },
   ];
 
   const isActive = (path) => {
-    return location.pathname === path 
-      ? 'bg-white/20 text-white shadow-inner font-extrabold border-l-4 border-white' 
-      : 'text-white/80 hover:text-white hover:bg-white/10 hover:translate-x-1';
+    return pathname === path;
   };
 
   return (
-    <aside className="w-64 min-h-screen bg-gradient-to-b from-primary-dark via-blue-600 to-primary text-white flex flex-col px-4 py-6 shadow-xl z-20">
-      {/* Brand Logo */}
-      <Link to="/" className="flex items-center gap-2.5 px-2 mb-8 hover:opacity-95 transition-opacity">
-        <span className="w-10 h-10 grid place-items-center rounded-xl bg-white/15 border border-white/20 font-bold text-lg">
-          ✦
-        </span>
-        <span className="text-xl font-black tracking-tight">CareerPath</span>
+    <aside className="w-64 h-screen bg-[#0a0f1d] border-r border-[#1f3052] text-slate-200 flex flex-col px-4 py-5 shrink-0 z-30 sticky top-0 overflow-y-auto transition-colors duration-150">
+      {/* Brand Header */}
+      <Link 
+        href="/admin" 
+        className="flex items-center gap-2.5 px-2 mb-6 hover:opacity-90 transition-opacity"
+      >
+        <div className="w-8 h-8 rounded-lg bg-primary text-white flex items-center justify-center font-bold shadow-xs">
+          <svg 
+            className="w-4.5 h-4.5" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2.2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <polygon points="12 2 15 9 22 12 15 15 12 22 9 15 2 12 9 9" />
+            <circle cx="12" cy="12" r="2" fill="currentColor" />
+          </svg>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-sm font-bold tracking-tight text-white leading-tight">CareerPath TI</span>
+          <span className="text-[10px] font-semibold text-slate-400 leading-none">Panel Administrator</span>
+        </div>
       </Link>
 
-      <div className="px-2 mb-6">
-        <span className="text-[10px] font-extrabold uppercase tracking-widest text-white/50 block mb-3">
-          Panel Administrator
-        </span>
-        
-        {/* Prototype convenience role toggler */}
-        <div className="flex items-center gap-1.5 bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-xs mb-4">
-          <UserCheck className="w-3.5 h-3.5 text-white/70" />
-          <select 
-            value={user?.role || 'admin'} 
-            onChange={handleRoleToggle}
-            className="bg-transparent font-bold text-white outline-none cursor-pointer w-full text-xs"
-          >
-            <option value="admin" className="text-slate-800">Admin</option>
-            <option value="student" className="text-slate-800">Mahasiswa</option>
-          </select>
-        </div>
-      </div>
-
       {/* Nav Menu */}
-      <nav className="flex-1 flex flex-col gap-1.5">
+      <nav className="flex-1 flex flex-col gap-1" aria-label="Menu Admin">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-2 py-1">
+          Navigasi Master
+        </span>
         {menuItems.map((item) => {
           const Icon = item.icon;
+          const active = isActive(item.path);
           return (
             <Link 
               key={item.name}
-              to={item.path} 
-              className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-bold transition-all duration-200 ${isActive(item.path)}`}
+              href={item.path} 
+              className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors duration-150 ${
+                active 
+                  ? 'bg-primary text-white font-bold border-l-3 border-amber-400' 
+                  : 'text-slate-300 hover:text-white hover:bg-[#18243e]'
+              }`}
             >
-              <Icon className="w-4 h-4 shrink-0" />
+              <Icon className="w-4 h-4 shrink-0 text-slate-400" aria-hidden="true" />
               <span>{item.name}</span>
             </Link>
           );
         })}
       </nav>
 
-      {/* Admin User Profile Section */}
-      <div className="mt-auto border-t border-white/15 pt-5 flex items-center justify-between gap-2.5">
-        <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 grid place-items-center rounded-full bg-white/20 text-white font-extrabold text-xs">
-            {user?.initials || 'AD'}
-          </div>
-          <div className="min-w-0">
-            <h4 className="text-xs font-bold truncate leading-tight">{user?.name || 'Administrator'}</h4>
-            <span className="text-[10px] text-white/60 truncate block">{user?.email || 'admin@careerpath.id'}</span>
-          </div>
+      {/* Footer User & Theme Bar */}
+      <div className="mt-auto pt-3 border-t border-[#1f3052] flex flex-col gap-3">
+        <div className="flex items-center justify-between px-1">
+          <ThemeToggle size="sm" showLabel={true} className="border-[#1f3052] bg-[#18243e] text-slate-200" />
         </div>
-        <button 
-          onClick={() => { logout(); navigate('/login'); }}
-          className="p-2 rounded-lg hover:bg-white/10 text-white/70 hover:text-white transition-colors duration-150"
-          title="Keluar"
-        >
-          <LogOut className="w-4 h-4" />
-        </button>
+
+        <div className="flex items-center justify-between gap-2 bg-[#18243e] p-2 rounded-lg border border-[#1f3052]">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="w-7 h-7 rounded-md bg-primary text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+              {user?.initials || 'AD'}
+            </div>
+            <div className="min-w-0">
+              <span className="text-xs font-semibold text-white block truncate leading-tight">
+                {user?.name || 'Administrator'}
+              </span>
+              <span className="text-[10px] text-slate-400 block truncate leading-tight">
+                {user?.email || 'admin@careerpath.id'}
+              </span>
+            </div>
+          </div>
+          <button 
+            onClick={() => { logout(); router.push('/login'); }}
+            className="p-1.5 text-slate-400 hover:text-rose-400 rounded-md transition-colors"
+            title="Keluar dari sesi"
+            aria-label="Keluar dari sesi"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </aside>
   );
