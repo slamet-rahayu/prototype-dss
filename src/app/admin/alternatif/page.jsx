@@ -6,16 +6,13 @@ import { apiRequest } from '@/utils/apiClient';
 import Modal from '@/components/Modal';
 import Toast from '@/components/Toast';
 import Card from '@/components/Card';
-import { Skeleton, TableSkeleton } from '@/components/Skeleton';
+import { Skeleton } from '@/components/Skeleton';
 import { 
   Search, 
   Trash2, 
   Sliders, 
   Plus, 
-  Briefcase,
-  CheckCircle2,
-  Building2,
-  Sparkles,
+  Info,
   AlertCircle
 } from 'lucide-react';
 
@@ -42,6 +39,7 @@ export default function CareersConfig() {
               icon: c.icon || '⌘',
               subtitle: c.subtitle || '',
               description: c.description || '',
+              jobMarketKeyword: c.jobMarketKeyword || c.marketDetail?.jobMarketKeyword || c.title,
               marketDemandScore: c.marketDemandScore || 80,
               marketDemand: {
                 title: `Gambaran kebutuhan pasar kerja untuk ${c.title}.`,
@@ -51,6 +49,7 @@ export default function CareersConfig() {
                 shortNote: c.marketDetail?.shortNote || 'dan peluang remote',
                 location: c.marketDetail?.primaryLocation || 'Jakarta',
                 skills: c.marketDetail?.requiredSkills || ['Java', 'SQL', 'Git'],
+                jobMarketKeyword: c.jobMarketKeyword || c.marketDetail?.jobMarketKeyword || c.title,
                 note: `Data pasar kerja untuk ${c.title}.`
               },
               riasecMapped: (c.riasecWeights || []).filter(w => w.weight > 0).map(w => w.dimension),
@@ -78,6 +77,7 @@ export default function CareersConfig() {
   const [icon, setIcon] = useState('⌘');
   const [subtitle, setSubtitle] = useState('');
   const [description, setDescription] = useState('');
+  const [jobMarketKeyword, setJobMarketKeyword] = useState('');
   const [vacancy, setVacancy] = useState('');
   const [trend, setTrend] = useState('Tren meningkat');
   const [location, setLocation] = useState('');
@@ -93,9 +93,10 @@ export default function CareersConfig() {
     setIcon(data.icon || '⌘');
     setSubtitle(data.subtitle || '');
     setDescription(data.description || '');
-    setVacancy(data.marketDemand?.vacancy || '');
+    setJobMarketKeyword(data.jobMarketKeyword || data.marketDemand?.jobMarketKeyword || name);
+    setVacancy(data.marketDemand?.vacancy || '0');
     setTrend(data.marketDemand?.trend?.replace(/[↗→↘]\s*/g, '') || 'Tren meningkat');
-    setLocation(data.marketDemand?.location || '');
+    setLocation(data.marketDemand?.location || 'Nasional / Remote');
     setIsModalOpen(true);
   };
 
@@ -121,9 +122,10 @@ export default function CareersConfig() {
     setIcon('⌘');
     setSubtitle('');
     setDescription('');
-    setVacancy('');
+    setJobMarketKeyword('');
+    setVacancy('0');
     setTrend('Tren meningkat');
-    setLocation('');
+    setLocation('Nasional / Remote');
     setIsModalOpen(true);
   };
 
@@ -133,7 +135,7 @@ export default function CareersConfig() {
     const nameTrimmed = careerName.trim();
     const subTrimmed = subtitle.trim();
     const descTrimmed = description.trim();
-    const locTrimmed = location.trim();
+    const kwTrimmed = jobMarketKeyword.trim();
 
     if (!nameTrimmed) {
       errs.careerName = "Nama alternatif karir wajib diisi.";
@@ -155,17 +157,10 @@ export default function CareersConfig() {
       errs.description = "Deskripsi karir minimal 10 karakter.";
     }
 
-    if (vacancy === '' || vacancy === null || vacancy === undefined) {
-      errs.vacancy = "Jumlah lowongan wajib diisi.";
-    } else {
-      const vacNum = Number(vacancy);
-      if (isNaN(vacNum) || vacNum < 0) {
-        errs.vacancy = "Jumlah lowongan harus berupa bilangan positif.";
-      }
-    }
-
-    if (!locTrimmed) {
-      errs.location = "Wilayah penempatan wajib diisi (contoh: Jakarta, Remote).";
+    if (!kwTrimmed) {
+      errs.jobMarketKeyword = "Job Market Keyword wajib diisi.";
+    } else if (kwTrimmed.length < 2) {
+      errs.jobMarketKeyword = "Job Market Keyword minimal 2 karakter.";
     }
 
     if (Object.keys(errs).length > 0) {
@@ -176,14 +171,20 @@ export default function CareersConfig() {
 
     setFormErrors({});
 
+    const currentVacancy = editKey ? (careers[editKey]?.marketDemand?.vacancy || vacancy || '0') : (vacancy || '0');
+    const currentLocation = editKey ? (careers[editKey]?.marketDemand?.location || location || 'Nasional / Remote') : (location || 'Nasional / Remote');
+    const currentTrend = editKey ? (careers[editKey]?.marketDemand?.trend || trend) : trend;
+    const currentSkills = editKey ? (careers[editKey]?.marketDemand?.skills || ['Java', 'SQL', 'Git']) : ['Java', 'SQL', 'Git'];
+
     const marketDemand = {
       title: `Gambaran kebutuhan pasar kerja untuk ${careerName}.`,
-      vacancy: vacancy || '100',
-      trend: trend,
-      short: location.split(',')[0] || 'Jakarta',
+      vacancy: currentVacancy,
+      trend: currentTrend,
+      short: currentLocation.split(',')[0] || 'Nasional',
       shortNote: 'dan peluang remote',
-      location: location || 'Jakarta',
-      skills: ['Java', 'SQL', 'Git'],
+      location: currentLocation,
+      skills: currentSkills,
+      jobMarketKeyword: kwTrimmed,
       note: `Data pasar kerja untuk ${careerName}.`
     };
 
@@ -191,6 +192,7 @@ export default function CareersConfig() {
       icon,
       subtitle,
       description,
+      jobMarketKeyword: kwTrimmed,
       riasecMapped: editKey ? careers[editKey].riasecMapped : ["I"],
       academicWeights: editKey ? careers[editKey].academicWeights : { "Pemrograman": 30, "Basis Data": 20, "Analisis dan Perancangan Sistem": 20, "Jaringan dan Keamanan": 15, "Data dan Kecerdasan Buatan": 15 },
       marketDemandScore: editKey ? careers[editKey].marketDemandScore : 85,
@@ -202,12 +204,14 @@ export default function CareersConfig() {
       subtitle,
       description,
       icon,
+      jobMarketKeyword: kwTrimmed,
       marketDemandScore: newCareerData.marketDemandScore,
       marketDetail: {
-        vacancyCount: Number(vacancy) || 100,
-        trendStatus: trend,
-        primaryLocation: location || 'Jakarta & Remote',
-        requiredSkills: ['Java', 'SQL', 'Git'],
+        jobMarketKeyword: kwTrimmed,
+        vacancyCount: Number(currentVacancy) || 0,
+        trendStatus: currentTrend,
+        primaryLocation: currentLocation,
+        requiredSkills: currentSkills,
         shortNote: 'dan peluang remote'
       }
     };
@@ -399,7 +403,12 @@ export default function CareersConfig() {
                         </span>
                         <div>
                           <strong className="text-content-primary block font-semibold">{name}</strong>
-                          <span className="text-[11px] text-content-muted">{data.subtitle}</span>
+                          <span className="text-[11px] text-content-muted block">{data.subtitle}</span>
+                          {(data.jobMarketKeyword || data.marketDemand?.jobMarketKeyword) && (
+                            <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-mono text-content-muted bg-subsurface border border-divider px-1.5 py-0.5 rounded">
+                              keyword: <strong className="text-content-primary font-semibold">{data.jobMarketKeyword || data.marketDemand?.jobMarketKeyword}</strong>
+                            </span>
+                          )}
                         </div>
                       </div>
                     </td>
@@ -577,65 +586,55 @@ export default function CareersConfig() {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="grid gap-1.5">
-              <label htmlFor="vacancy" className="font-semibold text-content-primary text-xs">
-                Jumlah Lowongan Kerja (C3) <span className="text-red-500">*</span>
+          <div className="grid gap-1.5">
+            <div className="flex items-center justify-between">
+              <label htmlFor="jobMarketKeyword" className="font-semibold text-content-primary text-xs">
+                Job Market Keyword <span className="text-red-500">*</span>
               </label>
-              <input 
-                id="vacancy"
-                type="number"
-                min="0"
-                value={vacancy}
-                onChange={(e) => {
-                  setVacancy(e.target.value);
-                  if (formErrors.vacancy) setFormErrors(prev => ({ ...prev, vacancy: undefined }));
-                }}
-                placeholder="Contoh: 520"
-                className={`w-full px-3 py-2 bg-surface border rounded-lg text-content-primary text-sm outline-none tabular-nums transition-colors ${
-                  formErrors.vacancy 
-                    ? 'border-red-500 focus:border-red-500' 
-                    : 'border-divider focus:border-primary'
-                }`}
-                aria-invalid={!!formErrors.vacancy}
-                required
-              />
-              {formErrors.vacancy && (
-                <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium">
-                  <AlertCircle className="w-3 h-3 shrink-0" />
-                  <span>{formErrors.vacancy}</span>
-                </p>
-              )}
+              <span className="text-[11px] text-content-muted">Parameter keyword pencarian lowongan kerja</span>
             </div>
-            <div className="grid gap-1.5">
-              <label htmlFor="location" className="font-semibold text-content-primary text-xs">
-                Wilayah Penempatan Utama <span className="text-red-500">*</span>
-              </label>
-              <input 
-                id="location"
-                type="text"
-                value={location}
-                onChange={(e) => {
-                  setLocation(e.target.value);
-                  if (formErrors.location) setFormErrors(prev => ({ ...prev, location: undefined }));
-                }}
-                placeholder="Contoh: Jakarta, Remote"
-                className={`w-full px-3 py-2 bg-surface border rounded-lg text-content-primary text-sm outline-none transition-colors ${
-                  formErrors.location 
-                    ? 'border-red-500 focus:border-red-500' 
-                    : 'border-divider focus:border-primary'
-                }`}
-                aria-invalid={!!formErrors.location}
-                required
-              />
-              {formErrors.location && (
-                <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium">
-                  <AlertCircle className="w-3 h-3 shrink-0" />
-                  <span>{formErrors.location}</span>
-                </p>
-              )}
-            </div>
+            <input 
+              id="jobMarketKeyword"
+              type="text"
+              value={jobMarketKeyword}
+              onChange={(e) => {
+                setJobMarketKeyword(e.target.value);
+                if (formErrors.jobMarketKeyword) setFormErrors(prev => ({ ...prev, jobMarketKeyword: undefined }));
+              }}
+              placeholder="Contoh: Software Engineer, Fullstack Developer"
+              className={`w-full px-3 py-2 bg-surface border rounded-lg text-content-primary text-sm outline-none transition-colors ${
+                formErrors.jobMarketKeyword 
+                  ? 'border-red-500 focus:border-red-500' 
+                  : 'border-divider focus:border-primary'
+              }`}
+              aria-invalid={!!formErrors.jobMarketKeyword}
+              required
+            />
+            {formErrors.jobMarketKeyword ? (
+              <p className="text-[11px] text-red-500 mt-1 flex items-center gap-1 font-medium">
+                <AlertCircle className="w-3 h-3 shrink-0" />
+                <span>{formErrors.jobMarketKeyword}</span>
+              </p>
+            ) : (
+              <p className="text-[11px] text-content-muted">
+                Kata kunci (job title) yang digunakan ketika sinkronisasi pasar kerja dijalankan oleh scheduler.
+              </p>
+            )}
           </div>
+
+          {editKey !== null && (
+            <div className="p-3 bg-subsurface/60 border border-divider rounded-lg text-xs flex items-start gap-2.5">
+              <Info className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <div className="font-semibold text-content-primary">
+                  Data Pasar Kerja Tersinkronisasi Otomatis
+                </div>
+                <div className="text-content-muted leading-relaxed">
+                  Jumlah lowongan saat ini: <strong className="text-content-primary font-mono tabular-nums">{Number(vacancy || 0).toLocaleString('id-ID')}</strong> lowongan di wilayah <strong className="text-content-primary">{location || 'Nasional / Remote'}</strong>. Data ini bersumber dari API pasar kerja dan diperbarui secara berkala oleh scheduler sehingga tidak dapat diubah secara manual.
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center justify-end gap-3 pt-3 border-t border-divider">
             <button 

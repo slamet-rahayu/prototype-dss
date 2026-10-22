@@ -8,7 +8,8 @@ import {
   INITIAL_CAREERS,
   INITIAL_SAW_CONFIG,
   INITIAL_RECOMMENDATION_HISTORIES,
-  INITIAL_SCHEDULER_LOGS
+  INITIAL_SCHEDULER_LOGS,
+  INITIAL_SCHEDULER_CONFIGS
 } from '../data/initialData.js';
 
 // Global singleton PrismaClient instance
@@ -29,7 +30,8 @@ const inMemoryStore = {
   careers: JSON.parse(JSON.stringify(INITIAL_CAREERS)),
   sawConfig: JSON.parse(JSON.stringify(INITIAL_SAW_CONFIG)),
   recommendationHistories: JSON.parse(JSON.stringify(INITIAL_RECOMMENDATION_HISTORIES)),
-  schedulerLogs: JSON.parse(JSON.stringify(INITIAL_SCHEDULER_LOGS))
+  schedulerLogs: JSON.parse(JSON.stringify(INITIAL_SCHEDULER_LOGS)),
+  schedulerConfigs: JSON.parse(JSON.stringify(INITIAL_SCHEDULER_CONFIGS))
 };
 
 export const dbRepository = {
@@ -376,9 +378,18 @@ export const dbRepository = {
           marketDetail: true,
           riasecWeights: true,
           academicWeights: { include: { subject: true } }
-        }
+        },
+        orderBy: { title: 'asc' }
       });
-      if (careers && careers.length > 0) return careers;
+      if (careers && careers.length > 0) {
+        return careers.map(c => ({
+          ...c,
+          academicWeights: (c.academicWeights || []).map(w => ({
+            ...w,
+            subjectName: w.subjectName || w.subject?.name || `Mata Kuliah ${w.subjectId}`
+          }))
+        }));
+      }
     } catch {
       // Fallback
     }
@@ -386,7 +397,28 @@ export const dbRepository = {
   },
 
   async getCareerById(id) {
-    const careers = await this.getCareers();
+    try {
+      const career = await prisma.career.findFirst({
+        where: { OR: [{ id }, { slug: id }] },
+        include: {
+          marketDetail: true,
+          riasecWeights: true,
+          academicWeights: { include: { subject: true } }
+        }
+      });
+      if (career) {
+        return {
+          ...career,
+          academicWeights: (career.academicWeights || []).map(w => ({
+            ...w,
+            subjectName: w.subjectName || w.subject?.name || `Mata Kuliah ${w.subjectId}`
+          }))
+        };
+      }
+    } catch {
+      // Fallback
+    }
+    const careers = inMemoryStore.careers;
     return careers.find(c => c.id === id || c.slug === id) || null;
   },
 
@@ -394,25 +426,179 @@ export const dbRepository = {
     const career = inMemoryStore.careers.find(c => c.id === id || c.slug === id);
     if (career) {
       Object.assign(career, updateData);
+      if (updateData.jobMarketKeyword) {
+        career.jobMarketKeyword = updateData.jobMarketKeyword;
+        if (career.marketDetail) {
+          career.marketDetail.jobMarketKeyword = updateData.jobMarketKeyword;
+        }
+      }
+      if (updateData.riasecWeights && Array.isArray(updateData.riasecWeights)) {
+        career.riasecWeights = updateData.riasecWeights;
+        career.riasecMapped = updateData.riasecWeights.filter(w => (Number(w.weight) || 0) > 0).map(w => w.dimension);
+      }
+      if (updateData.academicWeights && Array.isArray(updateData.academicWeights)) {
+        career.academicWeights = updateData.academicWeights.map(aw => {
+          let subId = aw.subjectId;
+          let subName = aw.subjectName;
+          if (!subId && subName) {
+            const found = inMemoryStore.academicSubjects.find(s => s.name.toLowerCase().trim() === subName.toLowerCase().trim());
+            if (found) subId = found.id;
+          }
+          if (!subName && subId) {
+            const found = inMemoryStore.academicSubjects.find(s => s.id === subId);
+            if (found) subName = found.name;
+          }
+          return {
+            careerId: career.id,
+            subjectId: subId || 1,
+            subjectName: subName || '',
+            weight: Number(aw.weight) || 0
+          };
+        });
+      }
     }
 
     try {
-      await prisma.career.update({
-        where: { id },
-        data: updateData
+      const foundCareer = await prisma.career.findFirst({
+        where: { OR: [{ id }, { slug: id }] },
+        include: { marketDetail: true }
       });
-    } catch {
-      // Fallback
+      if (foundCareer) {
+        const { marketDetail, riasecWeights, academicWeights, ...careerFields } = updateData;
+        await prisma.career.update({
+          where: { id: foundCareer.id },
+          data: careerFields
+        });
+
+        // 1. Persist RIASEC Weights to DB
+        if (riasecWeights && Array.isArray(riasecWeights)) {
+          for (const rw of riasecWeights) {
+            if (rw.dimension) {
+              await prisma.careerRiasecWeight.upsert({
+                where: {
+                  careerId_dimension: {
+                    careerId: foundCareer.id,
+                    dimension: rw.dimension
+                  }
+                },
+                update: { weight: Number(rw.weight) || 0 },
+                create: {
+                  careerId: foundCareer.id,
+                  dimension: rw.dimension,
+                  weight: Number(rw.weight) || 0
+                }
+              });
+            }
+          }
+        }
+
+        // 2. Persist Academic Weights to DB
+        if (academicWeights && Array.isArray(academicWeights)) {
+          const subjects = await prisma.academicSubject.findMany();
+          const subjectNameMap = new Map();
+          subjects.forEach(s => {
+            subjectNameMap.set(s.name.toLowerCase().trim(), s.id);
+            subjectNameMap.set(String(s.id), s.id);
+          });
+
+          const resolvedWeights = [];
+          for (const aw of academicWeights) {
+            let subjectId = aw.subjectId ? Number(aw.subjectId) : null;
+            if (!subjectId && aw.subjectName) {
+              subjectId = subjectNameMap.get(aw.subjectName.toLowerCase().trim());
+            }
+            if (subjectId) {
+              resolvedWeights.push({
+                subjectId,
+                weight: Number(aw.weight) || 0
+              });
+            }
+          }
+
+          const targetSubjectIds = resolvedWeights.map(w => w.subjectId);
+
+          // Delete unlinked academic weights from this career
+          await prisma.careerAcademicWeight.deleteMany({
+            where: {
+              careerId: foundCareer.id,
+              subjectId: { notIn: targetSubjectIds }
+            }
+          });
+
+          // Upsert active academic weights
+          for (const aw of resolvedWeights) {
+            await prisma.careerAcademicWeight.upsert({
+              where: {
+                careerId_subjectId: {
+                  careerId: foundCareer.id,
+                  subjectId: aw.subjectId
+                }
+              },
+              update: { weight: aw.weight },
+              create: {
+                careerId: foundCareer.id,
+                subjectId: aw.subjectId,
+                weight: aw.weight
+              }
+            });
+          }
+        }
+
+        // 3. Persist Job Market Detail
+        if (marketDetail || updateData.jobMarketKeyword) {
+          await prisma.jobMarketDetail.upsert({
+            where: { careerId: foundCareer.id },
+            update: {
+              ...(updateData.jobMarketKeyword ? { jobMarketKeyword: updateData.jobMarketKeyword } : {}),
+              ...(marketDetail?.jobMarketKeyword ? { jobMarketKeyword: marketDetail.jobMarketKeyword } : {}),
+              ...(marketDetail?.vacancyCount !== undefined ? { vacancyCount: Number(marketDetail.vacancyCount) } : {}),
+              ...(marketDetail?.trendStatus ? { trendStatus: marketDetail.trendStatus } : {}),
+              ...(marketDetail?.primaryLocation ? { primaryLocation: marketDetail.primaryLocation } : {})
+            },
+            create: {
+              careerId: foundCareer.id,
+              jobMarketKeyword: updateData.jobMarketKeyword || marketDetail?.jobMarketKeyword || foundCareer.title,
+              vacancyCount: marketDetail?.vacancyCount ? Number(marketDetail.vacancyCount) : 0,
+              trendStatus: marketDetail?.trendStatus || 'Tren stabil',
+              primaryLocation: marketDetail?.primaryLocation || 'Jakarta, Bandung, dan Remote',
+              requiredSkills: marketDetail?.requiredSkills || []
+            }
+          });
+        }
+
+        const freshCareer = await prisma.career.findUnique({
+          where: { id: foundCareer.id },
+          include: {
+            marketDetail: true,
+            riasecWeights: true,
+            academicWeights: { include: { subject: true } }
+          }
+        });
+
+        if (freshCareer) {
+          return {
+            ...freshCareer,
+            academicWeights: (freshCareer.academicWeights || []).map(w => ({
+              ...w,
+              subjectName: w.subjectName || w.subject?.name || `Mata Kuliah ${w.subjectId}`
+            }))
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('Prisma updateCareer error fallback:', err.message);
     }
 
     return career;
   },
 
-  async updateJobMarket(careerId, { marketDemandScore, vacancyCount, trendStatus, primaryLocation, requiredSkills, shortNote }) {
+  async updateJobMarket(careerId, { marketDemandScore, jobMarketKeyword, vacancyCount, trendStatus, primaryLocation, requiredSkills, shortNote }) {
     const career = inMemoryStore.careers.find(c => c.id === careerId || c.slug === careerId);
     if (career) {
       if (marketDemandScore !== undefined) career.marketDemandScore = Number(marketDemandScore);
+      if (jobMarketKeyword !== undefined) career.jobMarketKeyword = jobMarketKeyword;
       if (career.marketDetail) {
+        if (jobMarketKeyword !== undefined) career.marketDetail.jobMarketKeyword = jobMarketKeyword;
         if (vacancyCount !== undefined) career.marketDetail.vacancyCount = Number(vacancyCount);
         if (trendStatus !== undefined) career.marketDetail.trendStatus = trendStatus;
         if (primaryLocation !== undefined) career.marketDetail.primaryLocation = primaryLocation;
@@ -427,15 +613,19 @@ export const dbRepository = {
         include: { marketDetail: true }
       });
       if (foundCareer) {
-        if (marketDemandScore !== undefined) {
+        if (marketDemandScore !== undefined || jobMarketKeyword !== undefined) {
           await prisma.career.update({
             where: { id: foundCareer.id },
-            data: { marketDemandScore: Number(marketDemandScore) }
+            data: { 
+              ...(marketDemandScore !== undefined ? { marketDemandScore: Number(marketDemandScore) } : {}),
+              ...(jobMarketKeyword !== undefined ? { jobMarketKeyword } : {})
+            }
           });
         }
         await prisma.jobMarketDetail.upsert({
           where: { careerId: foundCareer.id },
           update: {
+            ...(jobMarketKeyword !== undefined ? { jobMarketKeyword } : {}),
             ...(vacancyCount !== undefined ? { vacancyCount: Number(vacancyCount) } : {}),
             ...(trendStatus !== undefined ? { trendStatus } : {}),
             ...(primaryLocation !== undefined ? { primaryLocation } : {}),
@@ -444,6 +634,7 @@ export const dbRepository = {
           },
           create: {
             careerId: foundCareer.id,
+            jobMarketKeyword: jobMarketKeyword || foundCareer.title,
             vacancyCount: vacancyCount ? Number(vacancyCount) : 0,
             trendStatus: trendStatus || 'Tren meningkat',
             primaryLocation: primaryLocation || 'Jakarta, Bandung, dan Remote',
@@ -541,10 +732,201 @@ export const dbRepository = {
     return record;
   },
 
-  // --- SCHEDULER LOGS ---
-  async getSchedulerLogs() {
+  // --- SCHEDULER CONFIGS ---
+  async getSchedulerConfigs({ includeDeleted = false } = {}) {
     try {
-      const logs = await prisma.schedulerLog.findMany({ orderBy: { startedAt: 'desc' }, take: 20 });
+      // 1. Ambil seluruh alternatif karir aktif dari tabel Career
+      const careers = await prisma.career.findMany({
+        where: { isActive: true },
+        orderBy: { createdAt: 'asc' }
+      });
+
+      // 2. Ambil konfigurasi scheduler yang sudah tersimpan
+      const configs = await prisma.schedulerConfig.findMany({
+        where: includeDeleted ? undefined : { isDeleted: false },
+        orderBy: { createdAt: 'asc' }
+      });
+
+      if (careers && careers.length > 0) {
+        const resultConfigs = [];
+        for (const career of careers) {
+          let matching = configs.find(c => c.careerId === career.id || c.id === career.id || c.careerName.toLowerCase() === career.title.toLowerCase());
+          if (!matching) {
+            matching = await prisma.schedulerConfig.create({
+              data: {
+                id: `sched-${career.id}`,
+                careerId: career.id,
+                careerName: career.title,
+                cronExpression: '0 2 * * *',
+                executionTime: '02.00',
+                timezone: 'Asia/Jakarta',
+                isActive: true,
+                isDeleted: false,
+                lastStatus: 'Belum Berjalan'
+              }
+            }).catch(() => null);
+          } else if (matching.careerName !== career.title) {
+            matching = await prisma.schedulerConfig.update({
+              where: { id: matching.id },
+              data: { careerName: career.title }
+            }).catch(() => matching);
+          }
+          if (matching) {
+            resultConfigs.push(matching);
+          }
+        }
+        if (resultConfigs.length > 0) {
+          return resultConfigs;
+        }
+      }
+
+      if (configs && configs.length > 0) {
+        return configs;
+      }
+    } catch {
+      // Fallback
+    }
+
+    const memCareers = inMemoryStore.careers.filter(c => c.isActive);
+    if (memCareers && memCareers.length > 0) {
+      return memCareers.map(c => {
+        const found = inMemoryStore.schedulerConfigs.find(s => s.careerId === c.id || s.careerName.toLowerCase() === (c.title || c.name).toLowerCase());
+        return found || {
+          id: `sched-${c.id}`,
+          careerId: c.id,
+          careerName: c.title || c.name,
+          cronExpression: '0 2 * * *',
+          executionTime: '02.00',
+          timezone: 'Asia/Jakarta',
+          isActive: true,
+          isDeleted: false,
+          lastStatus: 'Belum Berjalan',
+          lastRunAt: null
+        };
+      });
+    }
+
+    return inMemoryStore.schedulerConfigs.filter(c => includeDeleted || !c.isDeleted);
+  },
+
+  async getSchedulerConfigById(id) {
+    try {
+      const config = await prisma.schedulerConfig.findFirst({
+        where: { OR: [{ id }, { careerId: id }] }
+      });
+      if (config) return config;
+    } catch {
+      // Fallback
+    }
+    return inMemoryStore.schedulerConfigs.find(c => (c.id === id || c.careerId === id) && !c.isDeleted) || null;
+  },
+
+  async createSchedulerConfig(data) {
+    const id = data.id || `sched-${Date.now().toString(36)}`;
+    const newConfig = {
+      id,
+      careerId: data.careerId || null,
+      careerName: data.careerName,
+      cronExpression: data.cronExpression || '0 2 * * *',
+      executionTime: data.executionTime || '02.00',
+      timezone: data.timezone || 'Asia/Jakarta',
+      isActive: data.isActive !== undefined ? Boolean(data.isActive) : true,
+      isDeleted: false,
+      deletedAt: null,
+      lastRunAt: null,
+      lastStatus: 'Belum Berjalan',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    inMemoryStore.schedulerConfigs.push(newConfig);
+
+    try {
+      const created = await prisma.schedulerConfig.create({
+        data: {
+          id: newConfig.id,
+          careerId: newConfig.careerId,
+          careerName: newConfig.careerName,
+          cronExpression: newConfig.cronExpression,
+          executionTime: newConfig.executionTime,
+          timezone: newConfig.timezone,
+          isActive: newConfig.isActive,
+          isDeleted: false,
+          lastStatus: newConfig.lastStatus
+        }
+      });
+      return created;
+    } catch {
+      // Fallback
+    }
+    return newConfig;
+  },
+
+  async updateSchedulerConfig(id, data) {
+    const inMemIndex = inMemoryStore.schedulerConfigs.findIndex(c => c.id === id || c.careerId === id);
+    if (inMemIndex !== -1) {
+      inMemoryStore.schedulerConfigs[inMemIndex] = {
+        ...inMemoryStore.schedulerConfigs[inMemIndex],
+        ...data,
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    try {
+      let targetId = inMemIndex !== -1 ? inMemoryStore.schedulerConfigs[inMemIndex].id : id;
+      const existing = await prisma.schedulerConfig.findFirst({
+        where: { OR: [{ id: targetId }, { careerId: targetId }] }
+      });
+      if (existing) {
+        targetId = existing.id;
+      }
+      const updated = await prisma.schedulerConfig.update({
+        where: { id: targetId },
+        data: {
+          ...(data.careerId !== undefined ? { careerId: data.careerId } : {}),
+          ...(data.careerName !== undefined ? { careerName: data.careerName } : {}),
+          ...(data.cronExpression !== undefined ? { cronExpression: data.cronExpression } : {}),
+          ...(data.executionTime !== undefined ? { executionTime: data.executionTime } : {}),
+          ...(data.timezone !== undefined ? { timezone: data.timezone } : {}),
+          ...(data.isActive !== undefined ? { isActive: Boolean(data.isActive) } : {}),
+          ...(data.isDeleted !== undefined ? { isDeleted: Boolean(data.isDeleted) } : {}),
+          ...(data.deletedAt !== undefined ? { deletedAt: data.deletedAt ? new Date(data.deletedAt) : null } : {}),
+          ...(data.lastRunAt !== undefined ? { lastRunAt: data.lastRunAt ? new Date(data.lastRunAt) : null } : {}),
+          ...(data.lastStatus !== undefined ? { lastStatus: data.lastStatus } : {})
+        }
+      });
+      return updated;
+    } catch {
+      // Fallback
+    }
+    return inMemIndex !== -1 ? inMemoryStore.schedulerConfigs[inMemIndex] : null;
+  },
+
+  async softDeleteSchedulerConfig(id) {
+    const now = new Date().toISOString();
+    return await this.updateSchedulerConfig(id, {
+      isDeleted: true,
+      deletedAt: now,
+      isActive: false
+    });
+  },
+
+  // --- SCHEDULER LOGS ---
+  async getSchedulerLogs({ limit = 50, executionType, status } = {}) {
+    const whereClause = {};
+    if (executionType && executionType !== 'Semua') {
+      whereClause.executionType = executionType;
+    }
+    if (status && status !== 'Semua') {
+      whereClause.status = status;
+    }
+
+    try {
+      const logs = await prisma.schedulerLog.findMany({ 
+        where: Object.keys(whereClause).length > 0 ? whereClause : undefined,
+        orderBy: { startedAt: 'desc' }, 
+        take: limit 
+      });
       if (logs && logs.length > 0) {
         return logs.map(l => {
           const inMem = inMemoryStore.schedulerLogs.find(
@@ -559,7 +941,15 @@ export const dbRepository = {
     } catch {
       // Fallback
     }
-    return inMemoryStore.schedulerLogs;
+
+    let filtered = inMemoryStore.schedulerLogs;
+    if (executionType && executionType !== 'Semua') {
+      filtered = filtered.filter(l => l.executionType === executionType);
+    }
+    if (status && status !== 'Semua') {
+      filtered = filtered.filter(l => l.status === status);
+    }
+    return filtered.slice(0, limit);
   },
 
   async createSchedulerLog(logData) {
@@ -572,7 +962,7 @@ export const dbRepository = {
     inMemoryStore.schedulerLogs.unshift(newLog);
 
     try {
-      const { careerSyncDetails, ...prismaLogData } = logData;
+      const { careerSyncDetails: _careerSyncDetails, ...prismaLogData } = logData;
       await prisma.schedulerLog.create({
         data: prismaLogData
       });
@@ -772,6 +1162,37 @@ export const dbRepository = {
     inMemoryStore.careers.push(newCareer);
 
     try {
+      let riasecCreate = undefined;
+      if (newCareer.riasecWeights && Array.isArray(newCareer.riasecWeights) && newCareer.riasecWeights.length > 0) {
+        riasecCreate = {
+          create: newCareer.riasecWeights.map(rw => ({
+            dimension: rw.dimension,
+            weight: Number(rw.weight) || 0
+          }))
+        };
+      }
+
+      let academicCreate = undefined;
+      if (newCareer.academicWeights && Array.isArray(newCareer.academicWeights) && newCareer.academicWeights.length > 0) {
+        const subjects = await prisma.academicSubject.findMany();
+        const subMap = new Map(subjects.map(s => [s.name.toLowerCase().trim(), s.id]));
+        const validAcademic = [];
+        for (const aw of newCareer.academicWeights) {
+          const subId = aw.subjectId ? Number(aw.subjectId) : subMap.get((aw.subjectName || '').toLowerCase().trim());
+          if (subId) {
+            validAcademic.push({
+              subjectId: subId,
+              weight: Number(aw.weight) || 0
+            });
+          }
+        }
+        if (validAcademic.length > 0) {
+          academicCreate = {
+            create: validAcademic
+          };
+        }
+      }
+
       const created = await prisma.career.create({
         data: {
           id,
@@ -789,12 +1210,14 @@ export const dbRepository = {
               requiredSkills: newCareer.marketDetail.requiredSkills || [],
               shortNote: newCareer.marketDetail.shortNote || ''
             }
-          }
+          },
+          riasecWeights: riasecCreate,
+          academicWeights: academicCreate
         },
         include: {
           marketDetail: true,
           riasecWeights: true,
-          academicWeights: true
+          academicWeights: { include: { subject: true } }
         }
       });
       return created;
@@ -847,9 +1270,13 @@ export const dbRepository = {
   async deleteSubject(id) {
     const numId = Number(id);
     try {
+      await prisma.careerAcademicWeight.deleteMany({ where: { subjectId: numId } });
+      await prisma.academicGrade.deleteMany({ where: { subjectId: numId } });
       await prisma.academicSubject.delete({
         where: { id: numId }
       });
+      const idx = inMemoryStore.academicSubjects.findIndex(s => s.id === numId);
+      if (idx !== -1) inMemoryStore.academicSubjects.splice(idx, 1);
       return true;
     } catch (e) {
       console.warn('Prisma deleteSubject fallback:', e.message);
@@ -864,7 +1291,7 @@ export const dbRepository = {
       const q = await prisma.riasecQuestion.create({
         data: { type, question }
       });
-      return q;
+      return { ...q, text: q.question };
     } catch (e) {
       console.warn('Prisma createRiasecQuestion fallback:', e.message);
       const fallback = { id: Date.now(), type, question, text: question };
@@ -880,12 +1307,29 @@ export const dbRepository = {
         where: { id: numId },
         data: { type, question }
       });
-      return q;
+      return { ...q, text: q.question };
     } catch (e) {
       console.warn('Prisma updateRiasecQuestion fallback:', e.message);
       const item = inMemoryStore.riasecQuestions.find(q => q.id === numId);
       if (item) Object.assign(item, { type, question, text: question });
-      return item;
+      return item ? { ...item, text: item.question } : null;
+    }
+  },
+
+  async deleteRiasecQuestion(id) {
+    const numId = Number(id);
+    try {
+      await prisma.riasecQuestion.delete({
+        where: { id: numId }
+      });
+      const idx = inMemoryStore.riasecQuestions.findIndex(q => q.id === numId);
+      if (idx !== -1) inMemoryStore.riasecQuestions.splice(idx, 1);
+      return true;
+    } catch (e) {
+      console.warn('Prisma deleteRiasecQuestion fallback:', e.message);
+      const idx = inMemoryStore.riasecQuestions.findIndex(q => q.id === numId);
+      if (idx !== -1) inMemoryStore.riasecQuestions.splice(idx, 1);
+      return true;
     }
   },
 

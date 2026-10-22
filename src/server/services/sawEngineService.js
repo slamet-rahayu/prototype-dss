@@ -46,10 +46,11 @@ export class SawEngineService {
           if (g.subjectId) gradeMap.set(`id_${g.subjectId}`, g.grade);
         });
 
-        career.academicWeights.forEach(({ subjectId, subjectName, weight }) => {
+        career.academicWeights.forEach(({ subjectId, subjectName, weight, subject }) => {
           let studentGrade = 0;
-          if (subjectName && gradeMap.has(subjectName)) {
-            studentGrade = gradeMap.get(subjectName);
+          const resolvedName = subjectName || subject?.name;
+          if (resolvedName && gradeMap.has(resolvedName)) {
+            studentGrade = gradeMap.get(resolvedName);
           } else if (subjectId && gradeMap.has(`id_${subjectId}`)) {
             studentGrade = gradeMap.get(`id_${subjectId}`);
           }

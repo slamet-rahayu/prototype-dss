@@ -5,6 +5,7 @@ import { successResponse, errorResponse } from '@/server/utils/apiResponse.js';
 
 const jobMarketSchema = z.object({
   marketDemandScore: z.number().min(0).max(100).optional(),
+  jobMarketKeyword: z.string().optional(),
   vacancyCount: z.number().min(0).optional(),
   trendStatus: z.string().optional(),
   primaryLocation: z.string().optional(),

@@ -13,7 +13,8 @@ import {
   CheckCircle2,
   AlertCircle,
   ExternalLink,
-  Printer
+  Printer,
+  Briefcase
 } from 'lucide-react';
 
 export default function Recommendations() {
@@ -188,9 +189,14 @@ export default function Recommendations() {
                 <span className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-xs border border-white/20 text-blue-100 font-medium text-[11px]">
                   RIASEC Target: {topResult.tags?.[0] || 'I R C'}
                 </span>
-                <span className="px-3 py-1 rounded-lg bg-white/10 backdrop-blur-xs border border-white/20 text-blue-100 font-medium text-[11px]">
-                  Volume Lowongan: {topResult.market?.vacancy || '500'} posisi
-                </span>
+                <Link
+                  href={`/lowongan?career=${encodeURIComponent(topResult.name)}`}
+                  className="px-3 py-1 rounded-lg bg-white/15 hover:bg-white/25 border border-white/25 text-white font-medium text-[11px] transition-colors flex items-center gap-1.5"
+                  title="Lihat lowongan kerja untuk karir peringkat 1 ini"
+                >
+                  <Briefcase className="w-3 h-3 text-amber-300" />
+                  <span>Lowongan Pasar: {topResult.market?.vacancy || '500'} posisi</span>
+                </Link>
                 <Link
                   href={`/eksplorasi/${topResult.name}`}
                   className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-blue-50 text-blue-900 font-bold text-xs transition-all duration-150 shadow-md hover:shadow-lg flex items-center gap-1.5 ml-auto sm:ml-0"
@@ -402,6 +408,15 @@ export default function Recommendations() {
                       style={{ width: `${selectedCareer.c3?.pct || 75}%` }} 
                     />
                   </div>
+                  <div className="flex items-center justify-between text-[11px] text-content-muted mt-2 pt-1.5 border-t border-divider/60">
+                    <span className="flex items-center gap-1.5">
+                      <Briefcase className="w-3.5 h-3.5 text-primary" />
+                      <span>Tersedia <strong className="font-mono text-content-primary">{selectedCareer.market?.vacancy || '200+'}</strong> posisi lowongan</span>
+                    </span>
+                    <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                      {selectedCareer.market?.trend || 'Tren stabil'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -413,12 +428,20 @@ export default function Recommendations() {
                 V = ({sawWeights?.c1 || 40}% × {selectedCareer.c1?.val}) + ({sawWeights?.c2 || 35}% × {selectedCareer.c2?.val}) + ({sawWeights?.c3 || 25}% × {selectedCareer.c3?.val}) = <strong className="font-mono text-primary">{selectedCareer.score}</strong>
               </div>
 
-              <div className="pt-2 flex gap-2">
+              <div className="pt-2 flex flex-col sm:flex-row gap-2">
                 <Link
-                  href={`/eksplorasi/${selectedCareer.name}`}
-                  className="w-full py-2 px-3 text-center bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-semibold transition-colors"
+                  href={`/eksplorasi/${encodeURIComponent(selectedCareer.name)}`}
+                  className="flex-1 py-2 px-3 text-center border border-divider hover:bg-subsurface text-content-primary rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
                 >
-                  Buka Profil Karir Lengkap
+                  <span>Buka Profil Karir</span>
+                </Link>
+                <Link
+                  href={`/lowongan?career=${encodeURIComponent(selectedCareer.name)}`}
+                  className="flex-1 py-2 px-3 text-center bg-primary hover:bg-primary-dark text-white rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 shadow-xs"
+                  title={`Lihat daftar lowongan kerja untuk ${selectedCareer.name}`}
+                >
+                  <Briefcase className="w-3.5 h-3.5" />
+                  <span>Eksplor Lowongan Kerja</span>
                 </Link>
               </div>
             </Card>

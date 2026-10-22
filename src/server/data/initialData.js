@@ -312,6 +312,7 @@ export const INITIAL_CAREERS = [
     id: "car-001",
     slug: "software-engineer",
     title: "Software Engineer",
+    jobMarketKeyword: "Software Engineer",
     icon: "⌘",
     description: "Mengembangkan, menguji, dan memelihara aplikasi atau sistem perangkat lunak.",
     subtitle: "Pengembangan perangkat lunak dan solusi digital",
@@ -332,6 +333,7 @@ export const INITIAL_CAREERS = [
       { subjectId: 5, subjectName: "Data dan Kecerdasan Buatan", weight: 10 }
     ],
     marketDetail: {
+      jobMarketKeyword: "Software Engineer",
       vacancyCount: 520,
       trendStatus: "Tren meningkat",
       primaryLocation: "Jakarta, Bandung, dan Remote",
@@ -343,6 +345,7 @@ export const INITIAL_CAREERS = [
     id: "car-002",
     slug: "data-analyst",
     title: "Data Analyst",
+    jobMarketKeyword: "Data Analyst",
     icon: "▤",
     description: "Menganalisis data, menghasilkan wawasan, dan membuat laporan visual.",
     subtitle: "Analisis, pengolahan, dan visualisasi data",
@@ -363,6 +366,7 @@ export const INITIAL_CAREERS = [
       { subjectId: 5, subjectName: "Data dan Kecerdasan Buatan", weight: 30 }
     ],
     marketDetail: {
+      jobMarketKeyword: "Data Analyst",
       vacancyCount: 340,
       trendStatus: "Tren meningkat",
       primaryLocation: "Jakarta, Tangerang, dan Surabaya",
@@ -374,6 +378,7 @@ export const INITIAL_CAREERS = [
     id: "car-003",
     slug: "cybersecurity-analyst",
     title: "Cybersecurity Analyst",
+    jobMarketKeyword: "Cybersecurity Analyst",
     icon: "⌁",
     description: "Melindungi infrastruktur jaringan, data, dan sistem dari ancaman keamanan siber.",
     subtitle: "Keamanan informasi dan perlindungan sistem",
@@ -394,6 +399,7 @@ export const INITIAL_CAREERS = [
       { subjectId: 5, subjectName: "Data dan Kecerdasan Buatan", weight: 10 }
     ],
     marketDetail: {
+      jobMarketKeyword: "Cybersecurity Analyst",
       vacancyCount: 210,
       trendStatus: "Tren meningkat",
       primaryLocation: "Jakarta, Bandung, dan Batam",
@@ -405,6 +411,7 @@ export const INITIAL_CAREERS = [
     id: "car-004",
     slug: "business-analyst",
     title: "Business Analyst",
+    jobMarketKeyword: "Business Analyst",
     icon: "◫",
     description: "Menjembatani kebutuhan bisnis dengan solusi teknologi informasi yang tepat.",
     subtitle: "Analisis kebutuhan bisnis dan solusi teknologi",
@@ -425,6 +432,7 @@ export const INITIAL_CAREERS = [
       { subjectId: 5, subjectName: "Data dan Kecerdasan Buatan", weight: 10 }
     ],
     marketDetail: {
+      jobMarketKeyword: "Business Analyst",
       vacancyCount: 310,
       trendStatus: "Tren stabil",
       primaryLocation: "Jakarta, Tangerang, dan Bekasi",
@@ -436,6 +444,7 @@ export const INITIAL_CAREERS = [
     id: "car-005",
     slug: "ui-ux-designer",
     title: "UI/UX Designer",
+    jobMarketKeyword: "UI/UX Designer",
     icon: "◌",
     description: "Merancang antarmuka pengguna (UI) dan alur pengalaman pengguna (UX) untuk produk digital.",
     subtitle: "Desain pengalaman pengguna dan produk digital",
@@ -456,6 +465,7 @@ export const INITIAL_CAREERS = [
       { subjectId: 5, subjectName: "Data dan Kecerdasan Buatan", weight: 20 }
     ],
     marketDetail: {
+      jobMarketKeyword: "UI/UX Designer",
       vacancyCount: 260,
       trendStatus: "Tren stabil",
       primaryLocation: "Jakarta, Bandung, dan Yogyakarta",
@@ -467,6 +477,7 @@ export const INITIAL_CAREERS = [
     id: "car-006",
     slug: "devops-engineer",
     title: "DevOps Engineer",
+    jobMarketKeyword: "DevOps Engineer",
     icon: "⚙",
     description: "Mengintegrasikan tim developer (Dev) dengan operasional TI (Ops) untuk mengotomatisasi pengujian, perilisan, dan infrastruktur cloud.",
     subtitle: "Otomatisasi infrastruktur dan rilis kode",
@@ -487,6 +498,7 @@ export const INITIAL_CAREERS = [
       { subjectId: 5, subjectName: "Data dan Kecerdasan Buatan", weight: 10 }
     ],
     marketDetail: {
+      jobMarketKeyword: "DevOps Engineer",
       vacancyCount: 220,
       trendStatus: "Tren meningkat",
       primaryLocation: "Jakarta, Tangerang, dan Remote",
@@ -498,6 +510,7 @@ export const INITIAL_CAREERS = [
     id: "car-007",
     slug: "quality-assurance-engineer",
     title: "Quality Assurance Engineer",
+    jobMarketKeyword: "Quality Assurance Engineer",
     icon: "★",
     description: "Menguji keandalan perangkat lunak, merancang skenario pengujian automated/manual, mengidentifikasi bug, dan menjaga standar perilisan.",
     subtitle: "Pengujian kualitas dan keandalan sistem software",
@@ -518,6 +531,7 @@ export const INITIAL_CAREERS = [
       { subjectId: 5, subjectName: "Data dan Kecerdasan Buatan", weight: 15 }
     ],
     marketDetail: {
+      jobMarketKeyword: "Quality Assurance Engineer",
       vacancyCount: 190,
       trendStatus: "Tren stabil",
       primaryLocation: "Jakarta, Bandung, dan Surabaya",
@@ -529,6 +543,7 @@ export const INITIAL_CAREERS = [
     id: "car-008",
     slug: "database-administrator",
     title: "Database Administrator",
+    jobMarketKeyword: "Database Administrator",
     icon: "▤",
     description: "Mengelola, mengamankan, mengoptimalkan, dan memelihara sistem database (DBMS) untuk kelancaran akses informasi organisasi.",
     subtitle: "Manajemen, performa, dan keamanan basis data",
@@ -549,6 +564,7 @@ export const INITIAL_CAREERS = [
       { subjectId: 5, subjectName: "Data dan Kecerdasan Buatan", weight: 5 }
     ],
     marketDetail: {
+      jobMarketKeyword: "Database Administrator",
       vacancyCount: 110,
       trendStatus: "Tren stabil",
       primaryLocation: "Jakarta, Bekasi, dan Cikarang",
@@ -560,6 +576,7 @@ export const INITIAL_CAREERS = [
     id: "car-009",
     slug: "network-administrator",
     title: "Network Administrator",
+    jobMarketKeyword: "Network Administrator",
     icon: "⌁",
     description: "Mengkonfigurasi, memelihara, mengamankan, dan menganalisis infrastruktur jaringan komputer lokal (LAN) maupun luas (WAN).",
     subtitle: "Pengelolaan dan pemeliharaan jaringan organisasi",
@@ -580,6 +597,7 @@ export const INITIAL_CAREERS = [
       { subjectId: 5, subjectName: "Data dan Kecerdasan Buatan", weight: 10 }
     ],
     marketDetail: {
+      jobMarketKeyword: "Network Administrator",
       vacancyCount: 135,
       trendStatus: "Tren stabil",
       primaryLocation: "Jakarta, Surabaya, dan Medan",
@@ -814,5 +832,107 @@ export const INITIAL_SCHEDULER_LOGS = [
     startedAt: "2026-10-16T16:15:00.000Z",
     finishedAt: "2026-10-16T16:15:00.850Z",
     careerSyncDetails: BASE_CAREER_SYNC_DETAILS
+  }
+];
+
+export const INITIAL_SCHEDULER_CONFIGS = [
+  {
+    id: "sched-001",
+    careerId: "car-001",
+    careerName: "Software Engineer",
+    cronExpression: "0 2 * * *",
+    executionTime: "02.00",
+    timezone: "Asia/Jakarta",
+    isActive: true,
+    lastRunAt: "2026-10-21T02:00:00.000Z",
+    lastStatus: "Berhasil"
+  },
+  {
+    id: "sched-002",
+    careerId: "car-002",
+    careerName: "Data Analyst",
+    cronExpression: "0 2 * * *",
+    executionTime: "02.00",
+    timezone: "Asia/Jakarta",
+    isActive: true,
+    lastRunAt: "2026-10-21T02:00:00.000Z",
+    lastStatus: "Berhasil"
+  },
+  {
+    id: "sched-003",
+    careerId: "car-003",
+    careerName: "Cybersecurity Analyst",
+    cronExpression: "0 2 * * *",
+    executionTime: "02.00",
+    timezone: "Asia/Jakarta",
+    isActive: true,
+    lastRunAt: "2026-10-21T02:00:00.000Z",
+    lastStatus: "Berhasil"
+  },
+  {
+    id: "sched-004",
+    careerId: "car-004",
+    careerName: "Business Analyst",
+    cronExpression: "0 2 * * *",
+    executionTime: "02.00",
+    timezone: "Asia/Jakarta",
+    isActive: true,
+    lastRunAt: "2026-10-21T02:00:00.000Z",
+    lastStatus: "Berhasil"
+  },
+  {
+    id: "sched-005",
+    careerId: "car-005",
+    careerName: "UI/UX Designer",
+    cronExpression: "0 2 * * *",
+    executionTime: "02.00",
+    timezone: "Asia/Jakarta",
+    isActive: true,
+    lastRunAt: "2026-10-21T02:00:00.000Z",
+    lastStatus: "Berhasil"
+  },
+  {
+    id: "sched-006",
+    careerId: "car-006",
+    careerName: "DevOps Engineer",
+    cronExpression: "0 2 * * *",
+    executionTime: "02.00",
+    timezone: "Asia/Jakarta",
+    isActive: true,
+    lastRunAt: "2026-10-21T02:00:00.000Z",
+    lastStatus: "Berhasil"
+  },
+  {
+    id: "sched-007",
+    careerId: "car-007",
+    careerName: "Quality Assurance Engineer",
+    cronExpression: "0 2 * * *",
+    executionTime: "02.00",
+    timezone: "Asia/Jakarta",
+    isActive: true,
+    lastRunAt: "2026-10-21T02:00:00.000Z",
+    lastStatus: "Berhasil"
+  },
+  {
+    id: "sched-008",
+    careerId: "car-008",
+    careerName: "Database Administrator",
+    cronExpression: "0 2 * * *",
+    executionTime: "02.00",
+    timezone: "Asia/Jakarta",
+    isActive: true,
+    lastRunAt: "2026-10-21T02:00:00.000Z",
+    lastStatus: "Berhasil"
+  },
+  {
+    id: "sched-009",
+    careerId: "car-009",
+    careerName: "Network Administrator",
+    cronExpression: "0 2 * * *",
+    executionTime: "02.00",
+    timezone: "Asia/Jakarta",
+    isActive: true,
+    lastRunAt: "2026-10-21T02:00:00.000Z",
+    lastStatus: "Berhasil"
   }
 ];

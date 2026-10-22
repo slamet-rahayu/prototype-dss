@@ -43,6 +43,11 @@ export default function SawConfig() {
   const [activeTab, setActiveTab] = useState('criteria');
   const [toast, setToast] = useState({ show: false, message: '' });
   const [isLoading, setIsLoading] = useState(true);
+  const [isSavingWeights, setIsSavingWeights] = useState(false);
+  const [isSavingMapping, setIsSavingMapping] = useState(false);
+  const [isSavingAcademic, setIsSavingAcademic] = useState(false);
+  const [isSubmittingComp, setIsSubmittingComp] = useState(false);
+  const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false);
 
   // Initial fetch from backend APIs
   useEffect(() => {
@@ -89,6 +94,7 @@ export default function SawConfig() {
               icon: c.icon || '⌘',
               subtitle: c.subtitle || '',
               description: c.description || '',
+              jobMarketKeyword: c.jobMarketKeyword || c.marketDetail?.jobMarketKeyword || c.title,
               marketDemandScore: c.marketDemandScore || 80,
               marketDemand: {
                 title: `Gambaran kebutuhan pasar kerja untuk ${c.title}.`,
@@ -100,16 +106,32 @@ export default function SawConfig() {
                 skills: c.marketDetail?.requiredSkills || ['Java', 'SQL', 'Git'],
                 note: `Data pasar kerja untuk ${c.title}.`
               },
-              riasecMapped: (c.riasecWeights || []).filter(w => w.weight > 0).map(w => w.dimension),
-              riasecWeights: (c.riasecWeights || []).reduce((acc, w) => { acc[w.dimension] = w.weight; return acc; }, {}),
+              riasecMapped: (c.riasecWeights || []).filter(w => (Number(w.weight) || 0) > 0).map(w => w.dimension),
+              riasecWeights: (c.riasecWeights || []).reduce((acc, w) => { acc[w.dimension] = Number(w.weight) || 0; return acc; }, {}),
               academicWeights: (c.academicWeights || []).reduce((acc, w) => {
                 const subName = w.subjectName || w.subject?.name || `Mata Kuliah ${w.subjectId}`;
-                acc[subName] = w.weight;
+                acc[subName] = Number(w.weight) || 0;
                 return acc;
               }, {})
             };
           });
           setCareers(map);
+
+          const careerNames = Object.keys(map);
+          const firstTitle = careerNames[0];
+          if (firstTitle) {
+            setSelectedMappingCareer(prev => (prev && map[prev] ? prev : firstTitle));
+            const targetMap = selectedMappingCareer && map[selectedMappingCareer] ? map[selectedMappingCareer] : map[firstTitle];
+            if (targetMap?.riasecWeights) {
+              setRiasecWeightsState({ ...targetMap.riasecWeights });
+            }
+
+            setSelectedAcademicCareer(prev => (prev && map[prev] ? prev : firstTitle));
+            const targetAcad = selectedAcademicCareer && map[selectedAcademicCareer] ? map[selectedAcademicCareer] : map[firstTitle];
+            if (targetAcad?.academicWeights) {
+              setAcademicWeightsMap({ ...targetAcad.academicWeights });
+            }
+          }
         }
       })
       .finally(() => {
@@ -170,7 +192,7 @@ export default function SawConfig() {
     }
   };
 
-  // --- Tab 1: Save weights ---
+  // --- Tab 1: Save & Reset weights ---
   const criteriaTotal = Number(c1W) + Number(c2W) + Number(c3W);
 
   // --- Tab 3: RIASEC weights total ---
@@ -199,8 +221,9 @@ export default function SawConfig() {
     }
 
     setWeightErrors({});
+    setIsSavingWeights(true);
     try {
-      await apiRequest('/admin/saw-config', {
+      const res = await apiRequest('/admin/saw-config', {
         method: 'PUT',
         body: {
           c1Weight: c1Num,
@@ -208,15 +231,50 @@ export default function SawConfig() {
           c3Weight: c3Num
         }
       });
+      const savedConfig = res?.data || { c1Weight: c1Num, c2Weight: c2Num, c3Weight: c3Num };
+      setSawWeights({
+        c1: savedConfig.c1Weight,
+        c2: savedConfig.c2Weight,
+        c3: savedConfig.c3Weight
+      });
+      setC1W(savedConfig.c1Weight);
+      setC2W(savedConfig.c2Weight);
+      setC3W(savedConfig.c3Weight);
+      triggerToast("Bobot kriteria SAW berhasil disimpan ke basis data.");
     } catch (e) {
-      console.warn('API update saw-config error:', e.message);
+      console.error('API update saw-config error:', e);
+      triggerToast(`Gagal menyimpan ke basis data: ${e.message}`);
+    } finally {
+      setIsSavingWeights(false);
     }
-    setSawWeights({
-      c1: c1Num,
-      c2: c2Num,
-      c3: c3Num
-    });
-    triggerToast("Bobot kriteria SAW berhasil disimpan ke basis data.");
+  };
+
+  const handleResetWeights = async () => {
+    if (window.confirm("Kembalikan bobot kriteria SAW ke konfigurasi default (C1: 40%, C2: 35%, C3: 25%)?")) {
+      setIsSavingWeights(true);
+      try {
+        const res = await apiRequest('/admin/saw-config', {
+          method: 'PUT',
+          body: { c1Weight: 40, c2Weight: 35, c3Weight: 25 }
+        });
+        const savedConfig = res?.data || { c1Weight: 40, c2Weight: 35, c3Weight: 25 };
+        setSawWeights({
+          c1: savedConfig.c1Weight,
+          c2: savedConfig.c2Weight,
+          c3: savedConfig.c3Weight
+        });
+        setC1W(savedConfig.c1Weight);
+        setC2W(savedConfig.c2Weight);
+        setC3W(savedConfig.c3Weight);
+        setWeightErrors({});
+        triggerToast("Bobot kriteria SAW berhasil direset ke nilai default.");
+      } catch (e) {
+        console.error('API reset saw-config error:', e);
+        triggerToast(`Gagal mereset bobot kriteria: ${e.message}`);
+      } finally {
+        setIsSavingWeights(false);
+      }
+    }
   };
 
   // --- Tab 2: Academic components CRUD ---
@@ -239,20 +297,109 @@ export default function SawConfig() {
   };
 
   const handleDeleteComponent = async (id) => {
-    if (window.confirm("Hapus komponen akademik ini?")) {
+    if (window.confirm("Hapus komponen akademik ini dari basis data?")) {
       try {
         await apiRequest(`/admin/academic-subjects/${id}`, { method: 'DELETE' });
+        const updated = academicComponents.filter(c => c.id !== id);
+        setAcademicComponents(updated);
+        triggerToast("Komponen akademik berhasil dihapus dari basis data.");
       } catch (e) {
-        console.warn('API delete subject error:', e.message);
+        console.error('API delete subject error:', e);
+        triggerToast(`Gagal menghapus komponen: ${e.message}`);
       }
-      const updated = academicComponents.filter(c => c.id !== id);
-      setAcademicComponents(updated);
-      triggerToast("Komponen akademik berhasil dihapus dari basis data.");
     }
   };
 
   const handleCompSubmit = async (e) => {
     e.preventDefault();
+    const errs = {};
+    const nameTrimmed = compName.trim();
+    const descTrimmed = compDesc.trim();
+
+    if (!nameTrimmed) {
+      errs.compName = "Nama komponen akademik wajib diisi.";
+    } else if (nameTrimmed.length < 3) {
+      errs.compName = "Nama komponen minimal 3 karakter.";
+    }
+
+    if (!descTrimmed) {
+      errs.compDesc = "Deskripsi komponen wajib diisi.";
+    } else if (descTrimmed.length < 5) {
+      errs.compDesc = "Deskripsi komponen minimal 5 karakter.";
+    }
+
+    if (compEditId === null) {
+      const duplicate = (academicComponents || []).find(c => 
+        String(c?.name || c?.subjectName || '').toLowerCase() === nameTrimmed.toLowerCase()
+      );
+      if (duplicate) {
+        errs.compName = "Komponen mata kuliah ini sudah terdaftar.";
+      }
+    }
+
+    if (Object.keys(errs).length > 0) {
+      setCompErrors(errs);
+      triggerToast("Harap periksa isian formulir komponen akademik.");
+      return;
+    }
+
+    setCompErrors({});
+    setIsSubmittingComp(true);
+
+    if (compEditId !== null) {
+      try {
+        const res = await apiRequest(`/admin/academic-subjects/${compEditId}`, {
+          method: 'PUT',
+          body: { name: compName, description: compDesc, icon: compIcon }
+        });
+        const updatedData = res.data || { name: compName, description: compDesc, icon: compIcon };
+        const updated = academicComponents.map(c => {
+          if (c.id === compEditId) {
+            return {
+              ...c,
+              name: updatedData.name || compName,
+              desc: updatedData.description || compDesc,
+              icon: updatedData.icon || compIcon
+            };
+          }
+          return c;
+        });
+        setAcademicComponents(updated);
+        triggerToast("Komponen akademik berhasil diperbarui di basis data.");
+        setIsCompModalOpen(false);
+      } catch (err) {
+        console.error('API update subject error:', err);
+        triggerToast(`Gagal memperbarui komponen: ${err.message}`);
+      } finally {
+        setIsSubmittingComp(false);
+      }
+    } else {
+      try {
+        const res = await apiRequest('/admin/academic-subjects', {
+          method: 'POST',
+          body: { name: compName, description: compDesc, icon: compIcon }
+        });
+        const created = res.data || {};
+        const newComp = {
+          id: created.id || Date.now(),
+          name: created.name || compName,
+          desc: created.description || compDesc,
+          grade: 80,
+          status: "Baik",
+          updated: "Hari ini",
+          icon: created.icon || compIcon
+        };
+        setAcademicComponents([...academicComponents, newComp]);
+        triggerToast("Komponen akademik berhasil ditambahkan ke basis data.");
+        setIsCompModalOpen(false);
+      } catch (err) {
+        console.error('API create subject error:', err);
+        triggerToast(`Gagal menambahkan komponen: ${err.message}`);
+      } finally {
+        setIsSubmittingComp(false);
+      }
+    }
+  };
     const errs = {};
     const nameTrimmed = compName.trim();
     const descTrimmed = compDesc.trim();
@@ -339,14 +486,15 @@ export default function SawConfig() {
   };
 
   // --- Tab 3: RIASEC mapping ---
-  const handleLoadMapping = (careerName) => {
+  const handleLoadMapping = (careerName, overrideMap = null) => {
     setSelectedMappingCareer(careerName);
-    const careerData = careers[careerName];
+    const source = overrideMap || careers;
+    const careerData = source[careerName];
     const weights = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
     if (careerData) {
       if (careerData.riasecWeights) {
         Object.entries(careerData.riasecWeights).forEach(([code, val]) => {
-          weights[code] = val;
+          weights[code] = Number(val) || 0;
         });
       } else if (careerData.riasecMapped) {
         const count = careerData.riasecMapped.length;
@@ -369,7 +517,7 @@ export default function SawConfig() {
 
   const handleSaveMapping = async () => {
     const activeCodes = Object.entries(riasecWeightsState)
-      .filter(([_, w]) => w > 0)
+      .filter(([_, w]) => Number(w) > 0)
       .map(([code]) => code);
 
     if (activeCodes.length === 0) {
@@ -383,6 +531,7 @@ export default function SawConfig() {
       weight: Number(weight) || 0
     }));
 
+    setIsSavingMapping(true);
     try {
       await apiRequest(`/admin/careers/${careerId}`, {
         method: 'PUT',
@@ -390,29 +539,32 @@ export default function SawConfig() {
           riasecWeights: riasecArray
         }
       });
+      const updated = { ...careers };
+      updated[selectedMappingCareer] = {
+        ...updated[selectedMappingCareer],
+        riasecMapped: activeCodes,
+        riasecWeights: { ...riasecWeightsState }
+      };
+      setCareers(updated);
+      triggerToast(`Pemetaan RIASEC untuk "${selectedMappingCareer}" berhasil disimpan ke basis data.`);
     } catch (e) {
-      console.warn('API update riasec weights error:', e.message);
+      console.error('API update riasec weights error:', e);
+      triggerToast(`Gagal menyimpan pemetaan RIASEC: ${e.message}`);
+    } finally {
+      setIsSavingMapping(false);
     }
-
-    const updated = { ...careers };
-    updated[selectedMappingCareer] = {
-      ...updated[selectedMappingCareer],
-      riasecMapped: activeCodes,
-      riasecWeights: riasecWeightsState
-    };
-    setCareers(updated);
-    triggerToast(`Pemetaan RIASEC untuk "${selectedMappingCareer}" berhasil disimpan ke basis data.`);
   };
 
   // --- Tab 4: Academic weights per career ---
-  const handleLoadAcademicWeights = (careerName) => {
+  const handleLoadAcademicWeights = (careerName, overrideMap = null) => {
     setSelectedAcademicCareer(careerName);
-    const careerData = careers[careerName];
+    const source = overrideMap || careers;
+    const careerData = source[careerName];
     
     const weights = {};
     if (careerData && careerData.academicWeights) {
       Object.entries(careerData.academicWeights).forEach(([compName, compWeight]) => {
-        weights[compName] = compWeight;
+        weights[compName] = Number(compWeight) || 0;
       });
     }
     setAcademicWeightsMap(weights);
@@ -421,11 +573,11 @@ export default function SawConfig() {
   const handleWeightChange = (compName, value) => {
     setAcademicWeightsMap(prev => ({
       ...prev,
-      [compName]: Number(value) || 0
+      [compName]: Math.max(0, Math.min(100, Number(value) || 0))
     }));
   };
 
-  const academicWeightsTotal = Object.values(academicWeightsMap).reduce((a, b) => a + b, 0);
+  const academicWeightsTotal = Object.values(academicWeightsMap).reduce((a, b) => a + Number(b || 0), 0);
 
   const unlinkedComponents = useMemo(() => {
     return (academicComponents || []).filter(comp => comp && academicWeightsMap[comp.name || comp.subjectName] === undefined);
@@ -433,7 +585,7 @@ export default function SawConfig() {
 
   const handleSaveAcademicWeights = async () => {
     if (academicWeightsTotal !== 100) {
-      triggerToast("Total bobot harus bernilai 100%.");
+      triggerToast("Total bobot kualifikasi akademik harus bernilai tepat 100%.");
       return;
     }
 
@@ -443,6 +595,7 @@ export default function SawConfig() {
       weight: Number(weight) || 0
     }));
 
+    setIsSavingAcademic(true);
     try {
       await apiRequest(`/admin/careers/${careerId}`, {
         method: 'PUT',
@@ -450,17 +603,19 @@ export default function SawConfig() {
           academicWeights: academicArray
         }
       });
+      const updated = { ...careers };
+      updated[selectedAcademicCareer] = {
+        ...updated[selectedAcademicCareer],
+        academicWeights: { ...academicWeightsMap }
+      };
+      setCareers(updated);
+      triggerToast(`Bobot kualifikasi akademik untuk "${selectedAcademicCareer}" berhasil disimpan ke basis data.`);
     } catch (e) {
-      console.warn('API update academic weights error:', e.message);
+      console.error('API update academic weights error:', e);
+      triggerToast(`Gagal menyimpan bobot akademik: ${e.message}`);
+    } finally {
+      setIsSavingAcademic(false);
     }
-
-    const updated = { ...careers };
-    updated[selectedAcademicCareer] = {
-      ...updated[selectedAcademicCareer],
-      academicWeights: { ...academicWeightsMap }
-    };
-    setCareers(updated);
-    triggerToast(`Bobot kualifikasi akademik untuk "${selectedAcademicCareer}" berhasil disimpan ke basis data.`);
   };
 
   // --- Tab 5: RIASEC Questions CRUD handlers ---
@@ -476,20 +631,21 @@ export default function SawConfig() {
     setQuestionEditId(item.id);
     setQuestionErrors({});
     setQuestionType(item.type);
-    setQuestionText(item.text);
+    setQuestionText(item.text || item.question || '');
     setIsQuestionModalOpen(true);
   };
 
   const handleDeleteQuestion = async (id) => {
-    if (window.confirm("Hapus pernyataan soal tes RIASEC ini?")) {
+    if (window.confirm("Hapus pernyataan soal tes RIASEC ini dari basis data?")) {
       try {
         await apiRequest(`/admin/riasec-questions/${id}`, { method: 'DELETE' });
+        const updated = riasecQuestions.filter(q => q.id !== id);
+        setRiasecQuestions(updated);
+        triggerToast("Pernyataan soal berhasil dihapus dari basis data.");
       } catch (e) {
-        console.warn('API delete question error:', e.message);
+        console.error('API delete question error:', e);
+        triggerToast(`Gagal menghapus soal: ${e.message}`);
       }
-      const updated = riasecQuestions.filter(q => q.id !== id);
-      setRiasecQuestions(updated);
-      triggerToast("Pernyataan soal berhasil dihapus dari basis data.");
     }
   };
 
@@ -511,45 +667,58 @@ export default function SawConfig() {
     }
 
     setQuestionErrors({});
+    setIsSubmittingQuestion(true);
 
     if (questionEditId !== null) {
       try {
-        await apiRequest(`/admin/riasec-questions/${questionEditId}`, {
+        const res = await apiRequest(`/admin/riasec-questions/${questionEditId}`, {
           method: 'PUT',
-          body: { type: questionType, question: questionText }
+          body: { type: questionType, question: textTrimmed }
         });
+        const updatedItem = res?.data || { type: questionType, question: textTrimmed };
+        const updated = riasecQuestions.map(q => {
+          if (q.id === questionEditId) {
+            return {
+              ...q,
+              type: updatedItem.type || questionType,
+              text: updatedItem.question || textTrimmed,
+              question: updatedItem.question || textTrimmed
+            };
+          }
+          return q;
+        });
+        setRiasecQuestions(updated);
+        triggerToast("Pernyataan soal berhasil diperbarui di basis data.");
+        setIsQuestionModalOpen(false);
       } catch (e) {
-        console.warn('API update question error:', e.message);
+        console.error('API update question error:', e);
+        triggerToast(`Gagal memperbarui soal: ${e.message}`);
+      } finally {
+        setIsSubmittingQuestion(false);
       }
-      const updated = riasecQuestions.map(q => {
-        if (q.id === questionEditId) {
-          return { ...q, type: questionType, text: questionText, question: questionText };
-        }
-        return q;
-      });
-      setRiasecQuestions(updated);
-      triggerToast("Pernyataan soal berhasil diperbarui di basis data.");
     } else {
-      let newId = Date.now();
       try {
         const res = await apiRequest('/admin/riasec-questions', {
           method: 'POST',
-          body: { type: questionType, question: questionText }
+          body: { type: questionType, question: textTrimmed }
         });
-        if (res.data?.id) newId = res.data.id;
+        const created = res?.data || {};
+        const newQuestion = {
+          id: created.id || Date.now(),
+          type: created.type || questionType,
+          text: created.question || textTrimmed,
+          question: created.question || textTrimmed
+        };
+        setRiasecQuestions([...riasecQuestions, newQuestion]);
+        triggerToast("Pernyataan soal berhasil ditambahkan ke basis data.");
+        setIsQuestionModalOpen(false);
       } catch (e) {
-        console.warn('API create question error:', e.message);
+        console.error('API create question error:', e);
+        triggerToast(`Gagal menambahkan soal: ${e.message}`);
+      } finally {
+        setIsSubmittingQuestion(false);
       }
-      const newQuestion = {
-        id: newId,
-        type: questionType,
-        text: questionText,
-        question: questionText
-      };
-      setRiasecQuestions([...riasecQuestions, newQuestion]);
-      triggerToast("Pernyataan soal berhasil ditambahkan ke basis data.");
     }
-    setIsQuestionModalOpen(false);
   };
 
   useEffect(() => {
@@ -657,12 +826,24 @@ export default function SawConfig() {
                   <h2 className="text-sm font-bold text-content-primary">Kriteria Metode SAW</h2>
                   <p className="text-content-muted text-xs mt-0.5">Parameter pembobotan nilai preferensi alternatif karir.</p>
                 </div>
-                <button 
-                  onClick={handleSaveWeights}
-                  className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
-                >
-                  Simpan Bobot
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    type="button"
+                    onClick={handleResetWeights}
+                    disabled={isSavingWeights}
+                    className="px-3 py-2 border border-divider hover:bg-subsurface text-content-secondary hover:text-content-primary text-xs font-semibold rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    Reset Default
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={handleSaveWeights}
+                    disabled={isSavingWeights}
+                    className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                  >
+                    {isSavingWeights ? "Menyimpan..." : "Simpan Bobot"}
+                  </button>
+                </div>
               </div>
 
               <div className="overflow-x-auto w-full">
@@ -1018,9 +1199,10 @@ export default function SawConfig() {
                 </button>
                 <button 
                   onClick={handleSaveMapping}
-                  className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
+                  disabled={isSavingMapping}
+                  className="px-4 py-2 bg-primary hover:bg-primary-dark text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  Simpan Pemetaan
+                  {isSavingMapping ? "Menyimpan..." : "Simpan Pemetaan"}
                 </button>
               </div>
             </Card>
@@ -1214,9 +1396,10 @@ export default function SawConfig() {
                 </button>
                 <button 
                   onClick={handleSaveAcademicWeights}
-                  className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-semibold text-xs rounded-lg shadow-xs transition-colors cursor-pointer"
+                  disabled={isSavingAcademic}
+                  className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-semibold text-xs rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
                 >
-                  Simpan Bobot
+                  {isSavingAcademic ? "Menyimpan..." : "Simpan Bobot"}
                 </button>
               </div>
             </Card>
@@ -1477,9 +1660,10 @@ export default function SawConfig() {
             </button>
             <button 
               type="submit"
-              className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-semibold text-xs rounded-lg shadow-xs transition-colors cursor-pointer"
+              disabled={isSubmittingComp}
+              className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-semibold text-xs rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
             >
-              Simpan Data
+              {isSubmittingComp ? "Menyimpan..." : "Simpan Data"}
             </button>
           </div>
         </form>
@@ -1548,9 +1732,10 @@ export default function SawConfig() {
             </button>
             <button 
               type="submit"
-              className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-semibold text-xs rounded-lg shadow-xs transition-colors cursor-pointer"
+              disabled={isSubmittingQuestion}
+              className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-semibold text-xs rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
             >
-              Simpan Soal
+              {isSubmittingQuestion ? "Menyimpan..." : "Simpan Soal"}
             </button>
           </div>
         </form>

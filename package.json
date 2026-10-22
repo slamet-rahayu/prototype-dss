@@ -13,7 +13,9 @@
     "prisma:seed": "node prisma/seed.js",
     "prisma:studio": "prisma studio",
     "create:admin": "node prisma/createAdmin.js",
-    "create-admin": "node prisma/createAdmin.js"
+    "create-admin": "node prisma/createAdmin.js",
+    "scheduler": "node scripts/scheduler.js",
+    "scheduler:now": "node scripts/scheduler.js --now"
   },
   "dependencies": {
     "@prisma/client": "^6.4.1",

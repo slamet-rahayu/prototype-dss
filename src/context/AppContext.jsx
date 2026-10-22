@@ -315,6 +315,58 @@ export const AppProvider = ({ children }) => {
       } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         setTheme('dark');
       }
+
+      // Authoritative database sync for master careers and criteria weights
+      apiRequest('/careers')
+        .then(res => {
+          if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+            const map = {};
+            res.data.forEach(c => {
+              map[c.title] = {
+                id: c.id,
+                slug: c.slug,
+                icon: c.icon || '⌘',
+                subtitle: c.subtitle || '',
+                description: c.description || '',
+                jobMarketKeyword: c.jobMarketKeyword || c.marketDetail?.jobMarketKeyword || c.title,
+                marketDemandScore: c.marketDemandScore || 80,
+                marketDemand: {
+                  title: `Gambaran kebutuhan pasar kerja untuk ${c.title}.`,
+                  vacancy: String(c.marketDetail?.vacancyCount || '100'),
+                  trend: c.marketDetail?.trendStatus || 'Tren meningkat',
+                  short: (c.marketDetail?.primaryLocation || 'Jakarta').split(',')[0],
+                  shortNote: c.marketDetail?.shortNote || 'dan peluang remote',
+                  location: c.marketDetail?.primaryLocation || 'Jakarta',
+                  skills: c.marketDetail?.requiredSkills || ['Java', 'SQL', 'Git'],
+                  note: `Data pasar kerja untuk ${c.title}.`
+                },
+                riasecMapped: (c.riasecWeights || []).filter(w => (Number(w.weight) || 0) > 0).map(w => w.dimension),
+                riasecWeights: (c.riasecWeights || []).reduce((acc, w) => { acc[w.dimension] = w.weight; return acc; }, {}),
+                academicWeights: (c.academicWeights || []).reduce((acc, w) => {
+                  const subName = w.subjectName || w.subject?.name || `Mata Kuliah ${w.subjectId}`;
+                  acc[subName] = w.weight;
+                  return acc;
+                }, {})
+              };
+            });
+            setCareers(map);
+          }
+        })
+        .catch(() => {});
+
+      if (token) {
+        apiRequest('/admin/saw-config')
+          .then(res => {
+            if (res?.data) {
+              setSawWeights({
+                c1: res.data.c1Weight || 40,
+                c2: res.data.c2Weight || 35,
+                c3: res.data.c3Weight || 25
+              });
+            }
+          })
+          .catch(() => {});
+      }
     } catch (e) {
       console.error('Error hydrating state from localStorage:', e);
     } finally {

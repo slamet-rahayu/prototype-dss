@@ -11,6 +11,7 @@ const careerCreateSchema = z.object({
   subtitle: z.string().optional(),
   description: z.string().min(5, 'Deskripsi karir wajib diisi'),
   icon: z.string().optional(),
+  jobMarketKeyword: z.string().optional(),
   marketDemandScore: z.number().min(0).max(100).optional(),
   riasecWeights: z.array(
     z.object({
@@ -26,6 +27,7 @@ const careerCreateSchema = z.object({
     })
   ).optional(),
   marketDetail: z.object({
+    jobMarketKeyword: z.string().optional(),
     vacancyCount: z.number().optional(),
     trendStatus: z.string().optional(),
     primaryLocation: z.string().optional(),
@@ -78,10 +80,12 @@ export async function POST(request) {
       subtitle: data.subtitle || '',
       description: data.description,
       icon: data.icon || '⌘',
+      jobMarketKeyword: data.jobMarketKeyword || data.marketDetail?.jobMarketKeyword || data.title,
       marketDemandScore: data.marketDemandScore || 80,
       riasecWeights: data.riasecWeights || [],
       academicWeights: data.academicWeights || [],
       marketDetail: data.marketDetail || {
+        jobMarketKeyword: data.jobMarketKeyword || data.marketDetail?.jobMarketKeyword || data.title,
         vacancyCount: 100,
         trendStatus: 'Tren stabil',
         primaryLocation: 'Jakarta & Remote',

@@ -10,29 +10,21 @@ import {
   Search, 
   Clock, 
   RotateCw, 
-  Calendar, 
-  Hourglass, 
-  CheckCircle2, 
+  RotateCcw,
   Database,
-  Sliders,
   Info,
-  SlidersHorizontal,
-  Server,
-  AlertCircle
+  X,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 export default function SchedulerConfig() {
   const [toast, setToast] = useState({ show: false, message: '' });
-  const [configErrors, setConfigErrors] = useState({});
-  
-  // Left Column Config Form States
-  const [schedulerName, setSchedulerName] = useState('Pembaruan Data Pasar Kerja');
-  const [schedulerCode, setSchedulerCode] = useState('MARKET_DATA_REFRESH');
   const [frequency, setFrequency] = useState('Setiap Hari');
   const [executionTime, setExecutionTime] = useState('02.00');
   const [timezone, setTimezone] = useState('Asia/Jakarta (WIB)');
-  const [cronExpression, setCronExpression] = useState('0 0 2 * * *');
   const [isAutoEnabled, setIsAutoEnabled] = useState(true);
+  const [nextRunTime, setNextRunTime] = useState(null);
 
   // Right Column Execution Summary States
   const [lastExecutionTime, setLastExecutionTime] = useState('20 Oktober 2026, 02.00 WIB');
@@ -44,11 +36,18 @@ export default function SchedulerConfig() {
   // History List State
   const [logSearchQuery, setLogSearchQuery] = useState('');
   const [activeLogTab, setActiveLogTab] = useState('Semua');
+  const [statusFilter, setStatusFilter] = useState('Semua');
+  const [dateRangeFilter, setDateRangeFilter] = useState('Semua');
+  const [sortBy, setSortBy] = useState('terbaru');
+  const [onlyFailures, setOnlyFailures] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [selectedLogDetail, setSelectedLogDetail] = useState(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   const [logs, setLogs] = useState([]);
   const [careersList, setCareersList] = useState([]);
+  const [careerConfigs, setCareerConfigs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Helper to extract or generate per-career sync breakdown
@@ -128,6 +127,8 @@ export default function SchedulerConfig() {
             id: l.id,
             startTime: startStr,
             endTime: endStr,
+            rawStartDate: l.startedAt,
+            rawEndDate: l.finishedAt,
             durationSec: l.durationSec,
             type: l.executionType || 'Otomatis',
             status: l.status || 'Berhasil',
@@ -145,18 +146,24 @@ export default function SchedulerConfig() {
           setLastExecutionTime(latest.startTime);
           setLastSuccessCount(latest.success);
           setLastFailedCount(latest.failed);
+          if (latest.durationSec !== undefined) {
+            const mins = Math.floor(latest.durationSec / 60).toString().padStart(2, '0');
+            const secs = Math.round(latest.durationSec % 60).toString().padStart(2, '0');
+            setLastDuration(`${mins} menit ${secs} detik`);
+          }
         }
       }
 
       if (configRes?.data) {
         const cfg = configRes.data;
-        if (cfg.schedulerName) setSchedulerName(cfg.schedulerName);
-        if (cfg.schedulerCode) setSchedulerCode(cfg.schedulerCode);
         if (cfg.frequency) setFrequency(cfg.frequency);
         if (cfg.executionTime) setExecutionTime(cfg.executionTime);
         if (cfg.timezone) setTimezone(cfg.timezone);
-        if (cfg.cronExpression) setCronExpression(cfg.cronExpression);
         if (cfg.isAutoEnabled !== undefined) setIsAutoEnabled(cfg.isAutoEnabled);
+        if (cfg.nextRun) setNextRunTime(cfg.nextRun);
+        if (cfg.careerConfigs && Array.isArray(cfg.careerConfigs)) {
+          setCareerConfigs(cfg.careerConfigs);
+        }
       }
     } catch (err) {
       console.warn('Could not fetch scheduler data:', err.message);
@@ -171,96 +178,6 @@ export default function SchedulerConfig() {
 
   const triggerToast = (msg) => {
     setToast({ show: true, message: msg });
-  };
-
-  const handleResetConfig = async () => {
-    setConfigErrors({});
-    setSchedulerName('Pembaruan Data Pasar Kerja');
-    setSchedulerCode('MARKET_DATA_REFRESH');
-    setFrequency('Setiap Hari');
-    setExecutionTime('02.00');
-    setTimezone('Asia/Jakarta (WIB)');
-    setCronExpression('0 0 2 * * *');
-    setIsAutoEnabled(true);
-    try {
-      await apiRequest('/admin/scheduler/config', {
-        method: 'PUT',
-        body: {
-          schedulerName: 'Pembaruan Data Pasar Kerja',
-          schedulerCode: 'MARKET_DATA_REFRESH',
-          frequency: 'Setiap Hari',
-          executionTime: '02.00',
-          timezone: 'Asia/Jakarta (WIB)',
-          cronExpression: '0 0 2 * * *',
-          isAutoEnabled: true
-        }
-      });
-      triggerToast("Konfigurasi diatur ulang ke nilai baku dan disimpan.");
-    } catch (err) {
-      triggerToast("Konfigurasi diatur ulang, namun gagal disimpan: " + err.message);
-    }
-  };
-
-  const handleSaveConfig = async (e) => {
-    e?.preventDefault?.();
-    const errs = {};
-    const nameTrimmed = schedulerName.trim();
-    const codeTrimmed = schedulerCode.trim();
-    const timeTrimmed = executionTime.trim();
-    const cronTrimmed = cronExpression.trim();
-
-    if (!nameTrimmed) {
-      errs.schedulerName = "Nama scheduler wajib diisi.";
-    } else if (nameTrimmed.length < 3) {
-      errs.schedulerName = "Nama scheduler minimal 3 karakter.";
-    }
-
-    if (!codeTrimmed) {
-      errs.schedulerCode = "Kode scheduler wajib diisi.";
-    } else if (!/^[A-Za-z0-9_]{3,30}$/.test(codeTrimmed)) {
-      errs.schedulerCode = "Kode scheduler harus 3-30 karakter alfanumerik atau garis bawah (_).";
-    }
-
-    if (!timeTrimmed) {
-      errs.executionTime = "Waktu eksekusi wajib diisi.";
-    } else if (!/^([01]?[0-9]|2[0-3])[:.][0-5][0-9]$/.test(timeTrimmed)) {
-      errs.executionTime = "Format waktu harus JJ.MM atau JJ:MM (contoh: 02.00 atau 14:30).";
-    }
-
-    if (!cronTrimmed) {
-      errs.cronExpression = "Cron expression wajib diisi.";
-    } else {
-      const parts = cronTrimmed.split(/\s+/);
-      if (parts.length < 5 || parts.length > 6) {
-        errs.cronExpression = "Cron expression harus terdiri dari 5 atau 6 segmen (contoh: 0 0 2 * * *).";
-      }
-    }
-
-    if (Object.keys(errs).length > 0) {
-      setConfigErrors(errs);
-      triggerToast("Harap periksa kembali isian konfigurasi scheduler.");
-      return;
-    }
-
-    setConfigErrors({});
-
-    try {
-      await apiRequest('/admin/scheduler/config', {
-        method: 'PUT',
-        body: {
-          schedulerName: nameTrimmed,
-          schedulerCode: codeTrimmed.toUpperCase(),
-          frequency,
-          executionTime: timeTrimmed,
-          timezone,
-          cronExpression: cronTrimmed,
-          isAutoEnabled
-        }
-      });
-      triggerToast("Konfigurasi scheduler berhasil disimpan ke basis data.");
-    } catch (err) {
-      triggerToast("Gagal menyimpan konfigurasi: " + err.message);
-    }
   };
 
   const handleLihatRiwayat = () => {
@@ -287,24 +204,227 @@ export default function SchedulerConfig() {
     }
   };
 
-  // Filter history logs
+  const handleRunSingleCareer = async (cfg) => {
+    if (isRunning) return;
+    setIsRunning(true);
+    triggerToast(`Memulai sinkronisasi manual untuk karir ${cfg.careerName}...`);
+
+    try {
+      const res = await apiRequest('/admin/scheduler/trigger', {
+        method: 'POST',
+        body: { 
+          executionType: 'Manual',
+          configId: cfg.id 
+        }
+      });
+      triggerToast(res?.message || `Sinkronisasi karir ${cfg.careerName} selesai.`);
+      await fetchSchedulerData();
+    } catch (err) {
+      triggerToast("Pembaruan gagal: " + err.message);
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  const handleToggleCareerConfig = async (cfg) => {
+    try {
+      const newStatus = !cfg.isActive;
+      await apiRequest('/admin/scheduler/config', {
+        method: 'PUT',
+        body: {
+          careerConfigId: cfg.id,
+          careerConfigData: { isActive: newStatus }
+        }
+      });
+      setCareerConfigs(prev => prev.map(c => c.id === cfg.id ? { ...c, isActive: newStatus } : c));
+      triggerToast(`Karir ${cfg.careerName} berhasil di-${newStatus ? 'aktifkan' : 'nonaktifkan'} dari antrian.`);
+    } catch (err) {
+      triggerToast("Gagal memperbarui status karir: " + err.message);
+    }
+  };
+
+  const handleRetryFailedJobs = async () => {
+    if (isRunning) return;
+    setIsRunning(true);
+    triggerToast("Memulai antrian eksekusi ulang untuk karir yang berstatus gagal...");
+
+    try {
+      const res = await apiRequest('/admin/scheduler/trigger', {
+        method: 'POST',
+        body: { 
+          executionType: 'Coba Ulang',
+          onlyFailures: true 
+        }
+      });
+      triggerToast(res?.message || "Coba ulang antrian karir gagal selesai diproses.");
+      await fetchSchedulerData();
+    } catch (err) {
+      triggerToast("Coba ulang gagal: " + err.message);
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  // Formatted next scheduled run
+  const formattedNextRun = useMemo(() => {
+    if (!isAutoEnabled) return { time: '-', date: 'Otomatisasi dinonaktifkan' };
+    if (!nextRunTime) return { time: executionTime, date: `${frequency}, ${timezone}` };
+    try {
+      const d = new Date(nextRunTime);
+      const timeStr = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }).replace(':', '.');
+      const dateStr = d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' }) + `, ${timezone}`;
+      return { time: timeStr, date: dateStr };
+    } catch {
+      return { time: executionTime, date: `${frequency}, ${timezone}` };
+    }
+  }, [nextRunTime, isAutoEnabled, executionTime, frequency, timezone]);
+
+  // Type Counts for Tabs
+  const typeCounts = useMemo(() => {
+    const counts = { Semua: logs.length, Otomatis: 0, Manual: 0, 'Coba Ulang': 0 };
+    for (const log of logs) {
+      if (counts[log.type] !== undefined) {
+        counts[log.type]++;
+      }
+    }
+    return counts;
+  }, [logs]);
+
+  // Check if any filter is active
+  const isAnyFilterActive = useMemo(() => {
+    return Boolean(
+      logSearchQuery.trim() !== '' ||
+      activeLogTab !== 'Semua' ||
+      statusFilter !== 'Semua' ||
+      dateRangeFilter !== 'Semua' ||
+      sortBy !== 'terbaru' ||
+      onlyFailures
+    );
+  }, [logSearchQuery, activeLogTab, statusFilter, dateRangeFilter, sortBy, onlyFailures]);
+
+  const handleResetFilters = () => {
+    setLogSearchQuery('');
+    setActiveLogTab('Semua');
+    setStatusFilter('Semua');
+    setDateRangeFilter('Semua');
+    setSortBy('terbaru');
+    setOnlyFailures(false);
+    setCurrentPage(1);
+  };
+
+  // Filter and sort history logs
   const filteredLogs = useMemo(() => {
-    return logs.filter(log => {
-      const matchesSearch = 
-        log.startTime.toLowerCase().includes(logSearchQuery.toLowerCase()) ||
-        log.type.toLowerCase().includes(logSearchQuery.toLowerCase()) ||
-        log.status.toLowerCase().includes(logSearchQuery.toLowerCase()) ||
-        log.message.toLowerCase().includes(logSearchQuery.toLowerCase());
+    const query = logSearchQuery.trim().toLowerCase();
+    const now = Date.now();
 
-      let matchesTab = true;
-      if (activeLogTab === 'Otomatis') matchesTab = log.type === 'Otomatis';
-      else if (activeLogTab === 'Manual') matchesTab = log.type === 'Manual';
-      else if (activeLogTab === 'Coba Ulang') matchesTab = log.type === 'Coba Ulang';
-      else if (activeLogTab === 'Sebagian Gagal') matchesTab = log.status === 'Sebagian Gagal';
+    const result = logs.filter(log => {
+      // 1. Search Query (matches start time, type, status, message, and career names)
+      if (query) {
+        const matchesStartTime = log.startTime?.toLowerCase().includes(query);
+        const matchesEndTime = log.endTime?.toLowerCase().includes(query);
+        const matchesType = log.type?.toLowerCase().includes(query);
+        const matchesStatus = log.status?.toLowerCase().includes(query);
+        const matchesMessage = log.message?.toLowerCase().includes(query);
+        const matchesCareer = Array.isArray(log.careerSyncDetails) && log.careerSyncDetails.some(c => 
+          (c.careerName || c.name || '').toLowerCase().includes(query)
+        );
 
-      return matchesSearch && matchesTab;
+        if (!matchesStartTime && !matchesEndTime && !matchesType && !matchesStatus && !matchesMessage && !matchesCareer) {
+          return false;
+        }
+      }
+
+      // 2. Execution Type Tab
+      if (activeLogTab !== 'Semua') {
+        if (log.type !== activeLogTab) {
+          return false;
+        }
+      }
+
+      // 3. Status Filter Dropdown
+      if (statusFilter !== 'Semua') {
+        if (log.status !== statusFilter) {
+          return false;
+        }
+      }
+
+      // 4. Only Failures Checkbox
+      if (onlyFailures) {
+        if (log.status === 'Berhasil' && (log.failed === 0 || !log.failed)) {
+          return false;
+        }
+      }
+
+      // 5. Date Range Filter
+      if (dateRangeFilter !== 'Semua') {
+        const rawDate = log.rawStartDate ? new Date(log.rawStartDate) : null;
+        if (rawDate && !isNaN(rawDate.getTime())) {
+          if (dateRangeFilter === 'today') {
+            const today = new Date();
+            const isSameDay = rawDate.getDate() === today.getDate() &&
+              rawDate.getMonth() === today.getMonth() &&
+              rawDate.getFullYear() === today.getFullYear();
+            if (!isSameDay) return false;
+          } else if (dateRangeFilter === '7d') {
+            const sevenDaysAgo = now - 7 * 24 * 60 * 60 * 1000;
+            if (rawDate.getTime() < sevenDaysAgo) return false;
+          } else if (dateRangeFilter === '30d') {
+            const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+            if (rawDate.getTime() < thirtyDaysAgo) return false;
+          }
+        }
+      }
+
+      return true;
     });
-  }, [logs, logSearchQuery, activeLogTab]);
+
+    // 6. Sorting
+    return result.sort((a, b) => {
+      if (sortBy === 'terlama') {
+        const timeA = a.rawStartDate ? new Date(a.rawStartDate).getTime() : a.id;
+        const timeB = b.rawStartDate ? new Date(b.rawStartDate).getTime() : b.id;
+        return timeA - timeB;
+      }
+      if (sortBy === 'durasi') {
+        return (b.durationSec || 0) - (a.durationSec || 0);
+      }
+      if (sortBy === 'kegagalan') {
+        return (b.failed || 0) - (a.failed || 0);
+      }
+      // default: 'terbaru'
+      const timeA = a.rawStartDate ? new Date(a.rawStartDate).getTime() : a.id;
+      const timeB = b.rawStartDate ? new Date(b.rawStartDate).getTime() : b.id;
+      return timeB - timeA;
+    });
+  }, [logs, logSearchQuery, activeLogTab, statusFilter, dateRangeFilter, onlyFailures, sortBy]);
+
+  // Reset page when filter criteria change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [logSearchQuery, activeLogTab, statusFilter, dateRangeFilter, onlyFailures, sortBy]);
+
+  // Pagination calculations
+  const totalFiltered = filteredLogs.length;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalFiltered);
+
+  const paginatedLogs = useMemo(() => {
+    return filteredLogs.slice(startIndex, endIndex);
+  }, [filteredLogs, startIndex, endIndex]);
+
+  const pageNumbers = useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (currentPage <= 3) {
+      return [1, 2, 3, 4, '...', totalPages];
+    }
+    if (currentPage >= totalPages - 2) {
+      return [1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages];
+  }, [totalPages, currentPage]);
 
   const handleOpenDetail = (log) => {
     setSelectedLogDetail(log);
@@ -357,278 +477,208 @@ export default function SchedulerConfig() {
         <Card className="p-5 flex flex-col justify-between">
           <span className="text-[11px] text-content-muted font-bold uppercase tracking-wider block mb-1">Status Scheduler</span>
           <div className="flex items-center gap-2 my-1">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-            <strong className="text-2xl font-bold text-content-primary leading-none">Aktif</strong>
+            <span className={`w-2.5 h-2.5 rounded-full ${isAutoEnabled ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+            <strong className="text-2xl font-bold text-content-primary leading-none">
+              {isAutoEnabled ? 'Aktif' : 'Nonaktif'}
+            </strong>
           </div>
-          <span className="text-xs text-content-secondary">Berjalan setiap hari pada 02.00 WIB</span>
+          <span className="text-xs text-content-secondary">
+            {isAutoEnabled ? `Berjalan otomatis 1 hari sekali (${executionTime} WIB)` : 'Penjadwalan otomatis dihentikan'}
+          </span>
         </Card>
         
         <Card className="p-5 flex flex-col justify-between">
-          <span className="text-[11px] text-content-muted font-bold uppercase tracking-wider block mb-1">Alternatif Karir Terpantau</span>
-          <strong className="text-3xl font-mono font-black text-content-primary block leading-none tabular-nums my-1">8</strong>
-          <span className="text-xs text-content-secondary">Target eksekusi kueri lowongan kerja</span>
+          <span className="text-[11px] text-content-muted font-bold uppercase tracking-wider block mb-1">Antrian Karir Aktif</span>
+          <strong className="text-3xl font-mono font-black text-content-primary block leading-none tabular-nums my-1">
+            {careerConfigs.filter(c => c.isActive).length}
+          </strong>
+          <span className="text-xs text-content-secondary">dari total {careerConfigs.length} karir terdaftar</span>
         </Card>
 
         <Card className="p-5 flex flex-col justify-between">
           <span className="text-[11px] text-content-muted font-bold uppercase tracking-wider block mb-1">Hasil Eksekusi Terakhir</span>
-          <strong className="text-3xl font-mono font-black text-emerald-600 dark:text-emerald-400 block leading-none tabular-nums my-1">8/8</strong>
-          <span className="text-xs text-content-secondary">Seluruh alternatif berhasil diperbarui</span>
+          <strong className="text-3xl font-mono font-black text-emerald-600 dark:text-emerald-400 block leading-none tabular-nums my-1">
+            {`${lastSuccessCount}/${lastSuccessCount + lastFailedCount || careerConfigs.length || 9}`}
+          </strong>
+          <span className="text-xs text-content-secondary">
+            {lastFailedCount === 0 ? 'Seluruh antrian berhasil disinkronisasi' : `${lastFailedCount} karir mengalami kegagalan`}
+          </span>
         </Card>
 
         <Card className="p-5 flex flex-col justify-between">
           <span className="text-[11px] text-content-muted font-bold uppercase tracking-wider block mb-1">Jadwal Eksekusi Berikutnya</span>
-          <strong className="text-3xl font-mono font-black text-content-primary block leading-none tabular-nums my-1">02.00</strong>
-          <span className="text-xs text-content-secondary">27 Juni 2026, Asia/Jakarta (WIB)</span>
+          <strong className="text-3xl font-mono font-black text-content-primary block leading-none tabular-nums my-1">
+            {formattedNextRun.time}
+          </strong>
+          <span className="text-xs text-content-secondary">{formattedNextRun.date}</span>
         </Card>
       </section>
 
-      {/* Two Column Grid */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 items-start">
-        {/* Left Column: Config Form */}
-        <Card className="lg:col-span-7 p-6">
-          <div className="flex items-center justify-between pb-4 border-b border-divider mb-6">
-            <div>
-              <h2 className="text-sm font-bold text-content-primary">Konfigurasi Jadwal Scheduler</h2>
-              <p className="text-content-muted text-xs mt-0.5">Parameter frekuensi dan waktu otomatisasi scraper.</p>
-            </div>
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold text-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-              Aktif
+      {/* Status Pembaruan Terakhir Card */}
+      <Card className="p-6 mb-8">
+        <div className="flex items-center justify-between pb-4 border-b border-divider mb-5 flex-wrap gap-3">
+          <div>
+            <h2 className="text-sm font-bold text-content-primary">Status Pembaruan Terakhir</h2>
+            <p className="text-content-muted text-xs mt-0.5">
+              Ringkasan hasil eksekusi scheduler cron untuk data pasar kerja (otomatis 1 hari sekali).
+            </p>
+          </div>
+          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-semibold border ${
+            lastFailedCount === 0
+              ? 'text-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+              : 'text-amber-800 bg-amber-50 dark:bg-amber-950/40 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+          }`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${lastFailedCount === 0 ? 'bg-emerald-600' : 'bg-amber-500'}`} />
+            {lastFailedCount === 0 ? 'Berhasil' : 'Sebagian Gagal'}
+          </span>
+        </div>
+
+        {/* Detailed Grid Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+          <div className="border border-divider bg-subsurface p-3.5 rounded-lg">
+            <span className="text-[10px] text-content-muted font-bold uppercase tracking-wider block mb-1">Waktu Mulai</span>
+            <strong className="text-content-primary text-xs font-mono font-bold block leading-snug">
+              {lastExecutionTime.split(',')[0]}
+            </strong>
+            <span className="text-[11px] text-content-secondary font-mono block">
+              {lastExecutionTime.split(',')[1] || '02.00 WIB'}
             </span>
           </div>
+          <div className="border border-divider bg-subsurface p-3.5 rounded-lg flex flex-col justify-center">
+            <span className="text-[10px] text-content-muted font-bold uppercase tracking-wider block mb-1">Durasi Pengerjaan</span>
+            <strong className="text-content-primary text-xs font-mono font-bold block leading-none">{lastDuration}</strong>
+          </div>
+          <div className="border border-divider bg-subsurface p-3.5 rounded-lg">
+            <span className="text-[10px] text-content-muted font-bold uppercase tracking-wider block mb-1">Berhasil Diambil</span>
+            <strong className="text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold block leading-none">{lastSuccessCount} karir</strong>
+          </div>
+          <div className="border border-divider bg-subsurface p-3.5 rounded-lg">
+            <span className="text-[10px] text-content-muted font-bold uppercase tracking-wider block mb-1">Gagal Diambil</span>
+            <strong className="text-content-primary text-xs font-mono font-bold block leading-none">{lastFailedCount} karir</strong>
+          </div>
+        </div>
 
-          <form onSubmit={handleSaveConfig} className="grid gap-4 text-xs font-semibold text-content-primary" noValidate>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="grid gap-1.5">
-                <label htmlFor="name-sched">Nama Scheduler</label>
-                <input 
-                  id="name-sched"
-                  type="text"
-                  value={schedulerName}
-                  onChange={(e) => {
-                    setSchedulerName(e.target.value);
-                    if (configErrors.schedulerName) setConfigErrors(prev => ({ ...prev, schedulerName: null }));
-                  }}
-                  aria-invalid={!!configErrors.schedulerName}
-                  className={`w-full px-3 py-2 bg-surface border rounded-lg text-content-primary text-xs outline-none transition-colors ${
-                    configErrors.schedulerName ? 'border-red-500 focus:border-red-500' : 'border-divider focus:border-primary'
-                  }`}
-                  required
-                />
-                {configErrors.schedulerName && (
-                  <p className="text-[11px] text-red-500 font-normal flex items-center gap-1 mt-0.5">
-                    <AlertCircle className="w-3 h-3 shrink-0" /> {configErrors.schedulerName}
-                  </p>
-                )}
-              </div>
-              <div className="grid gap-1.5">
-                <label htmlFor="code-sched">Kode Scheduler</label>
-                <input 
-                  id="code-sched"
-                  type="text"
-                  value={schedulerCode}
-                  onChange={(e) => {
-                    setSchedulerCode(e.target.value);
-                    if (configErrors.schedulerCode) setConfigErrors(prev => ({ ...prev, schedulerCode: null }));
-                  }}
-                  aria-invalid={!!configErrors.schedulerCode}
-                  className={`w-full px-3 py-2 bg-surface border rounded-lg text-content-primary text-xs font-mono outline-none transition-colors ${
-                    configErrors.schedulerCode ? 'border-red-500 focus:border-red-500' : 'border-divider focus:border-primary'
-                  }`}
-                  required
-                />
-                {configErrors.schedulerCode && (
-                  <p className="text-[11px] text-red-500 font-normal flex items-center gap-1 mt-0.5">
-                    <AlertCircle className="w-3 h-3 shrink-0" /> {configErrors.schedulerCode}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="grid gap-1.5">
-                <label htmlFor="freq-sched">Frekuensi Eksekusi</label>
-                <select 
-                  id="freq-sched"
-                  value={frequency}
-                  onChange={(e) => setFrequency(e.target.value)}
-                  className="w-full px-3 py-2 bg-surface border border-divider rounded-lg text-content-primary text-xs focus:border-primary outline-none cursor-pointer"
-                >
-                  <option value="Setiap Hari">Setiap Hari</option>
-                  <option value="Setiap Minggu">Setiap Minggu</option>
-                  <option value="Setiap Bulan">Setiap Bulan</option>
-                </select>
-              </div>
-              <div className="grid gap-1.5">
-                <label htmlFor="time-sched">Waktu Eksekusi</label>
-                <div className="relative">
-                  <input 
-                    id="time-sched"
-                    type="text"
-                    value={executionTime}
-                    onChange={(e) => {
-                      setExecutionTime(e.target.value);
-                      if (configErrors.executionTime) setConfigErrors(prev => ({ ...prev, executionTime: null }));
-                    }}
-                    placeholder="Contoh: 02.00"
-                    aria-invalid={!!configErrors.executionTime}
-                    className={`w-full pl-3 pr-8 py-2 bg-surface border rounded-lg text-content-primary text-xs font-mono outline-none transition-colors ${
-                      configErrors.executionTime ? 'border-red-500 focus:border-red-500' : 'border-divider focus:border-primary'
-                    }`}
-                    required
-                  />
-                  <Clock className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-content-muted" />
-                </div>
-                {configErrors.executionTime && (
-                  <p className="text-[11px] text-red-500 font-normal flex items-center gap-1 mt-0.5">
-                    <AlertCircle className="w-3 h-3 shrink-0" /> {configErrors.executionTime}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="grid gap-1.5">
-                <label htmlFor="tz-sched">Zona Waktu</label>
-                <select 
-                  id="tz-sched"
-                  value={timezone}
-                  onChange={(e) => setTimezone(e.target.value)}
-                  className="w-full px-3 py-2 bg-surface border border-divider rounded-lg text-content-primary text-xs focus:border-primary outline-none cursor-pointer"
-                >
-                  <option value="Asia/Jakarta (WIB)">Asia/Jakarta (WIB)</option>
-                  <option value="Asia/Makassar (WITA)">Asia/Makassar (WITA)</option>
-                  <option value="Asia/Jayapura (WIT)">Asia/Jayapura (WIT)</option>
-                </select>
-              </div>
-              <div className="grid gap-1.5">
-                <label htmlFor="cron-sched">Cron Expression</label>
-                <input 
-                  id="cron-sched"
-                  type="text"
-                  value={cronExpression}
-                  onChange={(e) => {
-                    setCronExpression(e.target.value);
-                    if (configErrors.cronExpression) setConfigErrors(prev => ({ ...prev, cronExpression: null }));
-                  }}
-                  placeholder="0 0 2 * * *"
-                  aria-invalid={!!configErrors.cronExpression}
-                  className={`w-full px-3 py-2 bg-surface border rounded-lg text-content-primary text-xs font-mono outline-none transition-colors ${
-                    configErrors.cronExpression ? 'border-red-500 focus:border-red-500' : 'border-divider focus:border-primary'
-                  }`}
-                  required
-                />
-                {configErrors.cronExpression && (
-                  <p className="text-[11px] text-red-500 font-normal flex items-center gap-1 mt-0.5">
-                    <AlertCircle className="w-3 h-3 shrink-0" /> {configErrors.cronExpression}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            <div className="border border-divider rounded-lg p-3.5 bg-subsurface flex items-center justify-between gap-4 mt-1">
-              <div className="min-w-0">
-                <h4 className="text-content-primary text-xs font-semibold">Aktifkan scheduler otomatis</h4>
-                <p className="text-content-muted text-[11px] leading-relaxed mt-0.5">
-                  Bila dinonaktifkan, data pasar kerja hanya dapat diperbarui secara manual oleh administrator.
-                </p>
-              </div>
+        {/* Bottom Actions */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-divider">
+          <div className="text-xs text-content-muted flex items-center gap-2">
+            <Clock className="w-4 h-4 text-content-muted shrink-0" />
+            <span>Eksekusi harian otomatis berjalan secara sekuensial satu demi satu (default 1 hari sekali) untuk seluruh karir aktif pada antrian.</span>
+          </div>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            {lastFailedCount > 0 && (
               <button
                 type="button"
-                onClick={() => setIsAutoEnabled(!isAutoEnabled)}
-                className={`w-11 h-6 rounded-full p-0.5 transition-colors cursor-pointer shrink-0 ${isAutoEnabled ? 'bg-primary' : 'bg-subsurface border border-divider'}`}
-                aria-label="Toggle scheduler otomatis"
+                onClick={handleRetryFailedJobs}
+                disabled={isRunning}
+                className="flex items-center justify-center gap-1.5 px-3.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/40 dark:text-amber-200 dark:border-amber-800 disabled:opacity-50 text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
+                title="Coba ulang antrian untuk karir yang berstatus gagal"
               >
-                <div className={`w-5 h-5 rounded-full bg-white shadow-xs transition-transform ${isAutoEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                <RotateCcw className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                Coba Ulang yang Gagal
               </button>
-            </div>
-
-            <div className="flex items-center justify-end gap-3 pt-3 border-t border-divider">
-              <button 
-                type="button" 
-                onClick={handleResetConfig}
-                className="px-4 py-2 border border-divider hover:bg-subsurface text-content-secondary font-semibold text-xs rounded-lg transition-colors cursor-pointer"
-              >
-                Atur Ulang
-              </button>
-              <button 
-                type="submit"
-                className="px-4 py-2 bg-primary hover:bg-primary-dark text-white font-semibold text-xs rounded-lg shadow-xs transition-colors cursor-pointer"
-              >
-                Simpan Konfigurasi
-              </button>
-            </div>
-          </form>
-        </Card>
-
-        {/* Right Column: Execution Summary */}
-        <Card className="lg:col-span-5 p-6 flex flex-col justify-between self-stretch">
-          <div>
-            <div className="flex items-center justify-between pb-4 border-b border-divider mb-6">
-              <div>
-                <h2 className="text-sm font-bold text-content-primary">Status Pembaruan Terakhir</h2>
-                <p className="text-content-muted text-xs mt-0.5">Ringkasan status eksekusi scheduler terbaru.</p>
-              </div>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold text-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-600" />
-                Berhasil
-              </span>
-            </div>
-
-            {/* Alert Banner */}
-            <div className="bg-primary-light/40 dark:bg-sky-950/30 border border-primary/20 dark:border-sky-800/40 rounded-lg p-3.5 mb-4 flex items-start gap-2.5">
-              <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-content-primary text-xs font-semibold">Pembaruan data selesai tanpa kendala</h4>
-                <p className="text-content-muted text-[11px] leading-relaxed mt-0.5">
-                  Scheduler berhasil mengambil jumlah lowongan kerja dari portal pasar kerja untuk seluruh alternatif karir aktif.
-                </p>
-              </div>
-            </div>
-
-            {/* Detailed Grid Stats */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <div className="border border-divider bg-subsurface p-3 rounded-lg">
-                <span className="text-[10px] text-content-muted font-bold uppercase tracking-wider block mb-0.5">Waktu Mulai</span>
-                <strong className="text-content-primary text-xs font-mono font-bold block leading-snug">
-                  {lastExecutionTime.split(',')[0]}
-                </strong>
-                <span className="text-[11px] text-content-secondary font-mono block">
-                  {lastExecutionTime.split(',')[1] || '02.00 WIB'}
-                </span>
-              </div>
-              <div className="border border-divider bg-subsurface p-3 rounded-lg flex flex-col justify-center">
-                <span className="text-[10px] text-content-muted font-bold uppercase tracking-wider block mb-0.5">Durasi Pengerjaan</span>
-                <strong className="text-content-primary text-xs font-mono font-bold block leading-none">{lastDuration}</strong>
-              </div>
-              <div className="border border-divider bg-subsurface p-3 rounded-lg">
-                <span className="text-[10px] text-content-muted font-bold uppercase tracking-wider block mb-0.5">Berhasil Diambil</span>
-                <strong className="text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold block leading-none">{lastSuccessCount} alternatif karir</strong>
-              </div>
-              <div className="border border-divider bg-subsurface p-3 rounded-lg">
-                <span className="text-[10px] text-content-muted font-bold uppercase tracking-wider block mb-0.5">Gagal Diambil</span>
-                <strong className="text-content-primary text-xs font-mono font-bold block leading-none">{lastFailedCount} alternatif karir</strong>
-              </div>
-            </div>
-          </div>
-
-          {/* Manual Scrape Box */}
-          <div className="border-t border-divider pt-4 mt-auto">
-            <h4 className="text-content-primary text-xs font-semibold mb-1">Pembaruan On-Demand</h4>
-            <p className="text-content-muted text-[11px] leading-relaxed mb-3">
-              Jalankan sinkronisasi langsung untuk memperbarui data lowongan pasar kerja tanpa menunggu siklus cron berikutnya.
-            </p>
+            )}
             <button
               onClick={handleRunSchedulerManual}
               disabled={isRunning}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 bg-primary hover:bg-primary-dark disabled:opacity-50 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
+              className="flex items-center justify-center gap-1.5 px-4 py-2 bg-primary hover:bg-primary-dark disabled:opacity-50 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer"
             >
               <RotateCw className={`w-3.5 h-3.5 ${isRunning ? 'animate-spin' : ''}`} />
-              Jalankan Pembaruan Manual
+              Jalankan Seluruh Antrian
             </button>
           </div>
-        </Card>
-      </section>
+        </div>
+      </Card>
+
+      {/* Career Configs Queue Table Card */}
+      <Card className="p-0 overflow-hidden mb-8">
+        <div className="px-6 py-4 border-b border-divider flex items-center justify-between flex-wrap gap-4 bg-subsurface/40">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-bold text-content-primary">Antrian Konfigurasi Karir Terjadwal</h2>
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-subsurface border border-divider text-content-secondary font-semibold">
+                sumber data: Alternatif Karir
+              </span>
+            </div>
+            <p className="text-content-muted text-xs mt-0.5">
+              Daftar karir dari data alternatif yang disinkronkan secara sekuensial (satu demi satu) oleh sistem antrian saat cron harian aktif.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] text-content-muted font-mono">
+              Aktif: <strong className="text-emerald-600 dark:text-emerald-400 font-semibold">{careerConfigs.filter(c => c.isActive).length}</strong> dari {careerConfigs.length} karir
+            </span>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto w-full">
+          <table className="w-full text-left border-collapse min-w-[650px]">
+            <thead>
+              <tr className="bg-subsurface border-b border-divider text-[11px] text-content-muted uppercase font-bold tracking-wider">
+                <th className="px-6 py-3">Karir Target</th>
+                <th className="px-6 py-3">Status Antrian</th>
+                <th className="px-6 py-3">Eksekusi Terakhir</th>
+                <th className="px-6 py-3 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-divider text-xs">
+              {careerConfigs.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-content-muted">
+                    <p className="text-xs">Belum ada alternatif karir yang aktif di basis data.</p>
+                  </td>
+                </tr>
+              ) : (
+                careerConfigs.map((cfg) => (
+                  <tr key={cfg.id} className="hover:bg-subsurface/30 transition-colors">
+                    <td className="px-6 py-3.5">
+                      <strong className="text-content-primary font-semibold block">{cfg.careerName}</strong>
+                      <span className="text-[11px] text-content-muted font-mono">{cfg.careerId || cfg.id}</span>
+                    </td>
+                    <td className="px-6 py-3.5">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleCareerConfig(cfg)}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-semibold border cursor-pointer transition-colors ${
+                          cfg.isActive
+                            ? 'text-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+                            : 'text-content-muted bg-subsurface border-divider'
+                        }`}
+                        title="Klik untuk mengubah status antrian karir ini"
+                      >
+                        <span className={`w-1.5 h-1.5 rounded-full ${cfg.isActive ? 'bg-emerald-600' : 'bg-gray-400'}`} />
+                        {cfg.isActive ? 'Aktif' : 'Nonaktif'}
+                      </button>
+                    </td>
+                    <td className="px-6 py-3.5">
+                      <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                        cfg.lastStatus === 'Berhasil' 
+                          ? 'text-emerald-700 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-300'
+                          : (cfg.lastStatus === 'Gagal' ? 'text-red-700 bg-red-50 dark:bg-red-950/40 dark:text-red-300' : 'text-content-muted bg-subsurface')
+                      }`}>
+                        {cfg.lastStatus || 'Belum Berjalan'}
+                      </span>
+                      <span className="text-[10px] text-content-muted font-mono block mt-0.5">
+                        {cfg.lastRunAt ? new Date(cfg.lastRunAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) + ', ' + new Date(cfg.lastRunAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-3.5 text-right whitespace-nowrap">
+                      <button
+                        type="button"
+                        onClick={() => handleRunSingleCareer(cfg)}
+                        disabled={isRunning}
+                        className="px-3 py-1.5 bg-subsurface hover:bg-divider border border-divider text-content-primary font-semibold text-xs rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                        title={`Jalankan sinkronisasi langsung khusus karir ${cfg.careerName}`}
+                      >
+                        Jalankan Sekarang
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
 
       {/* Bottom Table Card */}
       <Card id="history-section" className="p-0 overflow-hidden scroll-mt-6">
@@ -642,33 +692,137 @@ export default function SchedulerConfig() {
           </span>
         </div>
 
-        {/* Filters and Search Bar */}
-        <div className="px-6 py-3 border-b border-divider flex items-center justify-between flex-wrap gap-4 bg-subsurface/20">
-          <div className="flex items-center gap-1 overflow-x-auto">
-            {['Semua', 'Otomatis', 'Manual', 'Coba Ulang', 'Sebagian Gagal'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveLogTab(tab)}
-                className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap ${
-                  activeLogTab === tab 
-                    ? 'bg-primary text-white shadow-xs' 
-                    : 'text-content-secondary hover:text-content-primary hover:bg-subsurface'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+        {/* Filters Toolbar */}
+        <div className="p-4 sm:px-6 border-b border-divider bg-subsurface/20 space-y-3">
+          {/* Top Row: Type Tabs & Search */}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+            {/* Type Filter Buttons */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0" role="tablist" aria-label="Filter jenis eksekusi">
+              {['Semua', 'Otomatis', 'Manual', 'Coba Ulang'].map(tab => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveLogTab(tab)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-colors cursor-pointer whitespace-nowrap focus-visible:ring-2 focus-visible:ring-primary ${
+                    activeLogTab === tab 
+                      ? 'bg-primary text-white shadow-xs' 
+                      : 'text-content-secondary hover:text-content-primary hover:bg-subsurface border border-divider/60'
+                  }`}
+                >
+                  <span>{tab === 'Semua' ? 'Semua Jenis' : tab}</span>
+                  <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                    activeLogTab === tab ? 'bg-white/20 text-white' : 'bg-surface text-content-muted'
+                  }`}>
+                    {typeCounts[tab] || 0}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Search Input */}
+            <div className="relative w-full md:w-72">
+              <input 
+                type="search"
+                placeholder="Cari karir, waktu, status..."
+                value={logSearchQuery}
+                onChange={(e) => setLogSearchQuery(e.target.value)}
+                className="w-full pl-8 pr-8 py-1.5 bg-surface border border-divider rounded-lg text-content-primary text-xs focus:border-primary outline-none transition-colors focus-visible:ring-2 focus-visible:ring-primary/20"
+                aria-label="Cari riwayat eksekusi"
+              />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-content-muted pointer-events-none" />
+              {logSearchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setLogSearchQuery('')}
+                  aria-label="Hapus kata kunci pencarian"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 text-content-muted hover:text-content-primary cursor-pointer rounded"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
 
-          <div className="relative">
-            <input 
-              type="search"
-              placeholder="Cari status atau jenis..."
-              value={logSearchQuery}
-              onChange={(e) => setLogSearchQuery(e.target.value)}
-              className="w-56 sm:w-64 pl-8 pr-3 py-1.5 bg-surface border border-divider rounded-lg text-content-primary text-xs focus:border-primary outline-none transition-colors"
-            />
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-content-muted" />
+          {/* Bottom Row: Additional Select Filters & Actions */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-divider/40 text-xs text-content-secondary">
+            <div className="flex flex-wrap items-center gap-2.5">
+              {/* Status Select */}
+              <div className="flex items-center gap-1.5">
+                <label htmlFor="filter-status" className="text-[11px] font-medium text-content-muted whitespace-nowrap">Status:</label>
+                <select
+                  id="filter-status"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="px-2.5 py-1 bg-surface border border-divider rounded-md text-xs text-content-primary font-medium outline-none focus:border-primary cursor-pointer transition-colors"
+                >
+                  <option value="Semua">Semua Status</option>
+                  <option value="Berhasil">Berhasil</option>
+                  <option value="Sebagian Gagal">Sebagian Gagal</option>
+                  <option value="Gagal">Gagal</option>
+                </select>
+              </div>
+
+              {/* Date Range Select */}
+              <div className="flex items-center gap-1.5">
+                <label htmlFor="filter-date" className="text-[11px] font-medium text-content-muted whitespace-nowrap">Waktu:</label>
+                <select
+                  id="filter-date"
+                  value={dateRangeFilter}
+                  onChange={(e) => setDateRangeFilter(e.target.value)}
+                  className="px-2.5 py-1 bg-surface border border-divider rounded-md text-xs text-content-primary font-medium outline-none focus:border-primary cursor-pointer transition-colors"
+                >
+                  <option value="Semua">Semua Waktu</option>
+                  <option value="today">Hari Ini</option>
+                  <option value="7d">7 Hari Terakhir</option>
+                  <option value="30d">30 Hari Terakhir</option>
+                </select>
+              </div>
+
+              {/* Sort By Select */}
+              <div className="flex items-center gap-1.5">
+                <label htmlFor="filter-sort" className="text-[11px] font-medium text-content-muted whitespace-nowrap">Urutkan:</label>
+                <select
+                  id="filter-sort"
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="px-2.5 py-1 bg-surface border border-divider rounded-md text-xs text-content-primary font-medium outline-none focus:border-primary cursor-pointer transition-colors"
+                >
+                  <option value="terbaru">Terbaru Dahulu</option>
+                  <option value="terlama">Terlama Dahulu</option>
+                  <option value="durasi">Durasi Terlama</option>
+                  <option value="kegagalan">Gagal Terbanyak</option>
+                </select>
+              </div>
+
+              {/* Only Failures Checkbox */}
+              <label className="inline-flex items-center gap-1.5 cursor-pointer ml-1 select-none">
+                <input
+                  type="checkbox"
+                  checked={onlyFailures}
+                  onChange={(e) => setOnlyFailures(e.target.checked)}
+                  className="rounded border-divider text-primary focus:ring-primary w-3.5 h-3.5 cursor-pointer"
+                />
+                <span className="text-xs text-content-primary font-medium">Hanya yang ada kegagalan</span>
+              </label>
+            </div>
+
+            {/* Filter Status Summary & Reset */}
+            <div className="flex items-center gap-3 ml-auto">
+              <span className="text-[11px] text-content-muted font-mono tabular-nums">
+                Menampilkan <strong className="text-content-primary font-semibold">{filteredLogs.length}</strong> dari {logs.length} riwayat
+              </span>
+              {isAnyFilterActive && (
+                <button
+                  type="button"
+                  onClick={handleResetFilters}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-medium text-amber-700 bg-amber-50 hover:bg-amber-100 dark:text-amber-300 dark:bg-amber-950/40 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800 rounded transition-colors cursor-pointer"
+                  title="Atur ulang semua filter"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  Reset Filter
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -719,7 +873,7 @@ export default function SchedulerConfig() {
                   </tr>
                 ))
               ) : (
-                filteredLogs.map((log) => (
+                paginatedLogs.map((log) => (
                   <tr key={log.id} className="hover:bg-subsurface/30 transition-colors">
                     <td className="px-6 py-4">
                       <strong className="text-content-primary font-mono font-semibold block">{log.startTime}</strong>
@@ -766,12 +920,103 @@ export default function SchedulerConfig() {
               {!isLoading && filteredLogs.length === 0 && (
                 <tr>
                   <td colSpan="8" className="px-6 py-12 text-center text-content-muted">
-                    Tidak ada riwayat eksekusi scheduler yang cocok.
+                    <p className="text-xs font-medium text-content-secondary mb-1">
+                      Tidak ada riwayat eksekusi yang memenuhi kriteria filter saat ini.
+                    </p>
+                    {isAnyFilterActive ? (
+                      <button
+                        type="button"
+                        onClick={handleResetFilters}
+                        className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline font-semibold mt-2 cursor-pointer"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        Kembalikan dan tampilkan seluruh riwayat
+                      </button>
+                    ) : (
+                      <p className="text-[11px] text-content-muted">
+                        Riwayat eksekusi akan muncul secara otomatis setelah scheduler dijalankan.
+                      </p>
+                    )}
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination Bar */}
+        <div className="px-6 py-3.5 bg-subsurface/40 border-t border-divider flex items-center justify-between flex-wrap gap-4 text-content-muted text-xs">
+          <div className="flex items-center gap-3">
+            <span>
+              Menampilkan <strong className="text-content-primary font-mono tabular-nums">{totalFiltered > 0 ? startIndex + 1 : 0}</strong> - <strong className="text-content-primary font-mono tabular-nums">{endIndex}</strong> dari <strong className="text-content-primary font-mono tabular-nums">{totalFiltered}</strong> log eksekusi.
+            </span>
+            <div className="flex items-center gap-1.5 ml-2">
+              <label htmlFor="log-page-size" className="text-[11px] text-content-muted">Per halaman:</label>
+              <select
+                id="log-page-size"
+                value={pageSize}
+                onChange={(e) => {
+                  setPageSize(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="px-2 py-0.5 bg-surface border border-divider rounded text-content-primary text-xs font-mono outline-none cursor-pointer focus:border-primary"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2">
+              <button 
+                type="button"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="inline-flex items-center gap-1 px-3 py-1.5 border border-divider bg-surface hover:bg-subsurface text-content-primary font-semibold rounded-md disabled:opacity-40 transition-colors cursor-pointer text-xs focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label="Halaman sebelumnya"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                Sebelumnya
+              </button>
+              
+              <div className="flex items-center gap-1">
+                {pageNumbers.map((page, idx) => {
+                  if (page === '...') {
+                    return <span key={`ellipsis-${idx}`} className="px-1.5 text-content-muted select-none">...</span>;
+                  }
+                  return (
+                    <button
+                      key={page}
+                      type="button"
+                      onClick={() => setCurrentPage(page)}
+                      className={`min-w-7 h-7 px-1.5 flex items-center justify-center font-mono rounded-md text-xs font-semibold transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-primary ${
+                        currentPage === page
+                          ? 'bg-primary text-white shadow-xs'
+                          : 'border border-divider bg-surface hover:bg-subsurface text-content-primary'
+                      }`}
+                      aria-current={currentPage === page ? 'page' : undefined}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button 
+                type="button"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="inline-flex items-center gap-1 px-3 py-1.5 border border-divider bg-surface hover:bg-subsurface text-content-primary font-semibold rounded-md disabled:opacity-40 transition-colors cursor-pointer text-xs focus-visible:ring-2 focus-visible:ring-primary"
+                aria-label="Halaman selanjutnya"
+              >
+                Selanjutnya
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
         </div>
       </Card>
 

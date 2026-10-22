@@ -19,6 +19,7 @@ export default function Navbar() {
     { label: 'Tes RIASEC', path: '/riasec' },
     { label: 'Hasil Rekomendasi', path: '/rekomendasi' },
     { label: 'Katalog Karir', path: '/eksplorasi' },
+    { label: 'Lowongan Kerja', path: '/lowongan' },
     { label: 'Profil', path: '/profile' }
   ];
 

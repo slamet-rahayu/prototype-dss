@@ -111,6 +111,7 @@ model Career {
   subtitle          String
   description       String
   icon              String                 @default("⌘")
+  jobMarketKeyword  String?
   marketDemandScore Float                  @default(80.0)
   isActive          Boolean                @default(true)
   createdAt         DateTime               @default(now())
@@ -122,15 +123,16 @@ model Career {
 }
 
 model JobMarketDetail {
-  id              String   @id @default(uuid())
-  careerId        String   @unique
-  career          Career   @relation(fields: [careerId], references: [id], onDelete: Cascade)
-  vacancyCount    Int      @default(0)
-  trendStatus     String   @default("Tren meningkat")
-  primaryLocation String   @default("Jakarta, Bandung, dan Remote")
-  requiredSkills  Json
-  shortNote       String?
-  updatedAt       DateTime @updatedAt
+  id               String   @id @default(uuid())
+  careerId         String   @unique
+  career           Career   @relation(fields: [careerId], references: [id], onDelete: Cascade)
+  jobMarketKeyword String?
+  vacancyCount     Int      @default(0)
+  trendStatus      String   @default("Tren meningkat")
+  primaryLocation  String   @default("Jakarta, Bandung, dan Remote")
+  requiredSkills   Json
+  shortNote        String?
+  updatedAt        DateTime @updatedAt
 }
 
 model CareerRiasecWeight {
@@ -188,4 +190,20 @@ model SchedulerLog {
   message       String
   startedAt     DateTime @default(now())
   finishedAt    DateTime
+}
+
+model SchedulerConfig {
+  id             String    @id @default(uuid())
+  careerId       String?
+  careerName     String
+  cronExpression String    @default("0 2 * * *")
+  executionTime  String    @default("02.00")
+  timezone       String    @default("Asia/Jakarta")
+  isActive       Boolean   @default(true)
+  isDeleted      Boolean   @default(false)
+  deletedAt      DateTime?
+  lastRunAt      DateTime?
+  lastStatus     String?   @default("Berhasil")
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 }
