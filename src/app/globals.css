@@ -27,13 +27,14 @@
   }
 
   .dark {
-    --bg-canvas: #0a0f1d;
-    --bg-surface: #111a2e;
-    --bg-subsurface: #18243e;
-    --border-divider: #1f3052;
-    --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
+    /* Redesigned Dark Mode Palette for optimal legibility & WCAG AA standards */
+    --bg-canvas: #0b1329;       /* Deep institutional navy canvas, removes pitch-black void */
+    --bg-surface: #1e293b;      /* Elevated crisp card & container surface (Slate 800) */
+    --bg-subsurface: #27354f;   /* Distinct subsurface for inputs, filter bars, and tables */
+    --border-divider: #374765;  /* Clear, structural 1px container dividers */
+    --text-primary: #ffffff;    /* Pure crisp white for headings, values, and titles (14:1 contrast) */
+    --text-secondary: #e2e8f0;  /* Bright slate for descriptions, body text, and table rows (11.8:1 contrast) */
+    --text-muted: #9fb0c7;      /* Clear, readable metadata, labels, and timestamps (7:1 contrast) */
   }
 
   html {
@@ -94,6 +95,72 @@
 
 .text-content-muted {
   color: var(--text-muted);
+}
+
+/* Dark Mode Contrast & Legibility Enhancements */
+.dark .text-primary {
+  color: #60a5fa;
+}
+
+.dark a.text-primary:hover,
+.dark button.text-primary:hover,
+.dark .hover\:text-primary:hover {
+  color: #93c5fd;
+}
+
+.dark .bg-primary {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.dark .hover\:bg-primary-dark:hover {
+  background-color: #1d4ed8;
+}
+
+.dark .border-primary {
+  border-color: #3b82f6;
+}
+
+.dark .bg-primary\/5 {
+  background-color: rgba(59, 130, 246, 0.10);
+}
+
+.dark .bg-primary\/10 {
+  background-color: rgba(59, 130, 246, 0.18);
+}
+
+.dark .bg-primary\/20 {
+  background-color: rgba(59, 130, 246, 0.28);
+}
+
+.dark .border-primary\/20 {
+  border-color: rgba(96, 165, 250, 0.30);
+}
+
+.dark .border-primary\/30 {
+  border-color: rgba(96, 165, 250, 0.45);
+}
+
+.dark .border-primary\/50 {
+  border-color: rgba(96, 165, 250, 0.65);
+}
+
+/* Form input legibility in dark mode */
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+.dark select option {
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
+/* Table border clarity in dark mode */
+.dark table th,
+.dark table td {
+  border-color: var(--border-divider);
 }
 
 /* Subtle, deliberate transitions (MOTION dial 1) */

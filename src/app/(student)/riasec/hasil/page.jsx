@@ -8,7 +8,7 @@ import { apiRequest } from '@/utils/apiClient';
 import Toast from '@/components/Toast';
 import Card from '@/components/Card';
 import { DetailViewSkeleton } from '@/components/Skeleton';
-import { RotateCcw, Info, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { RotateCcw, Info, ChevronRight, CheckCircle2, ShieldCheck, ExternalLink } from 'lucide-react';
 
 const TYPE_INFO = {
   R: {
@@ -63,6 +63,8 @@ export default function RiasecResult() {
             setRiasecResult({
               scores: res.data.scores,
               top: topLetters,
+              source: res.data.source || 'onet',
+              onetCareersUrl: res.data.onetCareersUrl || null,
               completedAt: res.data.completedAt
             });
           }
@@ -84,7 +86,7 @@ export default function RiasecResult() {
   const handleReset = () => {
     if (window.confirm("Apakah Anda yakin ingin mengulang tes? Seluruh jawaban sebelumnya akan dihapus.")) {
       setRiasecResult(null);
-      setRiasecProgress({ currentIndex: 0, answers: Array(18).fill(null) });
+      setRiasecProgress({ currentIndex: 0, answers: Array(30).fill(null) });
       triggerToast("Hasil tes diatur ulang. Mengalihkan ke halaman tes...");
       setTimeout(() => {
         router.push('/riasec');
@@ -179,9 +181,19 @@ export default function RiasecResult() {
                 {hollandCode}
               </div>
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-primary block mb-1">
-                  Kode Holland Dominan
-                </span>
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                    Kode Holland Dominan
+                  </span>
+                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                    riasecResult.source === 'onet' 
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' 
+                      : 'bg-primary/10 text-primary border border-primary/20'
+                  }`}>
+                    <ShieldCheck className="w-3 h-3" />
+                    <span>{riasecResult.source === 'onet' ? 'Hybrid: Terverifikasi O*NET API' : 'Hybrid: Terverifikasi Engine Lokal'}</span>
+                  </span>
+                </div>
                 <h2 className="text-lg sm:text-xl font-bold text-content-primary leading-tight mb-1">
                   Tipe Dominan: {riasecResult.top.map(t => TYPE_INFO[t]?.name).join(', ')}
                 </h2>
@@ -199,6 +211,17 @@ export default function RiasecResult() {
                 <span>Lihat Rekomendasi Karir</span>
                 <ChevronRight className="w-4 h-4" />
               </button>
+              {riasecResult.onetCareersUrl && (
+                <a
+                  href={riasecResult.onetCareersUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-2 border border-divider hover:bg-subsurface text-content-secondary hover:text-content-primary rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5"
+                >
+                  <ExternalLink className="w-3.5 h-3.5 text-primary" />
+                  <span>Eksplorasi O*NET</span>
+                </a>
+              )}
               <button
                 onClick={handleReset}
                 className="px-3 py-2 border border-divider hover:bg-subsurface text-content-secondary hover:text-content-primary rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5"
@@ -224,13 +247,16 @@ export default function RiasecResult() {
                     Perolehan skor dari akumulasi jawaban pada setiap kategori
                   </p>
                 </div>
-                <span className="text-xs font-mono text-content-muted">Skala Maks 15</span>
+                <span className="text-xs font-mono text-content-muted">
+                  Skala Maks {Math.max(15, ...Object.values(riasecResult.scores || {}).map(v => Number(v) || 0)) > 15 ? 20 : 15}
+                </span>
               </div>
 
               <div className="space-y-4">
                 {Object.entries(TYPE_INFO).map(([code, info]) => {
+                  const maxScale = Math.max(15, ...Object.values(riasecResult.scores || {}).map(v => Number(v) || 0)) > 15 ? 20 : 15;
                   const score = riasecResult.scores[code] || 0;
-                  const pct = Math.round((score / 15) * 100);
+                  const pct = Math.min(100, Math.round((score / maxScale) * 100));
                   const isTop = riasecResult.top.includes(code);
 
                   return (
@@ -249,7 +275,7 @@ export default function RiasecResult() {
                           </span>
                         </div>
                         <span className="font-mono font-bold text-content-primary">
-                          {score} <span className="text-content-muted font-normal text-[11px]">/ 15</span>
+                          {score} <span className="text-content-muted font-normal text-[11px]">/ {maxScale}</span>
                         </span>
                       </div>
 
@@ -321,8 +347,20 @@ export default function RiasecResult() {
         onClose={() => setToast({ show: false, message: '' })}
       />
 
-      <footer className="pt-8 pb-4 text-center text-xs text-content-muted">
-        CareerPath TI: Sistem Pendukung Keputusan Rekomendasi Karir Bidang Teknologi Informasi
+      <footer className="pt-8 pb-4 text-center text-xs text-content-muted space-y-1.5">
+        <p>CareerPath TI: Sistem Pendukung Keputusan Rekomendasi Karir Bidang Teknologi Informasi</p>
+        <p>
+          This site incorporates information from{' '}
+          <a 
+            href="https://services.onetcenter.org/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="underline hover:text-content-primary transition-colors"
+          >
+            O*NET Web Services
+          </a>{' '}
+          by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA).
+        </p>
       </footer>
     </main>
   );

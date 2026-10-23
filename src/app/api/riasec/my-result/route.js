@@ -31,6 +31,8 @@ export async function GET(request) {
         },
         topHolland: result.topHolland,
         completedAt: result.completedAt,
+        source: result.answersJson?.source || 'onet',
+        onetCareersUrl: result.answersJson?.onetCareersUrl || null,
         answersJson: result.answersJson
       },
       'Hasil RIASEC berhasil dimuat'

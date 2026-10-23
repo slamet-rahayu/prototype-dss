@@ -564,7 +564,7 @@ function JobMarketContent() {
                     {/* Card Header: Company, Location, and Work Arrangement */}
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-lg bg-slate-900 dark:bg-slate-800 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs border border-divider">
+                        <div className="w-10 h-10 rounded-lg bg-slate-900 dark:bg-primary/20 dark:text-sky-300 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs border border-divider dark:border-primary/30">
                           {companyInitials}
                         </div>
                         <div className="min-w-0">
@@ -775,26 +775,28 @@ function JobMarketContent() {
           isOpen={!!activeJobModal}
           title={activeJobModal.title}
           onClose={() => setActiveJobModal(null)}
-          maxWidth="max-w-2xl"
+          maxWidth="max-w-4xl"
         >
           {isDetailLoading ? (
             <div className="py-12 space-y-4">
               <Skeleton className="h-20 w-full rounded-xl" />
-              <Skeleton className="h-6 w-3/4" />
-              <Skeleton className="h-24 w-full" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Skeleton className="h-40 w-full rounded-xl" />
+                <Skeleton className="h-40 w-full rounded-xl" />
+              </div>
               <Skeleton className="h-10 w-full" />
             </div>
           ) : (
             <div className="space-y-5 text-xs text-content-secondary leading-relaxed">
-              {/* Header Company & Meta */}
-              <div className="p-4 rounded-xl bg-subsurface/60 border border-divider flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-lg bg-slate-900 dark:bg-slate-800 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-xs border border-divider">
+              {/* Header Company & Compensation Bar */}
+              <div className="p-4 rounded-xl bg-subsurface/60 border border-divider flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-12 h-12 rounded-xl bg-slate-900 dark:bg-primary/20 dark:text-sky-300 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-xs border border-divider dark:border-primary/30">
                     {getCompanyInitials(getCompanyName(activeJobModal))}
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-bold text-content-primary">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="text-sm font-bold text-content-primary truncate">
                         {getCompanyName(activeJobModal)}
                       </h4>
                       {activeJobModal.company?.profileUrl && (
@@ -802,14 +804,14 @@ function JobMarketContent() {
                           href={activeJobModal.company.profileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-primary hover:underline text-[11px] flex items-center gap-0.5"
+                          className="text-primary hover:underline text-[11px] flex items-center gap-1 font-semibold"
                         >
                           <span>Profil Perusahaan</span>
                           <ExternalLink className="w-2.5 h-2.5" />
                         </a>
                       )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-content-muted mt-0.5">
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-content-muted mt-1">
                       <span className="flex items-center gap-1">
                         <MapPin className="w-3.5 h-3.5" />
                         {getLocationText(activeJobModal)}
@@ -828,97 +830,107 @@ function JobMarketContent() {
                   </div>
                 </div>
 
-                <div className="sm:text-right">
-                  <span className="text-[10px] text-content-muted block">
-                    {activeJobModal.salary?.shown ? 'Kompensasi Perekrut:' : 'Estimasi Gaji:'}
+                <div className="md:text-right shrink-0 p-3 md:p-0 rounded-lg bg-surface/60 md:bg-transparent border md:border-none border-divider">
+                  <span className="text-[10px] text-content-muted block uppercase tracking-wider font-semibold mb-0.5">
+                    {activeJobModal.salary?.shown ? 'Kompensasi Perekrut' : 'Estimasi Kompensasi'}
                   </span>
-                  <span className="text-sm font-mono font-bold text-content-primary">
+                  <span className="text-sm sm:text-base font-mono font-bold text-content-primary whitespace-nowrap">
                     {getSalaryDisplay(activeJobModal.salary) || 'Kompensasi Kompetitif'}
                   </span>
                 </div>
               </div>
 
-              {/* SAW Alignment Card */}
-              <div className="p-3.5 rounded-lg border border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/10 flex items-start gap-2.5">
-                <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold text-content-primary block mb-0.5 text-xs">
-                    Relevansi Kriteria SAW ({activeJobModal.careerName})
-                  </span>
-                  <p className="text-[11px] text-content-muted leading-relaxed">
-                    Posisi ini berkontribusi pada perhitungan Kriteria C3 (Kebutuhan Pasar Kerja). Mahasiswa yang memiliki minat dominan dan capaian akademik terkait bidang {activeJobModal.careerName} diprioritaskan dalam pemeringkatan alternatif karir.
-                  </p>
-                </div>
-              </div>
-
-              {/* Industry Function & Classification */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-lg bg-subsurface/40 border border-divider">
-                <div>
-                  <span className="text-[10px] text-content-muted block uppercase tracking-wider font-semibold">
-                    Fungsi Pekerjaan
-                  </span>
-                  <span className="text-xs font-semibold text-content-primary">
-                    {activeJobModal.function || 'Information Technology'}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-content-muted block uppercase tracking-wider font-semibold">
-                    Klasifikasi Industri
-                  </span>
-                  <span className="text-xs font-semibold text-content-primary">
-                    {activeJobModal.classification || 'Information & Communication Technology'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div>
-                <h5 className="font-bold text-content-primary mb-1.5 text-xs uppercase tracking-wider">
-                  Deskripsi Lowongan
-                </h5>
-                <p className="text-content-secondary leading-relaxed whitespace-pre-line">
-                  {activeJobModal.description || 'Tidak ada deskripsi rinci yang tersedia.'}
-                </p>
-              </div>
-
-              {/* Role Titles / Keywords */}
-              {activeJobModal.roleTitles && activeJobModal.roleTitles.length > 0 && (
-                <div>
-                  <h5 className="font-bold text-content-primary mb-1.5 text-xs uppercase tracking-wider flex items-center gap-1.5">
-                    <Tag className="w-3.5 h-3.5 text-primary" />
-                    <span>Kata Kunci & Peran Terkait</span>
-                  </h5>
-                  <div className="flex flex-wrap gap-1.5">
-                    {activeJobModal.roleTitles.map((role, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2.5 py-1 rounded-md text-xs font-mono bg-subsurface text-content-primary border border-divider"
-                      >
-                        {String(role).replace(/[-_]/g, ' ')}
-                      </span>
-                    ))}
+              {/* Responsive 2-Column Grid Layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                {/* Left Column: Description & Roles (7 cols) */}
+                <div className="lg:col-span-7 space-y-4">
+                  <div>
+                    <h5 className="font-bold text-content-primary mb-2 text-xs uppercase tracking-wider">
+                      Deskripsi Lowongan
+                    </h5>
+                    <div className="p-4 rounded-xl bg-subsurface/30 border border-divider">
+                      <p className="text-content-secondary leading-relaxed whitespace-pre-line text-xs">
+                        {activeJobModal.description || 'Tidak ada deskripsi rinci yang tersedia.'}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
 
-              {/* Categories */}
-              {activeJobModal.categories && activeJobModal.categories.length > 0 && (
-                <div>
-                  <h5 className="font-bold text-content-primary mb-1.5 text-xs uppercase tracking-wider">
-                    Kategori Terdaftar
-                  </h5>
-                  <div className="flex flex-wrap gap-1.5">
-                    {activeJobModal.categories.map((cat, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2.5 py-1 rounded-md text-xs bg-subsurface text-content-secondary border border-divider"
-                      >
-                        {cat.label || cat}
-                      </span>
-                    ))}
-                  </div>
+                  {/* Role Titles / Keywords */}
+                  {activeJobModal.roleTitles && activeJobModal.roleTitles.length > 0 && (
+                    <div>
+                      <h5 className="font-bold text-content-primary mb-2 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                        <Tag className="w-3.5 h-3.5 text-primary" />
+                        <span>Kata Kunci & Peran Terkait</span>
+                      </h5>
+                      <div className="flex flex-wrap gap-1.5">
+                        {activeJobModal.roleTitles.map((role, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2.5 py-1 rounded-md text-xs font-mono bg-subsurface text-content-primary border border-divider"
+                          >
+                            {String(role).replace(/[-_]/g, ' ')}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
+
+                {/* Right Column: SAW Alignment, Industry Info, Categories (5 cols) */}
+                <div className="lg:col-span-5 space-y-4">
+                  {/* SAW Alignment Card */}
+                  <div className="p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/5 dark:bg-blue-500/10 flex items-start gap-2.5">
+                    <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-bold text-content-primary block mb-1 text-xs">
+                        Relevansi Kriteria SAW ({activeJobModal.careerName})
+                      </span>
+                      <p className="text-[11px] text-content-muted leading-relaxed">
+                        Posisi ini berkontribusi langsung pada perhitungan Kriteria C3 (Kebutuhan Pasar Kerja). Mahasiswa dengan minat dan capaian akademik di bidang {activeJobModal.careerName} diprioritaskan dalam pemeringkatan karir.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Industry Function & Classification Card */}
+                  <div className="p-3.5 rounded-xl bg-subsurface/40 border border-divider space-y-3">
+                    <div>
+                      <span className="text-[10px] text-content-muted block uppercase tracking-wider font-semibold">
+                        Fungsi Pekerjaan
+                      </span>
+                      <span className="text-xs font-semibold text-content-primary">
+                        {activeJobModal.function || 'Information Technology'}
+                      </span>
+                    </div>
+                    <div className="pt-2 border-t border-divider">
+                      <span className="text-[10px] text-content-muted block uppercase tracking-wider font-semibold">
+                        Klasifikasi Industri
+                      </span>
+                      <span className="text-xs font-semibold text-content-primary">
+                        {activeJobModal.classification || 'Information & Communication Technology'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Categories */}
+                  {activeJobModal.categories && activeJobModal.categories.length > 0 && (
+                    <div>
+                      <h5 className="font-bold text-content-primary mb-2 text-xs uppercase tracking-wider">
+                        Kategori Terdaftar
+                      </h5>
+                      <div className="flex flex-wrap gap-1.5">
+                        {activeJobModal.categories.map((cat, idx) => (
+                          <span
+                            key={idx}
+                            className="px-2.5 py-1 rounded-md text-xs bg-subsurface text-content-secondary border border-divider"
+                          >
+                            {cat.label || cat}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               {/* Modal Actions */}
               <div className="pt-4 border-t border-divider flex flex-col sm:flex-row items-center justify-between gap-3">

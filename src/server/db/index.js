@@ -1333,21 +1333,6 @@ export const dbRepository = {
     }
   },
 
-  async deleteRiasecQuestion(id) {
-    const numId = Number(id);
-    try {
-      await prisma.riasecQuestion.delete({
-        where: { id: numId }
-      });
-      return true;
-    } catch (e) {
-      console.warn('Prisma deleteRiasecQuestion fallback:', e.message);
-      const idx = inMemoryStore.riasecQuestions.findIndex(q => q.id === numId);
-      if (idx !== -1) inMemoryStore.riasecQuestions.splice(idx, 1);
-      return true;
-    }
-  },
-
   async getAllRecommendationHistories() {
     try {
       const list = await prisma.recommendationHistory.findMany({

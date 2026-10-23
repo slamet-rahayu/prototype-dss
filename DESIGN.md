@@ -22,12 +22,13 @@ Strict limit of 2 core colors, 1 neutral scale, and 1 deliberate accent:
 
 | Role | Color Name | Hex (Light) | Hex (Dark) | Purpose & Usage |
 |---|---|---|---|---|
-| **Core 1** | Institutional Midnight Navy | `#0f172a` | `#f8fafc` (text) / `#0a0f1d` (canvas) | Brand foundation, primary text, high-contrast structural identity |
-| **Core 2** | Academic Royal Blue | `#1d4ed8` | `#60a5fa` (text) / `#1d4ed8` (CTA) | **Primary Color**: interactive buttons, navigation active state, primary links (6.70:1 contrast) |
+| **Core 1** | Institutional Midnight Navy | `#0f172a` | `#ffffff` (text) / `#0b1329` (canvas) | Brand foundation, primary text, high-contrast structural identity |
+| **Core 2** | Academic Royal Blue | `#1d4ed8` | `#60a5fa` (text) / `#2563eb` (CTA) | **Primary Color**: interactive buttons, navigation active state, primary links (6.70:1 contrast) |
 | **Accent** | Warm Ochre / Amber | `#d97706` | `#f59e0b` | **One deliberate accent**: reserved exclusively for #1 recommended career rank, top match score badge, and attention alerts |
-| **Neutral Canvas** | Clean Slate | `#f8fafc` | `#0a0f1d` | Page background canvas with zero background grid or noise |
-| **Neutral Surface** | Crisp Card Surface | `#ffffff` | `#111a2e` | Elevated card and container background |
-| **Neutral Border** | Structural Divider | `#e2e8f0` | `#1f3052` | 1px clean separation borders |
+| **Neutral Canvas** | Deep Institutional Slate | `#f8fafc` | `#0b1329` | Page background canvas with comfortable depth without pitch-black void |
+| **Neutral Surface** | Crisp Slate Surface | `#ffffff` | `#1e293b` | Elevated card and container background with clear visual separation |
+| **Neutral Subsurface** | High-Contrast Subsurface | `#f1f5f9` | `#27354f` | Clear container background for inputs, filter bars, and table headers |
+| **Neutral Border** | Structural Divider | `#e2e8f0` | `#374765` | 1px clean separation borders with clear legibility |
 
 ---
 

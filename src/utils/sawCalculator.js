@@ -34,11 +34,15 @@ export function calculateSaw({
             wSum += weight;
           }
         });
-        c1Raw = wSum > 0 ? (weightedScoreSum / wSum) / 15 : 0;
+        const maxScoreVal = Math.max(...Object.values(riasecScores).map(v => Number(v) || 0));
+        const divisor = maxScoreVal > 15 ? 20 : 15;
+        c1Raw = wSum > 0 ? (weightedScoreSum / wSum) / divisor : 0;
       } else if (data.riasecMapped && data.riasecMapped.length > 0) {
         // Fallback for backward compatibility
         const sum = data.riasecMapped.reduce((acc, code) => acc + (riasecScores[code] || 0), 0);
-        c1Raw = sum / (15 * data.riasecMapped.length);
+        const maxScoreVal = Math.max(...Object.values(riasecScores).map(v => Number(v) || 0));
+        const divisor = maxScoreVal > 15 ? 20 : 15;
+        c1Raw = sum / (divisor * data.riasecMapped.length);
       }
     }
 

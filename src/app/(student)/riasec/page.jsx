@@ -10,69 +10,59 @@ import Card from '@/components/Card';
 import { QuestionSkeleton } from '@/components/Skeleton';
 import { CheckCircle2, RotateCcw, AlertCircle, ArrowLeft, ArrowRight } from 'lucide-react';
 
-const TYPE_INFO = {
-  R: {
-    name: "Realistic",
-    description: "Aktivitas praktis, perangkat keras, infrastruktur TI, dan jaringan."
-  },
-  I: {
-    name: "Investigative",
-    description: "Analisis sistem, penalaran logis, rekayasa data, dan pemecahan masalah algoritma."
-  },
-  A: {
-    name: "Artistic",
-    description: "Desain antarmuka, kreativitas ide produk digital, dan estetika visual pengguna."
-  },
-  S: {
-    name: "Social",
-    description: "Komunikasi kebutuhan pengguna, pendampingan teknis, dan kolaborasi tim lintas fungsi."
-  },
-  E: {
-    name: "Enterprising",
-    description: "Kepemimpinan produk, strategi solusi digital, negosiasi, dan inisiatif bisnis TI."
-  },
-  C: {
-    name: "Conventional",
-    description: "Keteraturan prosedur, akurasi data, penjaminan mutu software, dan audit sistem."
-  }
-};
-
 const OPTIONS_SCALE = [
-  { val: 1, label: 'Sangat Tidak Sesuai' },
-  { val: 2, label: 'Tidak Sesuai' },
-  { val: 3, label: 'Netral / Cukup' },
-  { val: 4, label: 'Sesuai' },
-  { val: 5, label: 'Sangat Sesuai' }
+  { val: 1, label: 'Sangat Tidak Suka', en: 'Strongly Dislike' },
+  { val: 2, label: 'Tidak Suka', en: 'Dislike' },
+  { val: 3, label: 'Ragu-ragu / Netral', en: 'Unsure' },
+  { val: 4, label: 'Suka', en: 'Like' },
+  { val: 5, label: 'Sangat Suka', en: 'Strongly Like' }
 ];
 
 export default function RiasecQuiz() {
   const { riasecProgress, setRiasecProgress, riasecResult, setRiasecResult, riasecQuestions, setRiasecQuestions } = useContext(AppContext);
   const router = useRouter();
 
-  const [isLoading, setIsLoading] = useState(!riasecQuestions || riasecQuestions.length === 0);
+  const [isLoading, setIsLoading] = useState(!riasecQuestions || riasecQuestions.length !== 30);
 
   useEffect(() => {
     let active = true;
-    if (!riasecQuestions || riasecQuestions.length === 0) {
+    const shouldFetch = !riasecQuestions || riasecQuestions.length !== 30;
+    if (shouldFetch) {
       setIsLoading(true);
-      apiRequest('/riasec/questions')
-        .then(res => {
-          if (active && res.data && Array.isArray(res.data) && res.data.length > 0) {
-            setRiasecQuestions(res.data.map(q => ({
-              id: q.id,
-              type: q.type || q.dimension?.[0] || 'R',
-              text: q.question || q.questionText || '',
-              question: q.question || q.questionText || ''
-            })));
-          }
-        })
-        .catch(err => console.warn('Gagal memuat butir soal RIASEC:', err.message))
-        .finally(() => {
-          if (active) setIsLoading(false);
-        });
     }
+
+    apiRequest('/riasec/questions')
+      .then(res => {
+        if (active && res.data && Array.isArray(res.data) && res.data.length > 0) {
+          const formatted = res.data.map(q => ({
+            id: q.id || q.index,
+            index: q.index || q.id,
+            type: q.type || q.dimension?.[0] || 'R',
+            area: q.area || '',
+            text: q.question || q.questionText || q.text || '',
+            question: q.question || q.questionText || q.text || '',
+            translation: q.translation || q.textId || ''
+          }));
+          setRiasecQuestions(formatted);
+          try {
+            localStorage.setItem('careerpath-riasec-questions', JSON.stringify(formatted));
+          } catch {}
+
+          setAnswers(prev => {
+            if (Array.isArray(prev) && prev.length === formatted.length) {
+              return prev;
+            }
+            return Array(formatted.length).fill(null);
+          });
+        }
+      })
+      .catch(err => console.warn('Gagal memuat butir soal RIASEC:', err.message))
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+
     return () => { active = false; };
-  }, [riasecQuestions, setRiasecQuestions]);
+  }, [setRiasecQuestions]);
 
   const QUESTIONS = riasecQuestions || [];
 
@@ -134,11 +124,13 @@ export default function RiasecQuiz() {
     triggerToast("Menghitung skor dan menyimpan hasil RIASEC ke basis data...");
 
     try {
+      const answersString = QUESTIONS.map((q, idx) => String(answers[idx] || 3)).join('');
       const payload = {
         answers: QUESTIONS.map((q, idx) => ({
           questionId: q.id,
           score: Number(answers[idx]) || 3
-        }))
+        })),
+        answersString
       };
 
       const res = await apiRequest('/riasec/submit', {
@@ -154,11 +146,12 @@ export default function RiasecQuiz() {
         const newResult = {
           scores: res.data.scores,
           top: topLetters,
+          onetCareersUrl: res.data.onetCareersUrl || null,
           completedAt: res.data.completedAt || new Date().toISOString()
         };
 
         setRiasecResult(newResult);
-        triggerToast("Hasil tes RIASEC berhasil disimpan ke basis data Supabase.");
+        triggerToast("Hasil tes RIASEC berhasil diproses dan disimpan.");
         setTimeout(() => {
           router.push('/riasec/hasil');
         }, 500);
@@ -170,10 +163,12 @@ export default function RiasecQuiz() {
       setIsSubmitting(false);
     }
 
-    // Fallback local calculation
+    // Fallback local calculation matching O*NET rules
     const scores = { R: 0, I: 0, A: 0, S: 0, E: 0, C: 0 };
     QUESTIONS.forEach((q, idx) => {
-      scores[q.type] += Number(answers[idx] || 0);
+      const answerVal = Number(answers[idx]) || 3;
+      const point = Math.max(0, Math.min(4, answerVal - 1));
+      scores[q.type] += point;
     });
 
     const top = Object.entries(scores)
@@ -274,7 +269,7 @@ export default function RiasecQuiz() {
                   Pernyataan {currentIndex + 1} dari {QUESTIONS.length}
                 </span>
                 <span className="text-[11px] text-content-muted">
-                  Tipe Dimensi: <strong className="text-content-primary">{currentQuestion.type} ({TYPE_INFO[currentQuestion.type]?.name})</strong>
+                  Pilih tingkat kesukaan Anda terhadap aktivitas berikut
                 </span>
               </div>
               <div className="text-right">
@@ -301,15 +296,14 @@ export default function RiasecQuiz() {
 
           {/* Active Question Box */}
           <Card className="p-6 sm:p-8">
-            <div className="mb-3">
-              <span className="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-subsurface border border-divider text-content-muted uppercase tracking-wider">
-                Dimensi {currentQuestion.type}: {TYPE_INFO[currentQuestion.type]?.name}
-              </span>
-            </div>
-
-            <h2 className="text-lg sm:text-xl font-bold text-content-primary leading-relaxed mb-6">
+            <h2 className="text-lg sm:text-xl font-bold text-content-primary leading-relaxed mb-1.5">
               {currentQuestion.text}
             </h2>
+            {currentQuestion.translation && (
+              <p className="text-xs sm:text-sm text-content-muted italic mb-6">
+                Artinya: {currentQuestion.translation}
+              </p>
+            )}
 
             {/* 5-Point Likert Scale Buttons (Accessible) */}
             <fieldset className="grid grid-cols-1 sm:grid-cols-5 gap-3 mb-8">
@@ -380,8 +374,20 @@ export default function RiasecQuiz() {
         onClose={() => setToast({ show: false, message: '' })}
       />
 
-      <footer className="pt-8 pb-4 text-center text-xs text-content-muted">
-        Instrumen tes diadaptasi dari John L. Holland's Theory of Career Choice (RIASEC).
+      <footer className="pt-8 pb-4 text-center text-xs text-content-muted space-y-1.5">
+        <p>Instrumen tes diadaptasi dari John L. Holland's Theory of Career Choice (RIASEC).</p>
+        <p>
+          This site incorporates information from{' '}
+          <a 
+            href="https://services.onetcenter.org/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="underline hover:text-content-primary transition-colors"
+          >
+            O*NET Web Services
+          </a>{' '}
+          by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA).
+        </p>
       </footer>
     </main>
   );

@@ -40,24 +40,36 @@ const DEFAULT_ACADEMIC = [
 ];
 
 const DEFAULT_RIASEC_QUESTIONS = [
-  { id: 1, type: "R", text: "Saya tertarik merakit, memperbaiki, atau menguji perangkat keras dan perangkat teknis." },
-  { id: 2, type: "R", text: "Saya menikmati aktivitas yang menghasilkan sesuatu secara nyata melalui alat, sistem, atau teknologi." },
-  { id: 3, type: "R", text: "Saya tertarik memahami cara kerja jaringan, perangkat komputer, atau infrastruktur teknologi." },
-  { id: 4, type: "I", text: "Saya menikmati memecahkan masalah yang membutuhkan analisis dan penalaran yang mendalam." },
-  { id: 5, type: "I", text: "Saya tertarik mencari pola dari data untuk memahami suatu permasalahan." },
-  { id: 6, type: "I", text: "Saya senang mempelajari konsep baru dan menguji berbagai kemungkinan solusi." },
-  { id: 7, type: "A", text: "Saya tertarik membuat desain visual, ide kreatif, atau pengalaman digital yang menarik." },
-  { id: 8, type: "A", text: "Saya menikmati kebebasan untuk mengekspresikan gagasan melalui karya atau rancangan." },
-  { id: 9, type: "A", text: "Saya tertarik mengembangkan tampilan aplikasi agar lebih mudah dan menyenangkan digunakan." },
-  { id: 10, type: "S", text: "Saya menikmati membantu orang lain memahami masalah atau mempelajari hal baru." },
-  { id: 11, type: "S", text: "Saya tertarik bekerja dalam tim dan mendengarkan kebutuhan orang lain." },
-  { id: 12, type: "S", text: "Saya senang memberikan arahan atau dukungan ketika seseorang mengalami kesulitan." },
-  { id: 13, type: "E", text: "Saya tertarik memimpin diskusi dan mengajak orang lain mencapai suatu tujuan." },
-  { id: 14, type: "E", text: "Saya nyaman menyampaikan ide serta meyakinkan orang lain terhadap suatu solusi." },
-  { id: 15, type: "E", text: "Saya tertarik pada perencanaan, pengambilan keputusan, dan pengembangan peluang." },
-  { id: 16, type: "C", text: "Saya nyaman bekerja dengan data, aturan, dan prosedur yang terstruktur." },
-  { id: 17, type: "C", text: "Saya teliti dalam mengatur informasi, dokumentasi, atau rincian pekerjaan." },
-  { id: 18, type: "C", text: "Saya menikmati pekerjaan yang membutuhkan ketepatan, keteraturan, dan konsistensi." }
+  { id: 1, type: "R", text: "Build kitchen cabinets", translation: "Merakit atau membuat lemari dapur" },
+  { id: 2, type: "I", text: "Develop a new medicine", translation: "Mengembangkan formula obat baru" },
+  { id: 3, type: "A", text: "Write books or plays", translation: "Menulis buku atau naskah drama/sandiwara" },
+  { id: 4, type: "S", text: "Help people with personal or emotional problems", translation: "Membantu orang yang menghadapi masalah pribadi atau emosional" },
+  { id: 5, type: "E", text: "Manage a department within a large company", translation: "Mengelola sebuah departemen di perusahaan besar" },
+  { id: 6, type: "C", text: "Install software across computers on a large network", translation: "Menginstal perangkat lunak di berbagai komputer pada jaringan besar" },
+  { id: 7, type: "R", text: "Repair household appliances", translation: "Memperbaiki peralatan rumah tangga atau elektronik" },
+  { id: 8, type: "I", text: "Study ways to reduce water pollution", translation: "Mempelajari cara-cara menanggulangi pencemaran air" },
+  { id: 9, type: "A", text: "Compose or arrange music", translation: "Menciptakan atau mengaransemen karya musik" },
+  { id: 10, type: "S", text: "Give career guidance to people", translation: "Memberikan bimbingan atau konseling karir kepada orang lain" },
+  { id: 11, type: "E", text: "Start your own business", translation: "Merintis dan mendirikan bisnis sendiri" },
+  { id: 12, type: "C", text: "Operate a calculator", translation: "Mengoperasikan kalkulator atau mesin hitung administrasi" },
+  { id: 13, type: "R", text: "Assemble electronic parts", translation: "Merakit komponen dan suku cadang elektronik" },
+  { id: 14, type: "I", text: "Conduct chemical experiments", translation: "Melakukan eksperimen kimia di laboratorium" },
+  { id: 15, type: "A", text: "Create special effects for movies", translation: "Membuat efek visual khusus (VFX) untuk film" },
+  { id: 16, type: "S", text: "Perform rehabilitation therapy", translation: "Menjalankan terapi rehabilitasi bagi pemulihan pasien" },
+  { id: 17, type: "E", text: "Negotiate business contracts", translation: "Menegosiasikan kontrak bisnis dan kemitraan komersial" },
+  { id: 18, type: "C", text: "Keep shipping and receiving records", translation: "Mencatat dan mengelola logistik pengiriman barang" },
+  { id: 19, type: "R", text: "Drive a truck to deliver packages to offices and homes", translation: "Mengemudikan kendaraan pengiriman paket ke kantor dan rumah" },
+  { id: 20, type: "I", text: "Examine blood samples using a microscope", translation: "Memeriksa sampel darah menggunakan mikroskop" },
+  { id: 21, type: "A", text: "Paint sets for plays", translation: "Melukis dan mendesain tata panggung pertunjukan" },
+  { id: 22, type: "S", text: "Do volunteer work at a non-profit organization", translation: "Menjadi relawan aktif di organisasi nirlaba" },
+  { id: 23, type: "E", text: "Market a new line of clothing", translation: "Merancang strategi pemasaran untuk lini busana baru" },
+  { id: 24, type: "C", text: "Inventory supplies using a hand-held computer", translation: "Mendata inventaris barang menggunakan komputer genggam" },
+  { id: 25, type: "R", text: "Test the quality of parts before shipment", translation: "Menguji kontrol kualitas (QC) komponen sebelum dikirim" },
+  { id: 26, type: "I", text: "Develop a way to better predict the weather", translation: "Mengembangkan metode atau model prediksi cuaca yang akurat" },
+  { id: 27, type: "A", text: "Write scripts for movies or television shows", translation: "Menulis naskah skenario film atau program televisi" },
+  { id: 28, type: "S", text: "Teach a high-school class", translation: "Mengajar siswa dalam kelas sekolah menengah" },
+  { id: 29, type: "E", text: "Sell merchandise at a department store", translation: "Menjual produk dagang dan melayani pelanggan di toko ritel" },
+  { id: 30, type: "C", text: "Stamp, sort, and distribute mail for an organization", translation: "Menyortir, mencap, dan mendistribusikan surat dokumen organisasi" }
 ];
 
 const DEFAULT_RIASEC_RESULT = {
@@ -185,7 +197,7 @@ export const AppProvider = ({ children }) => {
 
   const [user, setUser] = useState(null);
   const [academicComponents, setAcademicComponents] = useState(DEFAULT_ACADEMIC);
-  const [riasecProgress, setRiasecProgress] = useState({ currentIndex: 0, answers: Array(18).fill(null) });
+  const [riasecProgress, setRiasecProgress] = useState({ currentIndex: 0, answers: Array(30).fill(null) });
   const [riasecResult, setRiasecResult] = useState(DEFAULT_RIASEC_RESULT);
   const [sawWeights, setSawWeights] = useState(DEFAULT_SAW_WEIGHTS);
   const [careers, setCareers] = useState(DEFAULT_CAREERS);
@@ -273,7 +285,19 @@ export const AppProvider = ({ children }) => {
       }
 
       const savedProgress = localStorage.getItem(STORAGE_KEYS.RIASEC_PROGRESS);
-      if (savedProgress) setRiasecProgress(JSON.parse(savedProgress));
+      if (savedProgress) {
+        try {
+          const parsed = JSON.parse(savedProgress);
+          if (parsed && Array.isArray(parsed.answers) && parsed.answers.length === 30) {
+            setRiasecProgress(parsed);
+          } else {
+            localStorage.removeItem(STORAGE_KEYS.RIASEC_PROGRESS);
+            setRiasecProgress({ currentIndex: 0, answers: Array(30).fill(null) });
+          }
+        } catch {
+          localStorage.removeItem(STORAGE_KEYS.RIASEC_PROGRESS);
+        }
+      }
 
       const savedResult = localStorage.getItem(STORAGE_KEYS.RIASEC_RESULT);
       if (savedResult) setRiasecResult(JSON.parse(savedResult));
@@ -307,7 +331,21 @@ export const AppProvider = ({ children }) => {
       if (savedHistory) setRecommendationHistory(JSON.parse(savedHistory));
 
       const savedQuestions = localStorage.getItem(STORAGE_KEYS.RIASEC_QUESTIONS);
-      if (savedQuestions) setRiasecQuestions(JSON.parse(savedQuestions));
+      if (savedQuestions) {
+        try {
+          const parsed = JSON.parse(savedQuestions);
+          if (Array.isArray(parsed) && parsed.length === 30) {
+            setRiasecQuestions(parsed);
+          } else {
+            localStorage.removeItem(STORAGE_KEYS.RIASEC_QUESTIONS);
+            localStorage.removeItem(STORAGE_KEYS.RIASEC_PROGRESS);
+            setRiasecQuestions(DEFAULT_RIASEC_QUESTIONS);
+          }
+        } catch {
+          localStorage.removeItem(STORAGE_KEYS.RIASEC_QUESTIONS);
+          setRiasecQuestions(DEFAULT_RIASEC_QUESTIONS);
+        }
+      }
 
       const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME);
       if (savedTheme) {

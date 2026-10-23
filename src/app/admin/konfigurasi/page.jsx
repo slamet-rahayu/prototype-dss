@@ -20,7 +20,8 @@ import {
   Layers,
   Sparkles,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  RefreshCw
 } from 'lucide-react';
 
 const TYPE_INFO = {
@@ -400,90 +401,6 @@ export default function SawConfig() {
       }
     }
   };
-    const errs = {};
-    const nameTrimmed = compName.trim();
-    const descTrimmed = compDesc.trim();
-
-    if (!nameTrimmed) {
-      errs.compName = "Nama komponen akademik wajib diisi.";
-    } else if (nameTrimmed.length < 3) {
-      errs.compName = "Nama komponen minimal 3 karakter.";
-    }
-
-    if (!descTrimmed) {
-      errs.compDesc = "Deskripsi komponen wajib diisi.";
-    } else if (descTrimmed.length < 5) {
-      errs.compDesc = "Deskripsi komponen minimal 5 karakter.";
-    }
-
-    if (compEditId === null) {
-      const duplicate = (academicComponents || []).find(c => 
-        String(c?.name || c?.subjectName || '').toLowerCase() === nameTrimmed.toLowerCase()
-      );
-      if (duplicate) {
-        errs.compName = "Komponen mata kuliah ini sudah terdaftar.";
-      }
-    }
-
-    if (Object.keys(errs).length > 0) {
-      setCompErrors(errs);
-      triggerToast("Harap periksa isian formulir komponen akademik.");
-      return;
-    }
-
-    setCompErrors({});
-
-    if (compEditId !== null) {
-      try {
-        await apiRequest(`/admin/academic-subjects/${compEditId}`, {
-          method: 'PUT',
-          body: { name: compName, description: compDesc, icon: compIcon }
-        });
-      } catch (err) {
-        console.warn('API update subject error:', err.message);
-      }
-      const updated = academicComponents.map(c => {
-        if (c.id === compEditId) {
-          return { ...c, name: compName, desc: compDesc, icon: compIcon };
-        }
-        return c;
-      });
-      setAcademicComponents(updated);
-      triggerToast("Komponen akademik berhasil diperbarui di basis data.");
-    } else {
-      const duplicate = (academicComponents || []).find(c => 
-        String(c?.name || c?.subjectName || '').toLowerCase() === String(compName || '').toLowerCase()
-      );
-      if (duplicate) {
-        triggerToast("Komponen ini sudah tersedia.");
-        return;
-      }
-
-      let newId = Date.now();
-      try {
-        const res = await apiRequest('/admin/academic-subjects', {
-          method: 'POST',
-          body: { name: compName, description: compDesc, icon: compIcon }
-        });
-        if (res.data?.id) newId = res.data.id;
-      } catch (err) {
-        console.warn('API create subject error:', err.message);
-      }
-
-      const newComp = {
-        id: newId,
-        name: compName,
-        desc: compDesc,
-        grade: 80,
-        status: "Baik",
-        updated: "Hari ini",
-        icon: compIcon
-      };
-      setAcademicComponents([...academicComponents, newComp]);
-      triggerToast("Komponen akademik berhasil ditambahkan ke basis data.");
-    }
-    setIsCompModalOpen(false);
-  };
 
   // --- Tab 3: RIASEC mapping ---
   const handleLoadMapping = (careerName, overrideMap = null) => {
@@ -619,6 +536,28 @@ export default function SawConfig() {
   };
 
   // --- Tab 5: RIASEC Questions CRUD handlers ---
+  const [isSyncingOnet, setIsSyncingOnet] = useState(false);
+
+  const handleSyncOnetQuestions = async () => {
+    setIsSyncingOnet(true);
+    triggerToast("Menyinkronkan butir pertanyaan resmi dari O*NET Web Services...");
+    try {
+      const res = await apiRequest('/admin/riasec-questions/sync', { method: 'POST' });
+      if (res?.data?.questions) {
+        setRiasecQuestions(res.data.questions);
+        try {
+          localStorage.setItem('careerpath-riasec-questions', JSON.stringify(res.data.questions));
+        } catch {}
+        triggerToast("30 butir soal baku O*NET berhasil disinkronkan ke basis data lokal (Metode Hybrid).");
+      }
+    } catch (err) {
+      console.error('Sync O*NET error:', err);
+      triggerToast(`Gagal menyinkronkan: ${err.message}`);
+    } finally {
+      setIsSyncingOnet(false);
+    }
+  };
+
   const handleOpenAddQuestion = () => {
     setQuestionEditId(null);
     setQuestionErrors({});
@@ -1435,8 +1374,13 @@ export default function SawConfig() {
         <Card className="p-0 overflow-hidden animate-fade-in" role="tabpanel">
           <div className="px-6 py-4 border-b border-divider flex items-center justify-between flex-wrap gap-4 bg-subsurface/40">
             <div>
-              <h2 className="text-sm font-bold text-content-primary">Daftar Soal Tes Minat RIASEC</h2>
-              <p className="text-content-muted text-xs mt-0.5">Kelola instrumen pernyataan kuesioner kriteria C1 minat karir.</p>
+              <div className="flex items-center gap-2 mb-0.5">
+                <h2 className="text-sm font-bold text-content-primary">Daftar Soal Tes Minat RIASEC</h2>
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  Metode Hybrid
+                </span>
+              </div>
+              <p className="text-content-muted text-xs">Instrumen kuesioner kriteria C1 (Sinkronisasi O*NET Web Services & Penyimpanan Basis Data Lokal).</p>
             </div>
 
             <div className="flex items-center gap-3 flex-wrap">
@@ -1465,6 +1409,17 @@ export default function SawConfig() {
                 />
                 <HelpCircle className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-content-muted" />
               </div>
+
+              <button 
+                type="button"
+                onClick={handleSyncOnetQuestions}
+                disabled={isSyncingOnet}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-surface hover:bg-subsurface border border-divider text-content-primary text-xs font-semibold rounded-lg shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                title="Tarik dan sinkronkan 30 butir soal baku dari O*NET Web Services ke basis data lokal"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-primary ${isSyncingOnet ? 'animate-spin' : ''}`} />
+                <span>{isSyncingOnet ? 'Menyinkronkan...' : 'Tarik Soal O*NET'}</span>
+              </button>
               
               <button 
                 onClick={handleOpenAddQuestion}

@@ -12,7 +12,6 @@ import {
   Users,
   Briefcase,
   Sliders,
-  TrendingUp,
   Clock,
   History,
   CheckCircle2,
@@ -306,18 +305,18 @@ export default function AdminDashboard() {
               </Link>
 
               <Link
-                href="/admin/pasar-kerja"
+                href="/admin/riwayat"
                 className="flex items-center gap-3 p-3 rounded-lg border border-divider bg-subsurface hover:bg-subsurface/80 transition-colors group"
               >
                 <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary dark:bg-primary/20 dark:text-sky-300 flex items-center justify-center shrink-0">
-                  <TrendingUp className="w-4 h-4" />
+                  <History className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <strong className="text-xs font-semibold text-content-primary block leading-tight group-hover:text-primary">
-                    Data Pasar Kerja TI
+                    Riwayat Rekomendasi
                   </strong>
                   <span className="text-[10px] text-content-muted block truncate">
-                    Sinkronisasi lowongan & indeks serapan
+                    Pantau log kalkulasi SAW mahasiswa
                   </span>
                 </div>
               </Link>

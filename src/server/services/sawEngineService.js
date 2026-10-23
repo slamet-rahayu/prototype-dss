@@ -27,8 +27,10 @@ export class SawEngineService {
           }
         });
 
-        // Skor maksimal per pertanyaan adalah 5 x 3 = 15 per dimensi
-        c1Raw = totalWeight > 0 ? (weightedSum / totalWeight) / 15 : 0;
+        // Skor maksimal dimensi: 20 untuk O*NET (5 soal x 4 poin), atau 15 untuk instrumen lama (3 soal x 5 poin)
+        const maxScoreVal = Math.max(...Object.values(riasecScores).map(v => Number(v) || 0));
+        const divisor = maxScoreVal > 15 ? 20 : 15;
+        c1Raw = totalWeight > 0 ? (weightedSum / totalWeight) / divisor : 0;
       }
 
       // --- C2: Kemampuan Akademik ---

@@ -164,10 +164,13 @@ export function getSalaryDisplay(salary) {
   if (!salary) return null;
   if (typeof salary === 'string') return salary;
   if (salary.display) {
-    // Normalize any corrupted characters like RpA or ?
+    // Normalize any corrupted characters like RpA, ?, en-dash, and translations
     return salary.display
       .replace(/RpA\S*/g, 'Rp ')
       .replace(/[?]+/g, '-')
+      .replace(/–/g, '-')
+      .replace(/per month/i, '/ bln')
+      .replace(/per year/i, '/ thn')
       .trim();
   }
 
